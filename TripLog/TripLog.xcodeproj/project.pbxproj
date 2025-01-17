@@ -1,0 +1,740 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AAC9B0962D3A721C006892A7 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0952D3A721C006892A7 /* SnapKit */; };
+		AAC9B0992D3A722B006892A7 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0982D3A722B006892A7 /* Alamofire */; };
+		AAC9B09C2D3A7257006892A7 /* RxDataSources in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B09B2D3A7257006892A7 /* RxDataSources */; };
+		AAC9B09F2D3A7265006892A7 /* RxKeyboard in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B09E2D3A7265006892A7 /* RxKeyboard */; };
+		AAC9B0A22D3A72A9006892A7 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A12D3A72A9006892A7 /* RxCocoa */; };
+		AAC9B0A42D3A72A9006892A7 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A32D3A72A9006892A7 /* RxRelay */; };
+		AAC9B0A62D3A72A9006892A7 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A52D3A72A9006892A7 /* RxSwift */; };
+		AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A82D3A72C9006892A7 /* FSCalendar */; };
+		AAC9B0AC2D3A72E4006892A7 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0AB2D3A72E4006892A7 /* Then */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AAC9B0772D3A7073006892A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AAC9B0552D3A7070006892A7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AAC9B05C2D3A7070006892A7;
+			remoteInfo = TripLog;
+		};
+		AAC9B0812D3A7073006892A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AAC9B0552D3A7070006892A7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AAC9B05C2D3A7070006892A7;
+			remoteInfo = TripLog;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		AAC9B05D2D3A7070006892A7 /* TripLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TripLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAC9B0762D3A7073006892A7 /* TripLogTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAC9B0802D3A7073006892A7 /* TripLogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AAC9B0882D3A7073006892A7 /* Exceptions for "TripLog" folder in "TripLog" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = AAC9B05C2D3A7070006892A7 /* TripLog */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		AAC9B05F2D3A7070006892A7 /* TripLog */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AAC9B0882D3A7073006892A7 /* Exceptions for "TripLog" folder in "TripLog" target */,
+			);
+			path = TripLog;
+			sourceTree = "<group>";
+		};
+		AAC9B0792D3A7073006892A7 /* TripLogTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TripLogTests;
+			sourceTree = "<group>";
+		};
+		AAC9B0832D3A7073006892A7 /* TripLogUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TripLogUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AAC9B05A2D3A7070006892A7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAC9B0A42D3A72A9006892A7 /* RxRelay in Frameworks */,
+				AAC9B0AC2D3A72E4006892A7 /* Then in Frameworks */,
+				AAC9B09C2D3A7257006892A7 /* RxDataSources in Frameworks */,
+				AAC9B09F2D3A7265006892A7 /* RxKeyboard in Frameworks */,
+				AAC9B0A22D3A72A9006892A7 /* RxCocoa in Frameworks */,
+				AAC9B0962D3A721C006892A7 /* SnapKit in Frameworks */,
+				AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */,
+				AAC9B0992D3A722B006892A7 /* Alamofire in Frameworks */,
+				AAC9B0A62D3A72A9006892A7 /* RxSwift in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAC9B0732D3A7073006892A7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAC9B07D2D3A7073006892A7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AAC9B0542D3A7070006892A7 = {
+			isa = PBXGroup;
+			children = (
+				AAC9B05F2D3A7070006892A7 /* TripLog */,
+				AAC9B0792D3A7073006892A7 /* TripLogTests */,
+				AAC9B0832D3A7073006892A7 /* TripLogUITests */,
+				AAC9B05E2D3A7070006892A7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AAC9B05E2D3A7070006892A7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AAC9B05D2D3A7070006892A7 /* TripLog.app */,
+				AAC9B0762D3A7073006892A7 /* TripLogTests.xctest */,
+				AAC9B0802D3A7073006892A7 /* TripLogUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AAC9B05C2D3A7070006892A7 /* TripLog */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAC9B0892D3A7073006892A7 /* Build configuration list for PBXNativeTarget "TripLog" */;
+			buildPhases = (
+				AAC9B0592D3A7070006892A7 /* Sources */,
+				AAC9B05A2D3A7070006892A7 /* Frameworks */,
+				AAC9B05B2D3A7070006892A7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AAC9B05F2D3A7070006892A7 /* TripLog */,
+			);
+			name = TripLog;
+			packageProductDependencies = (
+				AAC9B0952D3A721C006892A7 /* SnapKit */,
+				AAC9B0982D3A722B006892A7 /* Alamofire */,
+				AAC9B09B2D3A7257006892A7 /* RxDataSources */,
+				AAC9B09E2D3A7265006892A7 /* RxKeyboard */,
+				AAC9B0A12D3A72A9006892A7 /* RxCocoa */,
+				AAC9B0A32D3A72A9006892A7 /* RxRelay */,
+				AAC9B0A52D3A72A9006892A7 /* RxSwift */,
+				AAC9B0A82D3A72C9006892A7 /* FSCalendar */,
+				AAC9B0AB2D3A72E4006892A7 /* Then */,
+			);
+			productName = TripLog;
+			productReference = AAC9B05D2D3A7070006892A7 /* TripLog.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AAC9B0752D3A7073006892A7 /* TripLogTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAC9B08E2D3A7073006892A7 /* Build configuration list for PBXNativeTarget "TripLogTests" */;
+			buildPhases = (
+				AAC9B0722D3A7073006892A7 /* Sources */,
+				AAC9B0732D3A7073006892A7 /* Frameworks */,
+				AAC9B0742D3A7073006892A7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AAC9B0782D3A7073006892A7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AAC9B0792D3A7073006892A7 /* TripLogTests */,
+			);
+			name = TripLogTests;
+			packageProductDependencies = (
+			);
+			productName = TripLogTests;
+			productReference = AAC9B0762D3A7073006892A7 /* TripLogTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		AAC9B07F2D3A7073006892A7 /* TripLogUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAC9B0912D3A7073006892A7 /* Build configuration list for PBXNativeTarget "TripLogUITests" */;
+			buildPhases = (
+				AAC9B07C2D3A7073006892A7 /* Sources */,
+				AAC9B07D2D3A7073006892A7 /* Frameworks */,
+				AAC9B07E2D3A7073006892A7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AAC9B0822D3A7073006892A7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AAC9B0832D3A7073006892A7 /* TripLogUITests */,
+			);
+			name = TripLogUITests;
+			packageProductDependencies = (
+			);
+			productName = TripLogUITests;
+			productReference = AAC9B0802D3A7073006892A7 /* TripLogUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AAC9B0552D3A7070006892A7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					AAC9B05C2D3A7070006892A7 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					AAC9B0752D3A7073006892A7 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = AAC9B05C2D3A7070006892A7;
+					};
+					AAC9B07F2D3A7073006892A7 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = AAC9B05C2D3A7070006892A7;
+					};
+				};
+			};
+			buildConfigurationList = AAC9B0582D3A7070006892A7 /* Build configuration list for PBXProject "TripLog" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AAC9B0542D3A7070006892A7;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AAC9B0942D3A721C006892A7 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				AAC9B0972D3A722B006892A7 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				AAC9B09A2D3A7257006892A7 /* XCRemoteSwiftPackageReference "RxDataSources" */,
+				AAC9B09D2D3A7265006892A7 /* XCRemoteSwiftPackageReference "RxKeyboard" */,
+				AAC9B0A02D3A72A9006892A7 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				AAC9B0A72D3A72C9006892A7 /* XCRemoteSwiftPackageReference "FSCalendar" */,
+				AAC9B0AA2D3A72E4006892A7 /* XCRemoteSwiftPackageReference "Then" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = AAC9B05E2D3A7070006892A7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AAC9B05C2D3A7070006892A7 /* TripLog */,
+				AAC9B0752D3A7073006892A7 /* TripLogTests */,
+				AAC9B07F2D3A7073006892A7 /* TripLogUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AAC9B05B2D3A7070006892A7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAC9B0742D3A7073006892A7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAC9B07E2D3A7073006892A7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AAC9B0592D3A7070006892A7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAC9B0722D3A7073006892A7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAC9B07C2D3A7073006892A7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AAC9B0782D3A7073006892A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AAC9B05C2D3A7070006892A7 /* TripLog */;
+			targetProxy = AAC9B0772D3A7073006892A7 /* PBXContainerItemProxy */;
+		};
+		AAC9B0822D3A7073006892A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AAC9B05C2D3A7070006892A7 /* TripLog */;
+			targetProxy = AAC9B0812D3A7073006892A7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		AAC9B08A2D3A7073006892A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TripLog/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLog";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AAC9B08B2D3A7073006892A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TripLog/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLog";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		AAC9B08C2D3A7073006892A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AAC9B08D2D3A7073006892A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AAC9B08F2D3A7073006892A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLogTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TripLog.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TripLog";
+			};
+			name = Debug;
+		};
+		AAC9B0902D3A7073006892A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLogTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TripLog.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TripLog";
+			};
+			name = Release;
+		};
+		AAC9B0922D3A7073006892A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLogUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = TripLog;
+			};
+			name = Debug;
+		};
+		AAC9B0932D3A7073006892A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLogUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = TripLog;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AAC9B0582D3A7070006892A7 /* Build configuration list for PBXProject "TripLog" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAC9B08C2D3A7073006892A7 /* Debug */,
+				AAC9B08D2D3A7073006892A7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAC9B0892D3A7073006892A7 /* Build configuration list for PBXNativeTarget "TripLog" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAC9B08A2D3A7073006892A7 /* Debug */,
+				AAC9B08B2D3A7073006892A7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAC9B08E2D3A7073006892A7 /* Build configuration list for PBXNativeTarget "TripLogTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAC9B08F2D3A7073006892A7 /* Debug */,
+				AAC9B0902D3A7073006892A7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAC9B0912D3A7073006892A7 /* Build configuration list for PBXNativeTarget "TripLogUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAC9B0922D3A7073006892A7 /* Debug */,
+				AAC9B0932D3A7073006892A7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AAC9B0942D3A721C006892A7 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
+		AAC9B0972D3A722B006892A7 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
+		AAC9B09A2D3A7257006892A7 /* XCRemoteSwiftPackageReference "RxDataSources" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RxSwiftCommunity/RxDataSources";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.2;
+			};
+		};
+		AAC9B09D2D3A7265006892A7 /* XCRemoteSwiftPackageReference "RxKeyboard" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RxSwiftCommunity/RxKeyboard";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.1;
+			};
+		};
+		AAC9B0A02D3A72A9006892A7 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.8.0;
+			};
+		};
+		AAC9B0A72D3A72C9006892A7 /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/WenchaoD/FSCalendar";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.4;
+			};
+		};
+		AAC9B0AA2D3A72E4006892A7 /* XCRemoteSwiftPackageReference "Then" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devxoul/Then.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AAC9B0952D3A721C006892A7 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B0942D3A721C006892A7 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		AAC9B0982D3A722B006892A7 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B0972D3A722B006892A7 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		AAC9B09B2D3A7257006892A7 /* RxDataSources */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B09A2D3A7257006892A7 /* XCRemoteSwiftPackageReference "RxDataSources" */;
+			productName = RxDataSources;
+		};
+		AAC9B09E2D3A7265006892A7 /* RxKeyboard */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B09D2D3A7265006892A7 /* XCRemoteSwiftPackageReference "RxKeyboard" */;
+			productName = RxKeyboard;
+		};
+		AAC9B0A12D3A72A9006892A7 /* RxCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B0A02D3A72A9006892A7 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxCocoa;
+		};
+		AAC9B0A32D3A72A9006892A7 /* RxRelay */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B0A02D3A72A9006892A7 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxRelay;
+		};
+		AAC9B0A52D3A72A9006892A7 /* RxSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B0A02D3A72A9006892A7 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxSwift;
+		};
+		AAC9B0A82D3A72C9006892A7 /* FSCalendar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B0A72D3A72C9006892A7 /* XCRemoteSwiftPackageReference "FSCalendar" */;
+			productName = FSCalendar;
+		};
+		AAC9B0AB2D3A72E4006892A7 /* Then */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC9B0AA2D3A72E4006892A7 /* XCRemoteSwiftPackageReference "Then" */;
+			productName = Then;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = AAC9B0552D3A7070006892A7 /* Project object */;
+}
