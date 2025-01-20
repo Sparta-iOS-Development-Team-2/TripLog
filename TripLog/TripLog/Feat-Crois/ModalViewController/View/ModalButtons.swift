@@ -19,7 +19,7 @@ final class ModalButtons: UIView {
         $0.titleLabel?.textAlignment = .center
         $0.backgroundColor = .clear
         $0.layer.cornerRadius = 8
-        $0.layer.borderColor = UIColor.Light.r400.cgColor
+        $0.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
         $0.layer.borderWidth = 1
     }
     

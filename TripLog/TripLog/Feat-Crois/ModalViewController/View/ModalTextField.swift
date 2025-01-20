@@ -34,11 +34,11 @@ final class ModalTextField: UIView {
         $0.clipsToBounds = true
         $0.backgroundColor = .clear
         $0.layer.cornerRadius = 8
-        $0.layer.borderColor = UIColor.Light.r400.cgColor
+        $0.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
         $0.layer.borderWidth = 1
-        $0.leftView = UIView(frame: .init(x: 0, y: 0, width: 10, height: 10))
+        $0.leftView = UIView(frame: .init(x: 0, y: 0, width: 12, height: 12))
         $0.leftViewMode = .always
-        $0.rightView = UIView(frame: .init(x: 0, y: 0, width: 10, height: 10))
+        $0.rightView = UIView(frame: .init(x: 0, y: 0, width: 12, height: 12))
         $0.rightViewMode = .always
         $0.autocapitalizationType = .none
         $0.keyboardType = .default
