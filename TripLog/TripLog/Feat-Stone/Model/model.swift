@@ -24,11 +24,11 @@ extension Trip {
             Trip(
                 title: "도쿄 여행 2024",
                 subtitle: "일본",
-                date:"2024.01.15 - 2024.01.20",
+                date: "2024.01.15 - 2024.01.20",
                 progress: 0.5,
-                expense: "1,700,000",
+                expense: "200,000",
                 budget: "2,000,000",
-                balance: "1,000,000"
+                balance: ""
             )
         ]
     }

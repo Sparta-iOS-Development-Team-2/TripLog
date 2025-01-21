@@ -46,16 +46,9 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     }
 
     private func setupTableView() {
-        // 테이블 뷰를 감싸는 컨테이너 뷰 추가
-        view.addSubview(tableContainerView)
-        tableContainerView.addSubview(tableView)
-        
-        // tableContainerView 배경색 설정
-        tableContainerView.backgroundColor = .lightGray  // 원하는 색으로 변경
-        
-        // 테이블 뷰 컨테이너 뷰의 스타일링을 단순화
-        tableContainerView.clipsToBounds = true
-        
+        // 테이블 뷰 추가
+        view.addSubview(tableView)
+
         // 테이블 뷰 설정
         tableView.dataSource = self
         tableView.delegate = self
@@ -65,14 +58,10 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
         tableView.separatorStyle = .none
         
         // SnapKit 레이아웃 설정
-        tableContainerView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(20) // 화면 상단과 간격
-            $0.leading.trailing.equalToSuperview().inset(16) // 좌우 여백
-            $0.bottom.equalToSuperview().offset(-500) // 화면 하단과 간격을 늘려서 더 아래로 내림
-        }
-        
         tableView.snp.makeConstraints {
-            $0.edges.equalToSuperview() // 컨테이너 뷰 내부에 꽉 채우기
+            $0.top.equalToSuperview().offset(20) // 화면 상단과 간격
+            $0.leading.trailing.equalToSuperview() // 좌우 여백
+            $0.bottom.equalToSuperview().offset(-20) // 화면 하단과 간격
         }
     }
 
@@ -134,19 +123,20 @@ class CustomTableViewCell: UITableViewCell {
         dateLabel.text = date
         expenseLabel.text = "지출: \(expense)"
         budgetLabel.text = "예산: \(budget)"
-        balanceLabel.text = "잔액: \(balance)"
         
         // 예산과 지출을 숫자로 변환
-        let budgetAmount = Float(budget.replacingOccurrences(of: ",", with: "")) ?? 0.0 // 예산 금액 (콤마 제거)
-        let expenseAmount = Float(expense.replacingOccurrences(of: ",", with: "")) ?? 0.0 // 지출 금액 (콤마 제거)
+        let budgetAmount = Int(budget.replacingOccurrences(of: ",", with: "")) ?? 0 // 예산 금액 (콤마 제거)
+        let expenseAmount = Int(expense.replacingOccurrences(of: ",", with: "")) ?? 0 // 지출 금액 (콤마 제거)
         
         // 진행률 계산: (지출 / 예산)
-        let progressValue = (budgetAmount > 0) ? expenseAmount / budgetAmount : 0.0
+        let progressValue = (budgetAmount > 0) ? Float(expenseAmount) / Float(budgetAmount) : 0.0
+        progressView.progress = progressValue // progressView의 진행률 업데이트
         
-        // progressView의 진행률 업데이트
-        progressView.progress = progressValue
+        // 잔액 계산: 예산 - 지출
+        let balanceAmount = budgetAmount - expenseAmount
         
-        print(progressValue)
+        // 잔액 라벨 업데이트 (정수로 표시)
+        balanceLabel.text = "잔액: \(balanceAmount)"
         
         setupLayout()
     }
@@ -164,7 +154,6 @@ class CustomTableViewCell: UITableViewCell {
         todayExpenseButton.backgroundColor = .clear
         todayExpenseButton.layer.borderColor = UIColor.lightGray.cgColor
         todayExpenseButton.layer.borderWidth = 1
-        todayExpenseButton.layer.cornerRadius = 8
 
         calendarButton.setTitle("캘린더", for: .normal)
         calendarButton.setTitleColor(.systemBlue, for: .normal)
@@ -172,12 +161,11 @@ class CustomTableViewCell: UITableViewCell {
         calendarButton.backgroundColor = .clear
         calendarButton.layer.borderColor = UIColor.lightGray.cgColor
         calendarButton.layer.borderWidth = 1
-        calendarButton.layer.cornerRadius = 8
 
         // 버튼 스택 뷰 설정
         buttonStackView.axis = .horizontal
-        buttonStackView.spacing = 8 // 버튼 사이 간격 설정
-        buttonStackView.distribution = .fillEqually
+        buttonStackView.spacing = 0 // 버튼 사이 간격 제거
+        buttonStackView.distribution = .fillEqually // 버튼 크기를 동일하게 설정
         buttonStackView.addArrangedSubview(todayExpenseButton)
         buttonStackView.addArrangedSubview(calendarButton)
 
@@ -223,7 +211,7 @@ class CustomTableViewCell: UITableViewCell {
 
         buttonStackView.snp.makeConstraints {
             $0.top.equalTo(balanceLabel.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.trailing.equalToSuperview()// 버튼의 좌우 여백을 0으로 설정하여 화면 전체를 채움
             $0.height.equalTo(50) // 버튼 높이 설정
         }
     }
