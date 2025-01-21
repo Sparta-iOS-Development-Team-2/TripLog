@@ -54,8 +54,8 @@ private extension ModalViewController {
 
     func bind() {
         let input: ModalViewModel.Input = .init(
-            cancelButtonTapped: self.modalView.cancelButtonTapped,
-            activeButtonTapped: self.modalView.activeButtonTapped
+            cancelButtonTapped: self.modalView.rx.cancelButtonTapped,
+            activeButtonTapped: self.modalView.rx.activeButtonTapped
         )
         
         let output = viewModel.transform(input: input)
@@ -65,7 +65,7 @@ private extension ModalViewController {
             .withUnretained(self)
             .emit { owner, _ in
                 
-                switch owner.modalView.state {
+                switch owner.modalView.checkModalStatus() {
                 case .createNewCashBook: break
                     // 가계부를 코어 데이터에 추가하는 로직
                 case .createNewbudget: break

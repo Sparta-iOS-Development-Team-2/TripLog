@@ -13,12 +13,12 @@ import RxCocoa
 
 final class ModalView: UIView {
     
-    private(set) var cancelButtonTapped = PublishRelay<Void>()
-    private(set) var activeButtonTapped = PublishRelay<Void>()
+    fileprivate let cancelButtonTapped = PublishRelay<Void>()
+    fileprivate let activeButtonTapped = PublishRelay<Void>()
     
     private let disposeBag = DisposeBag()
     
-    private(set) var state: ModalViewState
+    private var state: ModalViewState
     
     private let titleLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .subtitle, weight: .bold)
@@ -69,6 +69,10 @@ final class ModalView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func checkModalStatus() -> ModalViewState {
+        return self.state
     }
     
 }
@@ -129,13 +133,23 @@ private extension ModalView {
     }
     
     func bindButtons() {
-        buttons.createButton.rx.tap
+        buttons.rx.activeButtondTapped
             .bind(to: activeButtonTapped)
             .disposed(by: disposeBag)
         
-        buttons.cancelButton.rx.tap
+        buttons.rx.cancelButtondTapped
             .bind(to: cancelButtonTapped)
             .disposed(by: disposeBag)
     }
 
+}
+
+extension Reactive where Base: ModalView {
+    var activeButtonTapped: PublishRelay<Void> {
+        return base.activeButtonTapped
+    }
+    
+    var cancelButtonTapped: PublishRelay<Void> {
+        return base.cancelButtonTapped
+    }
 }

@@ -8,10 +8,12 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
+import RxCocoa
 
 final class ModalButtons: UIView {
     
-    private(set) var cancelButton = UIButton().then {
+    fileprivate let cancelButton = UIButton().then {
         $0.setTitle("취소", for: .normal)
         $0.setTitleColor(UIColor.Dark.base, for: .normal)
         $0.titleLabel?.font = .SCDream(size: .headline, weight: .medium)
@@ -23,7 +25,7 @@ final class ModalButtons: UIView {
         $0.layer.borderWidth = 1
     }
     
-    private(set) var createButton = UIButton().then {
+    fileprivate let createButton = UIButton().then {
         $0.titleLabel?.font = .SCDream(size: .headline, weight: .medium)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.numberOfLines = 1
@@ -73,5 +75,15 @@ private extension ModalButtons {
         buttonStack.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
+    }
+}
+
+extension Reactive where Base: ModalButtons {
+    var activeButtondTapped: Observable<Void> {
+        return base.createButton.rx.tap.asObservable()
+    }
+    
+    var cancelButtondTapped: Observable<Void> {
+        return base.cancelButton.rx.tap.asObservable()
     }
 }
