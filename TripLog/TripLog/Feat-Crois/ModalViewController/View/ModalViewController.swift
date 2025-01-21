@@ -8,8 +8,14 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
+import RxCocoa
 
 final class ModalViewController: UIViewController {
+    
+    private let disposeBag = DisposeBag()
+    
+    private let viewModel = ModalViewModel()
     
     private let modalView: ModalView
     
@@ -27,6 +33,7 @@ final class ModalViewController: UIViewController {
         super.viewDidLoad()
         
         view = self.modalView
+        bind()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -34,6 +41,7 @@ final class ModalViewController: UIViewController {
         
         self.view.endEditing(true)
     }
+    
 }
 
 private extension ModalViewController {
@@ -43,6 +51,40 @@ private extension ModalViewController {
         self.sheetPresentationController?.preferredCornerRadius = 12
         self.sheetPresentationController?.detents = [.medium()]
     }
-}
 
+    func bind() {
+        let input: ModalViewModel.Input = .init(
+            cancelButtonTapped: self.modalView.cancelButtonTapped,
+            activeButtonTapped: self.modalView.activeButtonTapped
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.active
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, _ in
+                
+                switch owner.modalView.state {
+                case .createNewCashBook: break
+                    // 가계부를 코어 데이터에 추가하는 로직
+                case .createNewbudget: break
+                    // 지출 내역을 코어 데이터에 추가하는 로직
+                case .editBudget: break
+                    // 지출 내역을 코어 데이터에 업데이트 하는 로직
+                }
+                
+                owner.dismiss(animated: true)
+                
+            }.disposed(by: disposeBag)
+        
+        output.modalDismiss
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { [weak self] _ in
+                
+                self?.dismiss(animated: true)
+                
+            }.disposed(by: disposeBag)
+    }
+}
 
