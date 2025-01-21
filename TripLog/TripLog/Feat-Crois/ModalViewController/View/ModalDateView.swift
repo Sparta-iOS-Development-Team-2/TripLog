@@ -31,7 +31,7 @@ final class ModalDateView: UIView {
         $0.axis = .horizontal
         $0.distribution = .fillEqually
         $0.alignment = .fill
-        $0.spacing = 0
+        $0.spacing = -0.5
         $0.backgroundColor = .clear
     }
     
