@@ -41,22 +41,25 @@ final class ModalTextField: UIView {
         $0.rightView = UIView(frame: .init(x: 0, y: 0, width: 12, height: 12))
         $0.rightViewMode = .always
         $0.autocapitalizationType = .none
-        $0.keyboardType = .default
     }
     
-    init(title: String, subTitle: String?, placeholder: String) {
+    init(title: String, subTitle: String?, placeholder: String, keyboardType: UIKeyboardType) {
         super.init(frame: .zero)
         
         self.title.text = title
         self.subTitle.text = subTitle
         self.textField.setPlaceholder(title: placeholder, color: .Light.r400)
         setupUI()
+        self.textField.keyboardType = keyboardType
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func changeKeyboardType(type: UIKeyboardType) {
+        self.textField.keyboardType = type
+    }
 }
 
 private extension ModalTextField {

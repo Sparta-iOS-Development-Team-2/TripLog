@@ -40,25 +40,25 @@ final class ModalView: UIView {
         switch state {
         case .createNewCashBook:
             self.titleLabel.text = state.modalTitle
-            self.firstSection = ModalTextField(title: "가계부 이름", subTitle: nil, placeholder: "예: 도쿄 여행 2024")
-            self.secondSection = ModalTextField(title: "여행 국가", subTitle: nil, placeholder: "예: 일본")
-            self.thirdSection = ModalTextField(title: "예산 설정", subTitle: "원(한화)", placeholder: "0")
+            self.firstSection = ModalTextField(title: "가계부 이름", subTitle: nil, placeholder: "예: 도쿄 여행 2024", keyboardType: .default)
+            self.secondSection = ModalTextField(title: "여행 국가", subTitle: nil, placeholder: "예: 일본", keyboardType: .default)
+            self.thirdSection = ModalTextField(title: "예산 설정", subTitle: "원(한화)", placeholder: "0", keyboardType: .numberPad)
             self.forthSection = ModalDateView()
             self.buttons = ModalButtons(buttonTitle: "생성")
             
         case .createNewbudget:
             self.titleLabel.text = state.modalTitle
             self.firstSection = ModalSegmentView()
-            self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세")
-            self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비")
+            self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
+            self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비", keyboardType: .default)
             self.forthSection = ModalAmoutView()
             self.buttons = ModalButtons(buttonTitle: "생성")
             
         case .editBudget:
             self.titleLabel.text = state.modalTitle
             self.firstSection = ModalSegmentView()
-            self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세")
-            self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비")
+            self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
+            self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비", keyboardType: .default)
             self.forthSection = ModalAmoutView()
             self.buttons = ModalButtons(buttonTitle: "수정")
         }
