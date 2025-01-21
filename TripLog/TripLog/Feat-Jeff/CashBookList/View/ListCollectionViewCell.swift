@@ -10,6 +10,7 @@ import SnapKit
 import Then
 
 class ListCollectionViewCell: UICollectionViewCell {
+    static let id = "ListCollectionViewCell"
     
     // 더미데이터
     private var country: String = "일본, 미국, 하와이, 스위스, 체코"
@@ -24,20 +25,20 @@ class ListCollectionViewCell: UICollectionViewCell {
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
     }
     
-    lazy var countryNameLabel = UILabel().then {
+    private lazy var countryNameLabel = UILabel().then {
         $0.numberOfLines = 2
         $0.text = "\(country)"
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
     }
     
-    lazy var bugetLabel = UILabel().then {
+    private lazy var bugetLabel = UILabel().then {
         $0.text = "💰 \(PriceFormatModel.wonFormat(buget))"
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
     }
     
-    lazy var periodLabel = UILabel().then {
+    private lazy var periodLabel = UILabel().then {
         $0.text = "🗓️ \(startDate) - \(endDate)"
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
@@ -116,4 +117,3 @@ class ListCollectionViewCell: UICollectionViewCell {
         }
     }
 }
-
