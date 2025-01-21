@@ -8,18 +8,17 @@
 import Foundation
 import Alamofire
 
-class NetworkManager {
+class APIManager {
     
-    static let shared = NetworkManager()
+    static let shared = APIManager()
     private init() {}
-
+    
     /// API 호출함수
     /// - Parameters:
     ///   - authKey: API 인증키
     ///   - dataType: 환율 / 대출금리 / 국제금리
     func fetchCurrencyRatesWithAlamofire(dataType: String, date: Date, completion: @escaping (Result<CurrencyRate, Error>) -> Void) {
         let url = "https://www.koreaexim.go.kr/site/program/financial/exchangeJSON"
-        // 검색일자는 함수 호출 시 날짜
         let searchDate = Date.formattedDateString(from: date)
         let apiKey = APIInfo.apiKey
         let parameters: Parameters = [
