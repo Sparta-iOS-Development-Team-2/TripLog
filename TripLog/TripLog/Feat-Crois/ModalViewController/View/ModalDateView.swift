@@ -8,8 +8,12 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
+import RxCocoa
 
 final class ModalDateView: UIView {
+    
+    private let disposeBag = DisposeBag()
     
     private let title = UILabel().then {
         $0.text = "여행 일정"
@@ -31,6 +35,9 @@ final class ModalDateView: UIView {
         $0.backgroundColor = .clear
     }
     
+    private var startDate: Date?
+    private var endDate: Date?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -48,6 +55,7 @@ private extension ModalDateView {
         configureSelf()
         setupStackView()
         setupLayout()
+        bind()
     }
     
     func configureSelf() {
@@ -71,6 +79,39 @@ private extension ModalDateView {
             $0.top.equalTo(title.snp.bottom).offset(8)
             $0.bottom.horizontalEdges.equalToSuperview()
         }
+    }
+    
+    func bind() {
+        startDatePicker.rx.selectedDate
+            .skip(2)
+            .asSignal(onErrorSignalWith: .empty())
+            .distinctUntilChanged()
+            .withUnretained(self)
+            .emit { owner, date in
+                
+                owner.startDate = date
+                owner.startDatePicker.configTextField(date: date)
+                
+            }.disposed(by: disposeBag)
+        
+        endDatePicker.rx.selectedDate
+            .skip(2)
+            .asSignal(onErrorSignalWith: .empty())
+            .distinctUntilChanged()
+            .withUnretained(self)
+            .emit { owner, date in
+                
+                owner.endDate = date
+                owner.endDatePicker.configTextField(date: date)
+                
+                guard let startDate = owner.startDate,
+                      startDate > date
+                else { return }
+                
+                owner.startDate = date
+                owner.startDatePicker.configTextField(date: date)
+                
+            }.disposed(by: disposeBag)
     }
     
 }

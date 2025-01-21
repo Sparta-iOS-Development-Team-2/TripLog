@@ -12,10 +12,8 @@ import RxSwift
 import RxCocoa
 
 final class ModalDatePicker: UIView {
-    
-    private let disposeBag = DisposeBag()
-    
-    private let datePicker = UIDatePicker().then {
+        
+    fileprivate let datePicker = UIDatePicker().then {
         $0.datePickerMode = .date
         $0.preferredDatePickerStyle = .compact
         $0.locale = .init(identifier: "KO_kr")
@@ -67,6 +65,13 @@ final class ModalDatePicker: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func configTextField(date: Date) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy년 MM월 dd일"
+        
+        self.textField.text = formatter.string(from: date)
+    }
+    
 }
 
 private extension ModalDatePicker {
@@ -74,7 +79,6 @@ private extension ModalDatePicker {
     func setupUI() {
         configureSelf()
         setupLayout()
-        bind()
     }
     
     func configureSelf() {
@@ -98,18 +102,10 @@ private extension ModalDatePicker {
         }
     }
     
-    func bind() {
-        datePicker.rx.date
-            .skip(1)
-            .distinctUntilChanged()
-            .map { date -> String in
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy년 MM월 dd일"
-                return formatter.string(from: date)
-            }
-            .bind(to: textField.rx.text)
-            .disposed(by: disposeBag)
-    }
-    
 }
 
+extension Reactive where Base: ModalDatePicker {
+    var selectedDate: Observable<Date> {
+        return base.datePicker.rx.date.asObservable()
+    }
+}
