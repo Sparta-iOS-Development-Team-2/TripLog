@@ -8,12 +8,17 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
+import RxCocoa
 
 final class ModalDatePicker: UIView {
+    
+    private let disposeBag = DisposeBag()
     
     private let datePicker = UIDatePicker().then {
         $0.datePickerMode = .date
         $0.preferredDatePickerStyle = .compact
+        $0.locale = .init(identifier: "KO_kr")
     }
     
     private let textField = UITextField().then {
@@ -69,6 +74,7 @@ private extension ModalDatePicker {
     func setupUI() {
         configureSelf()
         setupLayout()
+        bind()
     }
     
     func configureSelf() {
@@ -90,6 +96,19 @@ private extension ModalDatePicker {
             $0.centerY.equalToSuperview()
             $0.width.height.equalTo(20)
         }
+    }
+    
+    func bind() {
+        datePicker.rx.date
+            .skip(1)
+            .distinctUntilChanged()
+            .map { date -> String in
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy년 MM월 dd일"
+                return formatter.string(from: date)
+            }
+            .bind(to: textField.rx.text)
+            .disposed(by: disposeBag)
     }
     
 }
