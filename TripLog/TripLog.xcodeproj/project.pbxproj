@@ -16,8 +16,6 @@
 		AAC9B0A62D3A72A9006892A7 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A52D3A72A9006892A7 /* RxSwift */; };
 		AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A82D3A72C9006892A7 /* FSCalendar */; };
 		AAC9B0AC2D3A72E4006892A7 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0AB2D3A72E4006892A7 /* Then */; };
-		C3C455642D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C455622D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataClass.swift */; };
-		C3C455652D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C455632D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataProperties.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,8 +39,6 @@
 		AAC9B05D2D3A7070006892A7 /* TripLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TripLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC9B0762D3A7073006892A7 /* TripLogTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC9B0802D3A7073006892A7 /* TripLogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C3C455622D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CurrencyEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
-		C3C455632D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CurrencyEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -113,8 +109,6 @@
 		AAC9B0542D3A7070006892A7 = {
 			isa = PBXGroup;
 			children = (
-				C3C455622D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataClass.swift */,
-				C3C455632D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataProperties.swift */,
 				AAC9B05F2D3A7070006892A7 /* TripLog */,
 				AAC9B0792D3A7073006892A7 /* TripLogTests */,
 				AAC9B0832D3A7073006892A7 /* TripLogUITests */,
@@ -294,8 +288,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3C455642D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataClass.swift in Sources */,
-				C3C455652D3F8B9E00D9CBE5 /* CurrencyEntity+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,7 +324,7 @@
 		AAC9B08A2D3A7073006892A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
-			baseConfigurationReferenceRelativePath = "Hamsik/API&CoreData/Secrets.xcconfig";
+			baseConfigurationReferenceRelativePath = "Source/API&CoreData/Secrets.xcconfig";
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -365,7 +357,7 @@
 		AAC9B08B2D3A7073006892A7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
-			baseConfigurationReferenceRelativePath = "Hamsik/API&CoreData/Secrets.xcconfig";
+			baseConfigurationReferenceRelativePath = "Source/API&CoreData/Secrets.xcconfig";
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -517,7 +509,7 @@
 		AAC9B08F2D3A7073006892A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
-			baseConfigurationReferenceRelativePath = "Hamsik/API&CoreData/Secrets.xcconfig";
+			baseConfigurationReferenceRelativePath = "Source/API&CoreData/Secrets.xcconfig";
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -542,7 +534,7 @@
 		AAC9B0902D3A7073006892A7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
-			baseConfigurationReferenceRelativePath = "Hamsik/API&CoreData/Secrets.xcconfig";
+			baseConfigurationReferenceRelativePath = "Source/API&CoreData/Secrets.xcconfig";
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
