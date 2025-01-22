@@ -112,7 +112,7 @@ private extension ModalViewController {
 
 extension Reactive where Base: ModalViewController {
     /// 모달뷰의 active 버튼의 tap 이벤트를 방출하는 옵저버블
-    var completedLogic: Observable<Void> {
-        return base.modalView.rx.activeButtonTapped.asObservable()
+    var completedLogic: PublishRelay<Void> {
+        return base.modalView.rx.activeButtonTapped
     }
 }
