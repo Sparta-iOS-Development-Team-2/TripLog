@@ -82,7 +82,7 @@ final class ModalDatePicker: UIView {
     
     /// 데이트픽커 뷰의 날짜를 설정하는 메소드
     /// - Parameter date: 입력할 날짜
-    func configTextField(date: Date) {
+    func configureTextField(date: Date) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 MM월 dd일"
         

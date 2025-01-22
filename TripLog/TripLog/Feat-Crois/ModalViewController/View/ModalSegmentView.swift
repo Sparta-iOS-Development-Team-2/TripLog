@@ -40,7 +40,7 @@ final class ModalSegmentView: UIView {
     
     /// 세크먼트 컨트롤의 인덱스를 설정하는 메소드
     /// - Parameter isCardPayment: 지불 방법이 카드인지 확인하는 Bool 데이터
-    func configSegment(to isCardPayment: Bool) {
+    func configureSegment(to isCardPayment: Bool) {
         self.segmentView.selectedSegmentIndex = isCardPayment ? 1 : 0
     }
     

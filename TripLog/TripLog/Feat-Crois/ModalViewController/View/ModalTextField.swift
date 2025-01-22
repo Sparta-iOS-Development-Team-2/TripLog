@@ -78,7 +78,7 @@ final class ModalTextField: UIView {
     
     /// 텍스트필드를 세팅하는 메소드
     /// - Parameter text: 텍스트필드에 넣을 텍스트
-    func configTextField(text: String?) {
+    func configureTextField(text: String?) {
         textField.text = text
     }
     

@@ -102,14 +102,14 @@ private extension ModalDateView {
             .emit { owner, date in
                 
                 owner.startDate = date
-                owner.startDatePicker.configTextField(date: date)
+                owner.startDatePicker.configureTextField(date: date)
                 
                 guard let endDate = owner.endDate,
                       endDate < date
                 else { return }
                 
                 owner.endDate = date
-                owner.endDatePicker.configTextField(date: date)
+                owner.endDatePicker.configureTextField(date: date)
                 
             }.disposed(by: disposeBag)
         
@@ -121,14 +121,14 @@ private extension ModalDateView {
             .emit { owner, date in
                 
                 owner.endDate = date
-                owner.endDatePicker.configTextField(date: date)
+                owner.endDatePicker.configureTextField(date: date)
                 
                 guard let startDate = owner.startDate,
                       startDate > date
                 else { return }
                 
                 owner.startDate = date
-                owner.startDatePicker.configTextField(date: date)
+                owner.startDatePicker.configureTextField(date: date)
                 
             }.disposed(by: disposeBag)
     }

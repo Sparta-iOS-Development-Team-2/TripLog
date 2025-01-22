@@ -80,10 +80,10 @@ final class ModalView: UIView {
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalAmoutView
             {
-                firstSection.configSegment(to: data.isCardPayment)
-                secondSection.configTextField(text: data.expenseDetails)
-                thirdSection.configTextField(text: data.category)
-                forthSection.configtAmoutView(amout: data.amount, currency: data.carrency)
+                firstSection.configureSegment(to: data.isCardPayment)
+                secondSection.configureTextField(text: data.expenseDetails)
+                thirdSection.configureTextField(text: data.category)
+                forthSection.configureAmoutView(amout: data.amount, currency: data.carrency)
             }
         }
     
