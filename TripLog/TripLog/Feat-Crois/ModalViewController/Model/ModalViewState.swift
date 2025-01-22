@@ -10,7 +10,7 @@ import Foundation
 enum ModalViewState {
     case createNewCashBook
     case createNewbudget
-    case editBudget
+    case editBudget(data: TestModalViewData)
     
     var modalTitle: String {
         switch self {
