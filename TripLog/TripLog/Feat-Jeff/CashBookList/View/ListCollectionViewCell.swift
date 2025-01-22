@@ -4,12 +4,11 @@
 //
 //  Created by jae hoon lee on 1/20/25.
 //
-
 import UIKit
 import SnapKit
 import Then
 
-class ListCollectionViewCell: UICollectionViewCell {
+final class ListCollectionViewCell: UICollectionViewCell {
     static let id = "ListCollectionViewCell"
     
     private var tripNameLabel = UILabel().then {
@@ -52,28 +51,7 @@ class ListCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    /// 셀에 그림자 추가
-    func setupShadow() {
-        layer.borderWidth = 0.2
-        layer.borderColor = UIColor.lightGray.cgColor
-        
-        layer.cornerRadius = 8
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.2
-        layer.shadowOffset = CGSize(width: 0, height: 1)
-        layer.shadowRadius = 4
-        layer.masksToBounds = false
-    }
-   
-    /// 데이터에 저장된 값을 이용해 셀에 주입
-    func configureCell(data: ListCellData) {
-        tripNameLabel.text = data.tripName
-        noteLabel.text = data.note
-        bugetLabel.text = "💰 \(PriceFormatModel.wonFormat(Int(data.buget)))"
-        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
-    }
-    
-    /// 데이터가 있는 경우의 setupUI
+    /// setupUI
     private func setupUI() {
         backgroundColor = .white
         
@@ -100,4 +78,26 @@ class ListCollectionViewCell: UICollectionViewCell {
             $0.bottom.equalToSuperview().offset(-20)
         }
     }
+    
+    /// 셀에 그림자 추가(ContentView)
+    private func setupShadow() {
+        layer.borderWidth = 0.2
+        layer.borderColor = UIColor.lightGray.cgColor
+        
+        layer.cornerRadius = 8
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.2
+        layer.shadowOffset = CGSize(width: 0, height: 1)
+        layer.shadowRadius = 4
+        layer.masksToBounds = false
+    }
+   
+    /// 데이터에 저장된 값으로 셀에 주입
+    func configureCell(data: ListCellData) {
+        tripNameLabel.text = data.tripName
+        noteLabel.text = data.note
+        bugetLabel.text = "💰 \(PriceFormatModel.wonFormat(Int(data.buget)))"
+        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
+    }
+    
 }

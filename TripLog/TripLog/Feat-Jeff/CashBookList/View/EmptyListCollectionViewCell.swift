@@ -11,13 +11,11 @@ import Then
 final class EmptyListCollectionViewCell: UICollectionViewCell {
     static let id = "EmptyListCollectionViewCell"
     
-    // 여행 추가하기 Label
     private let addNameLabel = UILabel().then {
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
     }
     
-    // "+" Button
     private let addButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
         $0.tintColor = UIColor.Light.r200
