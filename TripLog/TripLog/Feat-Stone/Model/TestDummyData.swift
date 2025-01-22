@@ -8,7 +8,7 @@
 // Model.swift
 import Foundation
 
-struct Trip {
+struct TestDummyData {
     let title: String
     let subtitle: String
     let date: String
@@ -18,10 +18,10 @@ struct Trip {
     let balance: String
 }
 
-extension Trip {
-    static func sampleData() -> [Trip] {
+extension TestDummyData {
+    static func sampleData() -> [TestDummyData] {
         return [
-            Trip(
+            TestDummyData(
                 title: "도쿄 여행 2024",
                 subtitle: "일본",
                 date: "2024.01.15 - 2024.01.20",

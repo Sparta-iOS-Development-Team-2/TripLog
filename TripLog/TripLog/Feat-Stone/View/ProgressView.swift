@@ -4,17 +4,40 @@
 //
 //  Created by 김석준 on 1/22/25.
 //
-
 import UIKit
 import SnapKit
+import Then
 
 class ProgressView: UIView {
 
-    private let progressBar = UIProgressView(progressViewStyle: .default)
-    private let expenseLabel = UILabel()
-    private let budgetLabel = UILabel()
-    private let balanceLabel = UILabel()
+    private let progressBar = UIProgressView(progressViewStyle: .default).then {
+        $0.progressTintColor = .systemBlue
+        $0.trackTintColor = .lightGray
+    }
+    private let expenseLabel = UILabel().then {
+        $0.font = UIFont.SCDream(size: .caption, weight: .medium)
+        $0.textColor = .black
+    }
+    private let budgetLabel = UILabel().then {
+        $0.font = UIFont.SCDream(size: .caption, weight: .medium)
+        $0.textColor = .black
+        $0.textAlignment = .right
+    }
+    private let balanceLabel = UILabel().then {
+        $0.font = UIFont.SCDream(size: .body, weight: .bold)
+        $0.textAlignment = .right
+    }
 
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupLayout()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupLayout()
+    }
+    
     func configure(expense: String, budget: String) {
         // 예산과 지출을 숫자로 변환
         let budgetAmount = Int(budget.replacingOccurrences(of: ",", with: "")) ?? 0
@@ -28,39 +51,16 @@ class ProgressView: UIView {
         expenseLabel.text = "지출: \(expense)"
         budgetLabel.text = "예산: \(budget)"
         balanceLabel.text = "잔액: \(budgetAmount - expenseAmount)"
-    }
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupLayout()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupLayout()
+        // 색상 설정 (컬러 로드 실패 시 기본값 사용)
+        balanceLabel.textColor = UIColor.Personal.normal
     }
 
     private func setupLayout() {
         // 서브뷰 추가
-        [expenseLabel, budgetLabel, progressBar, balanceLabel].forEach {
-            addSubview($0)
-        }
-        
-        if let color = UIColor(named: "normal") {
-            print("Color loaded: \(color)")
-            balanceLabel.textColor = color
-        } else {
-            print("Color 'normal' not found!")
-        }
+        [expenseLabel, budgetLabel, progressBar, balanceLabel].forEach { addSubview($0) }
 
         // 레이아웃 설정
-        expenseLabel.font = UIFont.SCDream(size: .caption, weight: .medium)
-        budgetLabel.font = UIFont.SCDream(size: .caption, weight: .medium)
-        balanceLabel.font = UIFont.SCDream(size: .body, weight: .bold)
-        balanceLabel.textColor = UIColor(named: "normal")
-        balanceLabel.textAlignment = .right
-
-
         expenseLabel.snp.makeConstraints {
             $0.top.leading.equalToSuperview()
         }

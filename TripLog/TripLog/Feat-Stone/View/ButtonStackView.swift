@@ -9,8 +9,8 @@ import UIKit
 
 class CustomButtonStackView: UIStackView {
 
-    let todayExpenseButton = UIButton(type: .system)
-    let calendarButton = UIButton(type: .system)
+    private let todayExpenseButton = UIButton(type: .system)
+    private let calendarButton = UIButton(type: .system)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -25,26 +25,21 @@ class CustomButtonStackView: UIStackView {
     }
 
     private func setupButtons() {
-        
-        let grayColor = UIColor(red: 0x73 / 255.0, green: 0x73 / 255.0, blue: 0x73 / 255.0, alpha: 1.0)
-        
-        // "오늘 지출" 버튼 설정
-        todayExpenseButton.setTitle("오늘 지출", for: .normal)
-        todayExpenseButton.setTitleColor(UIColor(named: "normal"), for: .normal)
-        todayExpenseButton.titleLabel?.font = UIFont.SCDream(size: .display, weight: .bold)
-        todayExpenseButton.layer.borderColor = UIColor.lightGray.cgColor
-        todayExpenseButton.layer.borderWidth = 1
-
-        // "캘린더" 버튼 설정
-        calendarButton.setTitle("캘린더", for: .normal)
-        calendarButton.setTitleColor(grayColor, for: .normal)
-        calendarButton.titleLabel?.font = UIFont.SCDream(size: .display, weight: .bold)
-        calendarButton.layer.borderColor = UIColor.lightGray.cgColor
-        calendarButton.layer.borderWidth = 1
+        // 버튼 공통 설정
+        configureButton(todayExpenseButton, title: "오늘 지출", titleColor: UIColor(named: "normal"))
+        configureButton(calendarButton, title: "캘린더", titleColor: UIColor(red: 0x73 / 255.0, green: 0x73 / 255.0, blue: 0x73 / 255.0, alpha: 1.0))
 
         // 스택 뷰에 버튼 추가
         addArrangedSubview(todayExpenseButton)
         addArrangedSubview(calendarButton)
+    }
+
+    private func configureButton(_ button: UIButton, title: String, titleColor: UIColor?) {
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(titleColor, for: .normal)
+        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: .bold)
+        button.layer.borderColor = UIColor.lightGray.cgColor
+        button.layer.borderWidth = 1
     }
 
     private func setupLayout() {

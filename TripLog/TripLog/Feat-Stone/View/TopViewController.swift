@@ -7,13 +7,16 @@
 
 import UIKit
 import SnapKit
+import Then
 
 class TopViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
-    private let tableView = UITableView()
+    private let tableView = UITableView().then {
+        $0.separatorStyle = .none
+    }
 
     // Model 데이터
-    private let data = Trip.sampleData() // Model에서 가져옴
+    private let data = TestDummyData.sampleData() // Model에서 가져옴
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,15 +45,12 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: "CustomCell")
-        
-        // 구분선 삭제
-        tableView.separatorStyle = .none
-        
+
         // SnapKit 레이아웃 설정
         tableView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(20) // 화면 상단과 간격
-            $0.leading.trailing.equalToSuperview() // 좌우 여백
-            $0.bottom.equalToSuperview().offset(-20) // 화면 하단과 간격
+            $0.top.equalToSuperview().offset(20)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview().offset(-20)
         }
     }
 
@@ -77,56 +77,44 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // 셀을 선택했을 때
         tableView.deselectRow(at: indexPath, animated: true)
-        
+
         // 선택된 trip 데이터 가져오기
         let selectedTrip = data[indexPath.row]
-        
+
         // 네비게이션 바의 제목을 선택된 trip의 제목으로 설정
         self.navigationItem.title = selectedTrip.title
-        
+
         print("Cell tapped: \(indexPath.row), Title: \(selectedTrip.title)")
     }
-
 }
 
 class CustomTableViewCell: UITableViewCell {
 
-    private let subtitleLabel = UILabel()
-    private let dateLabel = UILabel()
+    private let titleDateView = TitleDateView()
     private let progressView = ProgressView()
     private let buttonStackView = CustomButtonStackView()
 
     func configure(subtitle: String, date: String, expense: String, budget: String) {
         // 데이터 설정
-        subtitleLabel.text = subtitle
-        dateLabel.text = date
+        titleDateView.configure(subtitle: subtitle, date: date)
         progressView.configure(expense: expense, budget: budget)
-        
-        // 폰트 크기 및 스타일 설정
-        subtitleLabel.font = UIFont.SCDream(size: .headline, weight: .medium)  // 원하는 폰트와 크기 지정
-        dateLabel.font = UIFont.SCDream(size: .headline, weight: .medium)   // 원하는 폰트와 크기 지정
-        
+
         setupLayout()
     }
 
     private func setupLayout() {
         // 모든 서브뷰 추가
-        [subtitleLabel, dateLabel, progressView, buttonStackView].forEach {
+        [titleDateView, progressView, buttonStackView].forEach {
             contentView.addSubview($0)
         }
 
-        subtitleLabel.snp.makeConstraints {
+        titleDateView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(4)
             $0.leading.trailing.equalToSuperview().inset(16)
         }
 
-        dateLabel.snp.makeConstraints {
-            $0.top.equalTo(subtitleLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(16)
-        }
-
         progressView.snp.makeConstraints {
-            $0.top.equalTo(dateLabel.snp.bottom).offset(16)
+            $0.top.equalTo(titleDateView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(16)
         }
 
