@@ -52,6 +52,13 @@ final class ModalButtons: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            self.cancelButton.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
+        }
+    }
+    
 }
 
 private extension ModalButtons {

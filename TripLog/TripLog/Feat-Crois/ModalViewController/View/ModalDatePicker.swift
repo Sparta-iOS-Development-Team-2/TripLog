@@ -65,6 +65,13 @@ final class ModalDatePicker: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            self.textField.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
+        }
+    }
+    
     func configTextField(date: Date) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 MM월 dd일"

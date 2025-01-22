@@ -58,6 +58,13 @@ final class ModalAmoutView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            self.textField.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
+        }
+    }
+    
 }
 
 private extension ModalAmoutView {
