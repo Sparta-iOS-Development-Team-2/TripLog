@@ -54,13 +54,24 @@ final class ModalView: UIView {
             self.forthSection = ModalAmoutView()
             self.buttons = ModalButtons(buttonTitle: "생성")
             
-        case .editBudget:
+        case .editBudget(data: let data):
             self.titleLabel.text = state.modalTitle
             self.firstSection = ModalSegmentView()
             self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
             self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비", keyboardType: .default)
             self.forthSection = ModalAmoutView()
             self.buttons = ModalButtons(buttonTitle: "수정")
+            
+            if let firstSection = self.firstSection as? ModalSegmentView,
+               let secondSection = self.secondSection as? ModalTextField,
+               let thirdSection = self.thirdSection as? ModalTextField,
+               let forthSection = self.forthSection as? ModalAmoutView
+            {
+                firstSection.configSegment(to: data.isCardPayment)
+                secondSection.configTextField(text: data.expenseDetails)
+                thirdSection.configTextField(text: data.category)
+                forthSection.configtAmoutView(amout: data.amount, currency: data.carrency)
+            }
         }
     
         super.init(frame: .zero)

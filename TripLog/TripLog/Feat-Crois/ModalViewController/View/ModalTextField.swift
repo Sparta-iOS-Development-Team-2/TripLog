@@ -64,9 +64,10 @@ final class ModalTextField: UIView {
         }
     }
     
-    func changeKeyboardType(type: UIKeyboardType) {
-        self.textField.keyboardType = type
+    func configTextField(text: String?) {
+        textField.text = text
     }
+    
 }
 
 private extension ModalTextField {

@@ -34,6 +34,10 @@ final class ModalSegmentView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func configSegment(to isCardPayment: Bool) {
+        self.segmentView.selectedSegmentIndex = isCardPayment ? 1 : 0
+    }
+    
 }
 
 private extension ModalSegmentView {

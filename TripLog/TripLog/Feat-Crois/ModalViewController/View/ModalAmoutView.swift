@@ -65,6 +65,11 @@ final class ModalAmoutView: UIView {
         }
     }
     
+    func configtAmoutView(amout: Int?, currency: Currency) {
+        self.textField.text = "\(amout ?? 0)"
+        self.currencyButton.setTitle(currency.rawValue, for: .normal)
+    }
+    
 }
 
 private extension ModalAmoutView {
