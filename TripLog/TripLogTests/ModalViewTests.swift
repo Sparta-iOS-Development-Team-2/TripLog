@@ -28,6 +28,7 @@ final class ModalViewTests: XCTestCase {
         
     }
     
+    // 모달뷰의 현태 status를 가져오는 메소드 테스트
     func testCheckModalViewStatus() throws {
         // given (modalView State = .createNewCashBook)
         
@@ -40,6 +41,7 @@ final class ModalViewTests: XCTestCase {
         XCTAssertEqual(result, "지출내역 수정하기", "🚨 ModalView's Status is not editBudget")
     }
     
+    // 모달뷰의 active 버튼 이벤트 방출 테스트
     func testModalViewActiveButtonTapped() throws {
         // given
         let input = sut.rx.activeButtonTapped
@@ -57,6 +59,7 @@ final class ModalViewTests: XCTestCase {
         XCTAssertEqual(result, "activeButtonTapped", "🚨 activeButtonTapped function is wrong")
     }
     
+    // 모달뷰의 취소 버튼 이벤트 방출 테스트
     func testModalViewCancelButtonTapped() throws {
         // given
         let input = sut.rx.cancelButtonTapped

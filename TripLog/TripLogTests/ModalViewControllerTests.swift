@@ -28,6 +28,7 @@ final class ModalViewControllerTests: XCTestCase {
         
     }
     
+    // 모달뷰 active 버튼 액션 테스트
     func testModalViewControllerCompletedAction() throws {
         // given
         let input = sut.rx.completedLogic
