@@ -95,7 +95,7 @@ private extension ModalDateView {
     /// 데이트픽커 바인딩 메소드
     func bind() {
         startDatePicker.rx.selectedDate
-            .skip(2)
+            .skip(1)
             .asSignal(onErrorSignalWith: .empty())
             .distinctUntilChanged()
             .withUnretained(self)
@@ -103,6 +103,13 @@ private extension ModalDateView {
                 
                 owner.startDate = date
                 owner.startDatePicker.configTextField(date: date)
+                
+                guard let endDate = owner.endDate,
+                      endDate < date
+                else { return }
+                
+                owner.endDate = date
+                owner.endDatePicker.configTextField(date: date)
                 
             }.disposed(by: disposeBag)
         
