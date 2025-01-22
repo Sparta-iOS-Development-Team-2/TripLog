@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 모든 통화를 모아두는 enum
 enum Currency: String, CaseIterable {
     case KRW = "원(한화)"         // 대한민국
     case USD = "USD(달러)"       // 미국

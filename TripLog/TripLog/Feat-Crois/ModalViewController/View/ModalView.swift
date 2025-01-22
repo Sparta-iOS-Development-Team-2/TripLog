@@ -11,14 +11,17 @@ import Then
 import RxSwift
 import RxCocoa
 
+/// 모달 뷰 컨트롤러의 뷰로 쓰일 모달 뷰
 final class ModalView: UIView {
+    
+    // MARK: - Rx Properties
     
     fileprivate let cancelButtonTapped = PublishRelay<Void>()
     fileprivate let activeButtonTapped = PublishRelay<Void>()
     
     private let disposeBag = DisposeBag()
     
-    private var state: ModalViewState
+    // MARK: - UI Components
     
     private let titleLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .subtitle, weight: .bold)
@@ -35,6 +38,16 @@ final class ModalView: UIView {
     private let thirdSection: UIView?
     private let forthSection: UIView?
     
+    // MARK: - Properties
+    
+    private var state: ModalViewState
+    
+    // MARK: - Initializer
+    
+    /// 모달뷰 기본 생성자
+    /// - Parameter state: 모달뷰의 상태를 지정
+    ///
+    /// ``ModalViewState``
     init(state: ModalViewState) {
         self.state = state
         switch state {
@@ -82,11 +95,15 @@ final class ModalView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// 모달뷰의 현재 상태를 반환하는 메소드
+    /// - Returns: 모달뷰의 현재 state
     func checkModalStatus() -> ModalViewState {
         return self.state
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension ModalView {
     
@@ -143,6 +160,7 @@ private extension ModalView {
         }
     }
     
+    /// 모달뷰의 버튼을 바인딩 하는 메소드
     func bindButtons() {
         buttons.rx.activeButtondTapped
             .bind(to: activeButtonTapped)
@@ -155,11 +173,15 @@ private extension ModalView {
 
 }
 
+// MARK: - Reactive Extension
+
 extension Reactive where Base: ModalView {
+    /// active 버튼의 tap 이벤트를 방출하는 옵저버블
     var activeButtonTapped: PublishRelay<Void> {
         return base.activeButtonTapped
     }
     
+    /// cancel 버튼의 tap 이벤트를 방출하는 옵저버블
     var cancelButtonTapped: PublishRelay<Void> {
         return base.cancelButtonTapped
     }

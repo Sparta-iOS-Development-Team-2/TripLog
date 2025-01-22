@@ -11,8 +11,11 @@ import Then
 import RxSwift
 import RxCocoa
 
+/// 모달뷰에서 날짜를 선택하는 공용 컴포넌츠
 final class ModalDatePicker: UIView {
-        
+    
+    // MARK: - UI Components
+    
     fileprivate let datePicker = UIDatePicker().then {
         $0.datePickerMode = .date
         $0.preferredDatePickerStyle = .compact
@@ -46,6 +49,10 @@ final class ModalDatePicker: UIView {
         $0.contentMode = .scaleAspectFit
     }
     
+    // MARK: - Initializer
+    
+    /// 데이트픽커뷰의 기본 생성자
+    /// - Parameter direction: 데이트 픽커의 방향(방향에 따라 cornerRadius 값이 바뀜)
     init(direction: ModalDatePickerDirection) {
         super.init(frame: .zero)
         
@@ -65,6 +72,7 @@ final class ModalDatePicker: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
@@ -72,6 +80,8 @@ final class ModalDatePicker: UIView {
         }
     }
     
+    /// 데이트픽커 뷰의 날짜를 설정하는 메소드
+    /// - Parameter date: 입력할 날짜
     func configTextField(date: Date) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 MM월 dd일"
@@ -80,6 +90,8 @@ final class ModalDatePicker: UIView {
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension ModalDatePicker {
     
@@ -111,7 +123,10 @@ private extension ModalDatePicker {
     
 }
 
+// MARK: - Reactive Extension
+
 extension Reactive where Base: ModalDatePicker {
+    /// 데이트픽커의 날짜가 선택되면 해당 날짜를 이벤트로 방출하는 옵저버블
     var selectedDate: Observable<Date> {
         return base.datePicker.rx.date.asObservable()
     }

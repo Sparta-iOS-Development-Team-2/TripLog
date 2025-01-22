@@ -11,7 +11,10 @@ import Then
 import RxSwift
 import RxCocoa
 
+/// 모달에서 버튼을 구현한 공용 컴포넌츠
 final class ModalButtons: UIView {
+    
+    // MARK: - UI Components
     
     fileprivate let cancelButton = UIButton().then {
         $0.setTitle("취소", for: .normal)
@@ -41,6 +44,8 @@ final class ModalButtons: UIView {
         $0.spacing = 16
     }
     
+    // MARK: - Initializer
+    
     init(buttonTitle: String) {
         super.init(frame: .zero)
         
@@ -52,6 +57,7 @@ final class ModalButtons: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
@@ -60,6 +66,8 @@ final class ModalButtons: UIView {
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension ModalButtons {
     
@@ -85,11 +93,15 @@ private extension ModalButtons {
     }
 }
 
+// MARK: - Reactive Extension
+
 extension Reactive where Base: ModalButtons {
+    /// active 버튼을 클릭했을 때 이벤트를 방출하는 옵저버블
     var activeButtondTapped: Observable<Void> {
         return base.createButton.rx.tap.asObservable()
     }
     
+    /// cancel 버튼을 클릭했을 때 이벤트를 방출하는 옵저버블
     var cancelButtondTapped: Observable<Void> {
         return base.cancelButton.rx.tap.asObservable()
     }

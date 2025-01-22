@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 테스트용 더미 데이터
 struct TestModalViewData {
     let isCardPayment: Bool
     let expenseDetails: String?

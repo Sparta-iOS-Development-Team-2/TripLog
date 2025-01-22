@@ -11,9 +11,14 @@ import Then
 import RxSwift
 import RxCocoa
 
+/// 모달뷰에서 날짜 설정을 구현한 공용 컴포넌츠
 final class ModalDateView: UIView {
     
+    // MARK: - Rx Properties
+    
     private let disposeBag = DisposeBag()
+    
+    // MARK: - UI Components
     
     private let title = UILabel().then {
         $0.text = "여행 일정"
@@ -35,8 +40,12 @@ final class ModalDateView: UIView {
         $0.backgroundColor = .clear
     }
     
-    private var startDate: Date?
-    private var endDate: Date?
+    // MARK: - Properties
+    
+    private var startDate: Date? // 여행 시작 일정을 저장
+    private var endDate: Date? // 여행 종료 일정을 저장
+    
+    // MARK: - Initializer
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -48,6 +57,8 @@ final class ModalDateView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+// MARK: - UI Setting Method
 
 private extension ModalDateView {
     
@@ -81,6 +92,7 @@ private extension ModalDateView {
         }
     }
     
+    /// 데이트픽커 바인딩 메소드
     func bind() {
         startDatePicker.rx.selectedDate
             .skip(2)

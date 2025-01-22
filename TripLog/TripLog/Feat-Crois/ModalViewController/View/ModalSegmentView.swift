@@ -9,7 +9,10 @@ import UIKit
 import SnapKit
 import Then
 
+/// 모달뷰에서 카드, 현금을 선택하는 세그먼트 컨트롤 공용 컴포넌츠
 final class ModalSegmentView: UIView {
+    
+    // MARK: - UI Components
     
     private let title = UILabel().then {
         $0.text = "지불 방법"
@@ -24,6 +27,7 @@ final class ModalSegmentView: UIView {
         $0.selectedSegmentIndex = 0
     }
     
+    // MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -34,11 +38,15 @@ final class ModalSegmentView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// 세크먼트 컨트롤의 인덱스를 설정하는 메소드
+    /// - Parameter isCardPayment: 지불 방법이 카드인지 확인하는 Bool 데이터
     func configSegment(to isCardPayment: Bool) {
         self.segmentView.selectedSegmentIndex = isCardPayment ? 1 : 0
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension ModalSegmentView {
     

@@ -9,7 +9,10 @@ import UIKit
 import SnapKit
 import Then
 
+/// 모달에서 텍스트 입력을 받을 텍스트 필드 공용 컴포넌츠
 final class ModalTextField: UIView {
+    
+    // MARK: - UI Components
     
     private let title = UILabel().then {
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
@@ -43,6 +46,14 @@ final class ModalTextField: UIView {
         $0.autocapitalizationType = .none
     }
     
+    // MARK: - Initializer
+    
+    /// 텍스트필드 기본 생성자
+    /// - Parameters:
+    ///   - title: 텍스트필드 대제목
+    ///   - subTitle: 텍스트필드 부제목(없을 수 있음)
+    ///   - placeholder: placeholder 텍스트
+    ///   - keyboardType: 키보드 타입 지정
     init(title: String, subTitle: String?, placeholder: String, keyboardType: UIKeyboardType) {
         super.init(frame: .zero)
         
@@ -57,6 +68,7 @@ final class ModalTextField: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
@@ -64,11 +76,15 @@ final class ModalTextField: UIView {
         }
     }
     
+    /// 텍스트필드를 세팅하는 메소드
+    /// - Parameter text: 텍스트필드에 넣을 텍스트
     func configTextField(text: String?) {
         textField.text = text
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension ModalTextField {
     

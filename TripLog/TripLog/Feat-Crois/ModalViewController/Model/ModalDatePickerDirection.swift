@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 모달의 데이트픽커 방향을 설정하는 enum
 enum ModalDatePickerDirection {
     case right
     case left

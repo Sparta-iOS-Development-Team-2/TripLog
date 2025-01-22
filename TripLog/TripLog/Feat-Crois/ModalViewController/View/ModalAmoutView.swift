@@ -9,7 +9,10 @@ import UIKit
 import SnapKit
 import Then
 
+/// 모달뷰에서 금액을 입력하는 공용 컴포넌츠
 final class ModalAmoutView: UIView {
+    
+    // MARK: - UI Components
     
     private let title = UILabel().then {
         $0.text = "금액"
@@ -48,6 +51,8 @@ final class ModalAmoutView: UIView {
         $0.keyboardType = .numberPad
     }
     
+    // MARK: - Initializer
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -58,6 +63,7 @@ final class ModalAmoutView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
@@ -65,12 +71,18 @@ final class ModalAmoutView: UIView {
         }
     }
     
+    /// 금액 입력 뷰를 세팅하는 메소드
+    /// - Parameters:
+    ///   - amout: 금액(빈 값일 수도 있음)
+    ///   - currency: 통화
     func configtAmoutView(amout: Int?, currency: Currency) {
         self.textField.text = "\(amout ?? 0)"
         self.currencyButton.setTitle(currency.rawValue, for: .normal)
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension ModalAmoutView {
     
@@ -85,6 +97,7 @@ private extension ModalAmoutView {
         [title, currencyButton, textField].forEach { self.addSubview($0) }
     }
     
+    /// 통화 선택 버튼에 메뉴 뷰를 추가하는 메소드
     func configureMenuForButton() {
         // 메뉴 항목 생성
         let children: [UIAction] = {
