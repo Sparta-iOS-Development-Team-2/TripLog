@@ -17,7 +17,7 @@ final class ModalViewController: UIViewController {
     
     private let viewModel = ModalViewModel()
     
-    private let modalView: ModalView
+    fileprivate let modalView: ModalView
     
     init(state: ModalViewState) {
         self.modalView = ModalView(state: state)
@@ -88,3 +88,8 @@ private extension ModalViewController {
     }
 }
 
+extension Reactive where Base: ModalViewController {
+    var completedLogic: Observable<Void> {
+        return base.modalView.rx.activeButtonTapped.asObservable()
+    }
+}
