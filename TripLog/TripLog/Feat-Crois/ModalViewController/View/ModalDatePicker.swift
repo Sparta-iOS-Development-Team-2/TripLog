@@ -51,7 +51,7 @@ final class ModalDatePicker: UIView {
     
     // MARK: - Initializer
     
-    /// 데이트픽커뷰의 기본 생성자
+    /// DatePicker뷰의 기본 생성자
     /// - Parameter direction: 데이트 픽커의 방향(방향에 따라 cornerRadius 값이 바뀜)
     init(direction: ModalDatePickerDirection) {
         super.init(frame: .zero)
@@ -80,7 +80,7 @@ final class ModalDatePicker: UIView {
         }
     }
     
-    /// 데이트픽커 뷰의 날짜를 설정하는 메소드
+    /// DatePicker 뷰의 날짜를 설정하는 메소드
     /// - Parameter date: 입력할 날짜
     func configureTextField(date: Date) {
         let formatter = DateFormatter()
@@ -126,7 +126,7 @@ private extension ModalDatePicker {
 // MARK: - Reactive Extension
 
 extension Reactive where Base: ModalDatePicker {
-    /// 데이트픽커의 날짜가 선택되면 해당 날짜를 이벤트로 방출하는 옵저버블
+    /// DatePicker의 날짜가 선택되면 해당 날짜를 이벤트로 방출하는 옵저버블
     var selectedDate: Observable<Date> {
         return base.datePicker.rx.date.asObservable()
     }

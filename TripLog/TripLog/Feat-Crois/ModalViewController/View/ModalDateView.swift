@@ -92,7 +92,7 @@ private extension ModalDateView {
         }
     }
     
-    /// 데이트픽커 바인딩 메소드
+    /// DatePicker 바인딩 메소드
     func bind() {
         startDatePicker.rx.selectedDate
             .skip(1)
