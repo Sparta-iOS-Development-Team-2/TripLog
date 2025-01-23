@@ -26,7 +26,7 @@ extension TestDummyData {
                 subtitle: "일본",
                 date: "2024.01.15 - 2024.01.20",
                 progress: 0.5,
-                expense: "200,000",
+                expense: "1,800,000",
                 budget: "2,000,000",
                 balance: ""
             )
