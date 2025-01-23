@@ -19,32 +19,41 @@ extension UIFont {
     }
     
     static func SCDream(size fontSize: FontSize, weight: UIFont.Weight) -> UIFont {
-        let familyName = "SCDream"
+        let familyName = "S-CoreDream-"
         
         var weightString: String
         switch weight {
         case .black:
-            weightString = "9"
+            weightString = "9Black"
         case .bold:
-            weightString = "7"
+            weightString = "7ExtraBold"
         case .heavy:
-            weightString = "8"
+            weightString = "8Heavy"
         case .ultraLight:
-            weightString = "2"
+            weightString = "2ExtraLight"
         case .light:
-            weightString = "3"
+            weightString = "3Lihgt"
         case .medium:
-            weightString = "5"
+            weightString = "5Medium"
         case .regular:
-            weightString = "4"
+            weightString = "4Regular"
         case .semibold:
-            weightString = "6"
+            weightString = "6Bold"
         case .thin:
-            weightString = "1"
+            weightString = "1Thin"
         default:
-            weightString = "4"
+            weightString = "4Regular"
         }
         
         return UIFont(name: "\(familyName)\(weightString)", size: fontSize.rawValue) ?? .systemFont(ofSize: fontSize.rawValue, weight: weight)
+    }
+    
+    static func printAll() {
+        familyNames.sorted().forEach { familyName in
+            print("*** \(familyName) ***")
+            fontNames(forFamilyName: familyName).sorted().forEach { fontName in
+                print("\(fontName)")
+            }
+        }
     }
 }
