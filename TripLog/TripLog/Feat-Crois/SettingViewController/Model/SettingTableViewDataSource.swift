@@ -44,9 +44,11 @@ private extension SettingViewController {
     // 테이블뷰 데이터소스 정의
     var dataSource: DataSource {
         let dataSource = DataSource(configureCell: { dataSource, tableView, indexPath, item in
-            // 임시 데이터
-            // 셀 구현 후 내용 변경
-            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: SetTableViewCell.id, for: indexPath) as? SetTableViewCell
+            else { return UITableViewCell() }
+                    
+            cell.configureCell(model: item)
+            
             return cell
             
         }, titleForHeaderInSection: { dataSource, index in
