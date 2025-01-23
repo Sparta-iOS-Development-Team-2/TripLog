@@ -9,8 +9,8 @@ import RxDataSources
 
 /// Core Data의 엔티티를 기반으로 하는 가계부 데이터 모델
 /// RxDataSource와 View에서 사용하기 위해 변환된 데이터 모델
-struct ListCellData: Identifiable {
-    let id: UUID
+struct ListCellData: Equatable, IdentifiableType {
+    var identity: UUID
     let tripName: String
     let note: String
     let buget: Double
@@ -18,7 +18,7 @@ struct ListCellData: Identifiable {
     let homecoming: String
     
     init(tripName: String, note: String, buget: Double, departure: String, homecoming: String) {
-        self.id = UUID()
+        self.identity = UUID()
         self.tripName = tripName
         self.note = note
         self.buget = buget
@@ -30,9 +30,10 @@ struct ListCellData: Identifiable {
 /// RxDataSource에서 사용되는 모델
 struct SectionOfListCellData {
     var items: [ListCellData]
+    var identity: UUID
 }
 
-extension SectionOfListCellData: SectionModelType {
+extension SectionOfListCellData: AnimatableSectionModelType {
     typealias Item = ListCellData
     
     init(original: SectionOfListCellData, items: [ListCellData]) {
@@ -40,6 +41,3 @@ extension SectionOfListCellData: SectionModelType {
         self.items = items
     }
 }
-
-
-

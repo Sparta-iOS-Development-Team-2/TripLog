@@ -17,10 +17,29 @@ final class CashBookListViewController: UIViewController {
     private let addCellView = AddCellView()
     private let viewModel = CashBookListViewModel()
     
-    private var dataSource: RxCollectionViewSectionedReloadDataSource<SectionOfListCellData>!
     private let viewWillAppearSubject = PublishSubject<Void>()
     private let testButtonTapped = PublishRelay<Void>()
     private let addButtonTapped = PublishRelay<Void>()
+    
+    typealias DataSource = RxCollectionViewSectionedAnimatedDataSource<SectionOfListCellData>
+    
+    let dataSource: DataSource = {
+        let dataSource = DataSource(
+            configureCell: { dataSource, collectionView, indexPath, item -> UICollectionViewCell in
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: ListCollectionViewCell.id,
+                    for: indexPath
+                ) as? ListCollectionViewCell else {
+                    return UICollectionViewCell()
+                }
+                cell.configureCell(data: item)
+                return cell })
+        dataSource.canMoveItemAtIndexPath = { dataSource, indexPath in
+            return true
+        }
+        
+        return dataSource
+    }()
     
     private let titleLabel = UILabel().then {
         $0.text = "나의 가계부"
@@ -62,18 +81,7 @@ final class CashBookListViewController: UIViewController {
     /// Rx를 이용한 dataSource구현(타입에는 SectionModelType인 SectionOfListCellData으로 정의)
     /// RxCollectionViewSectionedAnimatedDataSource -> // 변화....
     private func setDataSource() {
-        dataSource = RxCollectionViewSectionedReloadDataSource<SectionOfListCellData>(
-            configureCell: {dataSource, collectionView, indexPath, item in
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: ListCollectionViewCell.id,
-                    for: indexPath
-                ) as? ListCollectionViewCell else {
-                    fatalError("셀을 불러오지 못함")
-                }
-                cell.configureCell(data: item)
-                return cell
-            }
-        )
+        
     }
     
     func bind() {
@@ -164,13 +172,15 @@ final class CashBookListViewController: UIViewController {
             var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
             
             configuration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath in
-                guard let self = self else { return nil }
+                guard let self = self else {
+                    return UISwipeActionsConfiguration(actions: [])
+                }
                 
                 let item = self.viewModel.items[indexPath.row]
                 
                 let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
                     print("삭제")
-                    self.viewModel.deleteItem(with: item.id)
+                    self.viewModel.deleteItem(with: item.identity)
                     completion(true)
                 }
                 return UISwipeActionsConfiguration(actions: [deletAction])

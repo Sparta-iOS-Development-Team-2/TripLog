@@ -37,7 +37,8 @@ class CashBookListViewModel: ViewModelType {
                          buget: 5600000,
                          departure: "2025.12.12",
                          homecoming: "2025.12.21")
-        ]
+        ],
+        identity: UUID()
     )
     
     //    func deleteItem1(with id: UUID) {
@@ -65,11 +66,12 @@ class CashBookListViewModel: ViewModelType {
     
     func addItem(_ item: ListCellData) {
         items.append(item)
+        print("\(item)")
     }
     
     // 섹션을 하나로 고정으로 변경(deletcellrow) index로 지우기 -> 지워진거 이벤트 다시 방출
     func deleteItem(with id: UUID) {
-        if let index = items.firstIndex(where: { $0.id == id }) {
+        if let index = items.firstIndex(where: { $0.identity == id }) {
             items.remove(at: index)
         }
     }
@@ -77,7 +79,7 @@ class CashBookListViewModel: ViewModelType {
     func transform(input: Input) -> Output {
         let updatedData = itemsRelay
             .map { items in
-                [SectionOfListCellData(items: items)]
+                return [SectionOfListCellData(items: items, identity: UUID())]
             }.asDriver(onErrorJustReturn: [])
         
         let addCellViewHidden = itemsRelay
