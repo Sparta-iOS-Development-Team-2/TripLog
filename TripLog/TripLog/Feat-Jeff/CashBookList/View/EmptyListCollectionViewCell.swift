@@ -36,6 +36,7 @@ final class EmptyListCollectionViewCell: UICollectionViewCell {
     private func setupUI() {
         addNameLabel.text = "여행 추가하기"
         backgroundColor = .white
+        self.frame.size.height = 150
         
         [
             addButton,
@@ -50,6 +51,7 @@ final class EmptyListCollectionViewCell: UICollectionViewCell {
         
         addButton.snp.makeConstraints {
             $0.edges.equalToSuperview()
+            $0.height.equalTo(152)
         }
     }
     

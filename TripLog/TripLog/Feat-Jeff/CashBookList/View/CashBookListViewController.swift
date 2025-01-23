@@ -32,7 +32,7 @@ final class CashBookListViewController: UIViewController {
     }
     
     /// 임시 버튼
-    private let button = UIButton().then {
+    private let testButton = UIButton().then {
         $0.backgroundColor = .lightGray
         $0.setTitle("버튼", for: .normal)
         $0.setTitleColor(.red, for: .normal)
@@ -41,6 +41,8 @@ final class CashBookListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        
+       
         
         listCollectionView.register(EmptyListCollectionViewCell.self, forCellWithReuseIdentifier: EmptyListCollectionViewCell.id)
         listCollectionView.register(ListCollectionViewCell.self, forCellWithReuseIdentifier: ListCollectionViewCell.id)
@@ -88,7 +90,7 @@ final class CashBookListViewController: UIViewController {
     func bind() {
         let input = CashBookListViewModel.Input(
             callViewWillAppear: viewWillAppearSubject.asObservable(),
-            buttonTapped: button.rx.tap.asObservable()
+            buttonTapped: testButton.rx.tap.asObservable()
         )
         
         let output = viewModel.transform(input: input)
@@ -106,7 +108,7 @@ final class CashBookListViewController: UIViewController {
         [
             titleLabel,
             listCollectionView,
-            button
+            testButton
         ].forEach { view.addSubview($0) }
         
         titleLabel.snp.makeConstraints {
@@ -120,7 +122,7 @@ final class CashBookListViewController: UIViewController {
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
         
-        button.snp.makeConstraints {
+        testButton.snp.makeConstraints {
             $0.top.equalTo(listCollectionView.snp.bottom).offset(18)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(safeArea.snp.bottom).offset(-18)
@@ -128,24 +130,84 @@ final class CashBookListViewController: UIViewController {
         }
     }
     
-    /// CollectionView Composition Layout (compositional.list 넣어서 스와이프 부드러운 모션)
-    private func listCollectionViewLayout() -> UICollectionViewLayout{
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .fractionalHeight(1.0))
+    
+    /// CollectionView Layout(UICollectionLayoutListConfiguration)
+    private func listCollectionViewLayout() -> UICollectionViewLayout {
+        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection in
+            var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+            
+            switch sectionIndex {
+            case 0:
+                configuration.trailingSwipeActionsConfigurationProvider = { indexPath in
+                    let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
+                        print("삭제")
+                        completion(true)
+                    }
+                    return UISwipeActionsConfiguration(actions: [deletAction])
+                }
+                configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
+                    let editAction = UIContextualAction(style: .normal, title: "수정") { _, _, completion in
+                        print("수정")
+                        completion(true)
+                    }
+                    return UISwipeActionsConfiguration(actions: [editAction])
+                }
+                
+            case 1:
+                configuration.trailingSwipeActionsConfigurationProvider = { indexPath in
+                    let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
+                        print("삭제")
+                        completion(true)
+                    }
+                    return UISwipeActionsConfiguration(actions: [deletAction])
+                }
+                configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
+                    let editAction = UIContextualAction(style: .normal, title: "수정") { _, _, completion in
+                        print("수정")
+                        completion(true)
+                    }
+                    return UISwipeActionsConfiguration(actions: [editAction])
+                }
+            default:
+                break
+            }
+            
+            let section = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: layoutEnvironment)
+            section.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 10, trailing: 2)
+            return section
+        }
         
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(153))
-        
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 10, trailing: 2)
-        
-        return UICollectionViewCompositionalLayout(section: section)
+        return layout
     }
+    
+    /// CollectionView Composition Layout (compositional.list 넣어서 스와이프 부드러운 모션)
+//    private func listCollectionViewLayout() -> UICollectionViewLayout{
+//        let itemSize = NSCollectionLayoutSize(
+//            widthDimension: .fractionalWidth(1.0),
+//            heightDimension: .fractionalHeight(1.0))
+//        
+//        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+//        
+//        let groupSize = NSCollectionLayoutSize(
+//            widthDimension: .fractionalWidth(1.0),
+//            heightDimension: .absolute(153))
+//        
+//        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+//        
+//        let section = NSCollectionLayoutSection(group: group)
+//        section.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 10, trailing: 2)
+//        
+//        return UICollectionViewCompositionalLayout(section: section)
+//    }
 }
 
+/*
+ var leadingSwipeActionsConfigurationProvider: UICollectionLayoutListConfiguration.SwipeActionsConfigurationProvider?
+ 셀의 앞쪽 가장자리를 스와이프할 때 표시할 작업 세트를 제공하는 클로저입니다.
+ var trailingSwipeActionsConfigurationProvider: UICollectionLayoutListConfiguration.SwipeActionsConfigurationProvider?
+ */
+
+/// 어떻게 해야 첫번째 셀을 지울 수 있을지에 대해서 고민
+/// 가로 스크롤할 때 기능 구현
+/// 버튼 연결
+/// pr올리는게 목표

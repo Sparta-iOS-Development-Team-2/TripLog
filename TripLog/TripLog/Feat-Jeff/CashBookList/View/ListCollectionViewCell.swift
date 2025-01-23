@@ -77,6 +77,18 @@ final class ListCollectionViewCell: UICollectionViewCell {
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.bottom.equalToSuperview().offset(-20)
         }
+        
+        noteLabel.snp.makeConstraints {
+            $0.height.equalTo(20)
+        }
+        
+        bugetLabel.snp.makeConstraints {
+            $0.height.equalTo(20)
+        }
+        
+        periodLabel.snp.makeConstraints {
+            $0.height.equalTo(20)
+        }
     }
     
     /// 셀에 그림자 추가(ContentView)
