@@ -21,16 +21,13 @@ final class AddCellView: UIView {
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
     }
     
-    private let addButton = UIButton().then {
+    let addButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
         $0.tintColor = UIColor.Light.r200
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addButton.rx.tap
-            .bind(to: addButtonTapped)
-            .disposed(by: disposeBag)
         
         setupUI()
         setupShadow()

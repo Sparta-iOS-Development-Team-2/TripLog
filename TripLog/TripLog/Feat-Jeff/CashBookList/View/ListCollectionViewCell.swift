@@ -104,7 +104,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
         layer.masksToBounds = false
     }
    
-    /// 데이터에 저장된 값으로 셀에 주입
+    /// 데이터에 저장된 값으로 UI update
     func configureCell(data: ListCellData) {
         tripNameLabel.text = data.tripName
         noteLabel.text = data.note

@@ -9,112 +9,110 @@ import RxSwift
 import RxCocoa
 
 class CashBookListViewModel: ViewModelType {
-    
     var disposeBag = DisposeBag()
-  
+    let showAddListModal = PublishRelay<Void>()
+    private let itemsRelay = BehaviorRelay<[ListCellData]>(value: [])
+    
+    var items: [ListCellData] {
+        get { itemsRelay.value }
+        set { itemsRelay.accept(newValue) }
+    }
+    
+    private var currentIndex = 0
+    private var dummyData =
+    SectionOfListCellData(
+        items: [
+            ListCellData(tripName: "여름방학 여행 2025",
+                         note: "일본, 미국, 하와이, 스위스, 체코",
+                         buget: 26000000,
+                         departure: "2025.05.12",
+                         homecoming: "2025.06.13"),
+            ListCellData(tripName: "가을방학 여행 2025",
+                         note: "🇨🇮 🇩🇪 🇹🇷",
+                         buget: 3400000,
+                         departure: "2025.10.12",
+                         homecoming: "2025.10.23"),
+            ListCellData(tripName: "겨울방학 여행 2025",
+                         note: "대만, 일본, 발리",
+                         buget: 5600000,
+                         departure: "2025.12.12",
+                         homecoming: "2025.12.21")
+        ]
+    )
+    
+    //    func deleteItem1(with id: UUID) {
+    //        items = items.filter { $0.id != id }
+    //    }
+
     /// Input
     /// callViewWillAppear : ViewWillAppear 호출 시 방출
     /// buttonTapped : 임시 버튼을 눌렀을 시 방출(임시)
     struct Input {
         let callViewWillAppear: Observable<Void>
-        let buttonTapped: Observable<Void>
+        let testButtonTapped: PublishRelay<Void>
+        let addButtonTapped: PublishRelay<Void>
     }
     
     /// Output
     /// updatedData : SectionOfListCellData로 업데이트(임시)
     struct Output {
         let updatedData: Driver<[SectionOfListCellData]>
+        let showAddListModal: PublishRelay<Void>
+        let addCellViewHidden: Driver<Bool>
     }
     
     init() {}
     
-    /// 임시 coreData역할 (초기값 이슈)
-    let coreDataValue = BehaviorSubject<[SectionOfListCellData]>(value: [
-        .init(state: .emptyState,
-              items: [ListCellData(tripName: "",
-                                   note: "",
-                                   buget: 0,
-                                   departure: "",
-                                   homecoming: "")])
-              ])
+    func addItem(_ item: ListCellData) {
+        items.append(item)
+    }
     
-    // 더미데이터 추가를 위한 인덱스
-    private var currentIndex = 0
+    // 섹션을 하나로 고정으로 변경(deletcellrow) index로 지우기 -> 지워진거 이벤트 다시 방출
+    func deleteItem(with id: UUID) {
+        if let index = items.firstIndex(where: { $0.id == id }) {
+            items.remove(at: index)
+        }
+    }
     
-    // 더미데이터 값
-    private var dummyData = [
-        SectionOfListCellData(
-            state: .existState,
-            items: [
-                ListCellData(tripName: "여름방학 여행 2025",
-                             note: "일본, 미국, 하와이, 스위스, 체코",
-                             buget: 26000000,
-                             departure: "2025.05.12",
-                             homecoming: "2025.06.13")
-            ]
-        ),
-        SectionOfListCellData(
-            state: .existState,
-            items: [
-                ListCellData(tripName: "가을방학 여행 2025",
-                             note: "🇨🇮 🇩🇪 🇹🇷",
-                             buget: 3400000,
-                             departure: "2025.10.12",
-                             homecoming: "2025.10.23")
-            ]
-        ),
-        SectionOfListCellData(
-            state: .existState,
-            items: [
-                ListCellData(tripName: "겨을방학 여행 2025",
-                             note: "대만, 일본, 발리",
-                             buget: 5600000,
-                             departure: "2025.12.12",
-                             homecoming: "2025.12.21")
-            ]
-        )
-    ]
-    
-    ///
     func transform(input: Input) -> Output {
-        // CoreDataValue의 상태를 기반으로 섹션 업데이트
-           let updatedData = coreDataValue
-               .map { currentSections -> [SectionOfListCellData] in
-                   if currentSections.contains(where: { $0.state == .existState }) {
-                       // 데이터 섹션이 존재하면 빈 섹션 제거
-                       return currentSections.filter { $0.state == .existState }
-                   } else {
-                       // 데이터 섹션이 없으면 빈 섹션만 반환
-                       return [
-                           SectionOfListCellData(
-                               state: .emptyState,
-                               items: [ListCellData(tripName: "", note: "", buget: 0, departure: "", homecoming: "")]
-                           )
-                       ]
-                   }
-               }
-        /// 가장 최근의 데이터를 결합해 방출(최신상태를 가져옴)
-        /// -> 최근 데이터를 임시의 coreData에 저장
-        /// 최신값이 
-        input.buttonTapped
-            .withLatestFrom(coreDataValue)
-            .flatMap { [weak self] currentData -> Observable<[SectionOfListCellData]> in
-                guard let self = self else { return .just(currentData) }
+        let updatedData = itemsRelay
+            .map { items in
+                [SectionOfListCellData(items: items)]
+            }.asDriver(onErrorJustReturn: [])
+        
+        let addCellViewHidden = itemsRelay
+            .map { !$0.isEmpty }
+            .asDriver(onErrorJustReturn: true)
+        
+        // testButtonTapped 이벤트 처리: dummyData에서 새로운 데이터를 추가
+        input.testButtonTapped
+            .asSignal(onErrorSignalWith: .empty())
+            .emit(onNext: { [weak self] in
+                guard let self = self else { return }
                 
-                guard self.currentIndex < self.dummyData.count else { return .just(currentData) }
-                
-                var updatedData = currentData
-                updatedData.append(self.dummyData[self.currentIndex])
+                // dummyData에서 새로운 데이터 추가
+                guard self.currentIndex < self.dummyData.items.count else {
+                    return
+                }
+                let newItem = self.dummyData.items[self.currentIndex]
+                self.addItem(newItem)
                 self.currentIndex += 1
-                
-                return .just(updatedData)
-            }
-            .bind(to: coreDataValue)
+            })
+            .disposed(by: disposeBag)
+        
+        // addButtonTapped 이벤트 처리: 모달 표시
+        input.addButtonTapped
+            .asSignal(onErrorSignalWith: .empty())
+            .emit(onNext: { [weak self] in
+                guard let self = self else { return }
+                self.showAddListModal.accept(())
+            })
             .disposed(by: disposeBag)
         
         return Output(
-           updatedData: coreDataValue.asDriver(onErrorJustReturn: [])
+            updatedData: updatedData,
+            showAddListModal: showAddListModal,
+            addCellViewHidden: addCellViewHidden
         )
     }
-    
 }
