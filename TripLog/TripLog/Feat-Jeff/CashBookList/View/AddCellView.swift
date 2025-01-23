@@ -1,5 +1,5 @@
 //
-//  EmptyListCollectionViewCell.swift
+//  AddCellView.swift
 //  TripLog
 //
 //  Created by jae hoon lee on 1/22/25.
@@ -7,11 +7,16 @@
 import UIKit
 import SnapKit
 import Then
+import RxCocoa
+import RxSwift
 
-final class EmptyListCollectionViewCell: UICollectionViewCell {
-    static let id = "EmptyListCollectionViewCell"
+final class AddCellView: UIView {
+    
+    var disposeBag = DisposeBag()
+    let addButtonTapped = PublishRelay<Void>()
     
     private let addNameLabel = UILabel().then {
+        $0.text = "여행 추가하기"
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
     }
@@ -20,9 +25,12 @@ final class EmptyListCollectionViewCell: UICollectionViewCell {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
         $0.tintColor = UIColor.Light.r200
     }
-  
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
+        addButton.rx.tap
+            .bind(to: addButtonTapped)
+            .disposed(by: disposeBag)
         
         setupUI()
         setupShadow()
@@ -34,14 +42,12 @@ final class EmptyListCollectionViewCell: UICollectionViewCell {
     
     /// setupUI
     private func setupUI() {
-        addNameLabel.text = "여행 추가하기"
         backgroundColor = .white
-        self.frame.size.height = 150
         
         [
             addButton,
             addNameLabel
-        ].forEach { contentView.addSubview($0) }
+        ].forEach { addSubview($0) }
         
         addNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
@@ -55,8 +61,8 @@ final class EmptyListCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    /// 셀에 그림자 추가(contentView)
-    func setupShadow() {
+    /// 셀에 그림자 추가
+    private func setupShadow() {
         layer.borderWidth = 0.2
         layer.borderColor = UIColor.lightGray.cgColor
         
@@ -67,5 +73,4 @@ final class EmptyListCollectionViewCell: UICollectionViewCell {
         layer.shadowRadius = 4
         layer.masksToBounds = false
     }
-    
 }
