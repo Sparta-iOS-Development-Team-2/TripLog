@@ -6,8 +6,35 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
+import RxDataSources
 
 /// 설정탭 뷰 컨트롤러
 final class SettingViewController: UIViewController {
+    
+    private let disposeBag = DisposeBag()
+    
+    private let settingView = SettingView()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view = settingView
+        self.navigationController?.navigationBar.isHidden = true
+        bind()
+    }
+    
+}
+
+private extension SettingViewController {
+    
+    func bind() {
+        sections
+            .take(1)
+            .asDriver(onErrorDriveWith: .empty())
+            .drive(settingView.tableView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+    }
     
 }
