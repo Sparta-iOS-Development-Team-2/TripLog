@@ -35,6 +35,19 @@ private extension SettingViewController {
             .asDriver(onErrorDriveWith: .empty())
             .drive(settingView.tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
+        
+        settingView.tableView.rx.itemSelected
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, indexPath in
+                
+                guard
+                    let cell = owner.settingView.tableView.cellForRow(at: indexPath) as? SetTableViewCell
+                else { return }
+                
+                cell.action?()
+                
+            }.disposed(by: disposeBag)
     }
     
 }

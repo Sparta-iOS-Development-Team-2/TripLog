@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Then
 
 /// 설정탭에서 사용할 테이블뷰의 Cell Model
 struct SettingTableCellModel {
@@ -19,8 +20,8 @@ struct SettingTableCellModel {
         SettingTableCellModel(
             icon: UIImage(named: "darkModeIcon") ?? UIImage(),
             title: "다크모드",
-            extraView: UISwitch(),
-            action: nil
+            extraView: setupSwitch(),
+            action: toggleDarkModeSwitch
         ),
         
         SettingTableCellModel(
@@ -44,6 +45,21 @@ struct SettingTableCellModel {
             action: nil
         )
     ]
-
+    
 }
 
+private extension SettingTableCellModel {
+    
+    static func setupSwitch() -> UISwitch {
+        let toggleSwitch = UISwitch()
+        toggleSwitch.isOn = false
+        toggleSwitch.onTintColor = UIColor.Personal.normal
+        
+        return toggleSwitch
+    }
+    
+    static func toggleDarkModeSwitch() {
+        print("toggleTest")
+    }
+    
+}

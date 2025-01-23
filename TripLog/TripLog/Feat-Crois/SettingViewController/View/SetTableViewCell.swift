@@ -28,7 +28,7 @@ final class SetTableViewCell: UITableViewCell {
     
     private var extraView: UIView?
     
-    private var action: (() -> Void)?
+    private(set) var action: (() -> Void)?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -40,11 +40,19 @@ final class SetTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        setupReuse()
+    }
+    
     func configureCell(model: SettingTableCellModel) {
         self.icon.image = model.icon
         self.title.text = model.title
         self.extraView = model.extraView
         self.action = model.action
+        
+        setupUI()
     }
     
 }
@@ -58,6 +66,7 @@ private extension SetTableViewCell {
     
     func configureSelf() {
         self.backgroundColor = .clear
+        self.selectionStyle = .none
         if self.extraView != nil {
             [icon, title, extraView!].forEach { self.addSubview($0) }
         } else {
@@ -81,6 +90,13 @@ private extension SetTableViewCell {
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().inset(16)
         }
+    }
+    
+    func setupReuse() {
+        self.icon.image = nil
+        self.title.text = nil
+        self.extraView = nil
+        self.action = nil
     }
     
 }
