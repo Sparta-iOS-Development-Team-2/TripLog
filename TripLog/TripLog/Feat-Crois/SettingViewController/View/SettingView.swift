@@ -9,8 +9,11 @@ import UIKit
 import SnapKit
 import Then
 
+/// 설정 탭의 설정 뷰
 final class SettingView: UIView {
         
+    // MARK: - UI Components
+    
     private let title = UILabel().then {
         $0.text = "설정"
         $0.font = UIFont.SCDream(size: .title, weight: .bold)
@@ -30,6 +33,8 @@ final class SettingView: UIView {
         $0.register(SetTableViewCell.self, forCellReuseIdentifier: SetTableViewCell.id)
     }
     
+    // MARK: - Initializer
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -41,6 +46,8 @@ final class SettingView: UIView {
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension SettingView {
     

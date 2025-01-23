@@ -13,9 +13,15 @@ import RxDataSources
 /// 설정탭 뷰 컨트롤러
 final class SettingViewController: UIViewController {
     
+    // MARK: - Rx Properties
+    
     private let disposeBag = DisposeBag()
     
+    // MARK: - UI Components
+    
     private let settingView = SettingView()
+    
+    // MARK: - UIViewController LifeCycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,6 +32,8 @@ final class SettingViewController: UIViewController {
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension SettingViewController {
     

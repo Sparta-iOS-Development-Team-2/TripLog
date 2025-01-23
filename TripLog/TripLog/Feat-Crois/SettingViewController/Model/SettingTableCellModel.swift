@@ -48,11 +48,15 @@ struct SettingTableCellModel {
     
 }
 
+// MARK: - SettingTableCellModel Private Method
+
 private extension SettingTableCellModel {
     
+    /// 토글 스위치를 구현하는 메소드
+    /// - Returns: UISwitch
     static func setupSwitch() -> UISwitch {
         let toggleSwitch = UISwitch()
-        toggleSwitch.isOn = false
+        toggleSwitch.isOn = false // 유저의 디바이스 상태에 따라 변화하도록 변경
         toggleSwitch.onTintColor = UIColor.Personal.normal
         
         return toggleSwitch

@@ -9,9 +9,12 @@ import UIKit
 import SnapKit
 import Then
 
+/// 설정 탭의 테이블뷰 셀 UI
 final class SetTableViewCell: UITableViewCell {
     
     static let id = "SetTableViewCell"
+    
+    // MARK: - UI Components
     
     private let icon = UIImageView().then {
         $0.contentMode = .scaleAspectFit
@@ -28,7 +31,10 @@ final class SetTableViewCell: UITableViewCell {
     
     private var extraView: UIView?
     
+    // Cell Selected Action
     private(set) var action: (() -> Void)?
+    
+    // MARK: - Initializer
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -40,12 +46,15 @@ final class SetTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 셀 재사용 옵션
     override func prepareForReuse() {
         super.prepareForReuse()
         
         setupReuse()
     }
     
+    /// 셀의 UI를 설정하는 메소드
+    /// - Parameter model: 셀 모델 데이터
     func configureCell(model: SettingTableCellModel) {
         self.icon.image = model.icon
         self.title.text = model.title
@@ -56,6 +65,8 @@ final class SetTableViewCell: UITableViewCell {
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension SetTableViewCell {
     
@@ -92,6 +103,7 @@ private extension SetTableViewCell {
         }
     }
     
+    /// 셀 재사용시 수행할 메소드
     func setupReuse() {
         self.icon.image = nil
         self.title.text = nil
