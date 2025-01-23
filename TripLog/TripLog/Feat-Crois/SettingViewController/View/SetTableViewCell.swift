@@ -74,7 +74,7 @@ private extension SetTableViewCell {
         
         title.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.leading.equalTo(icon.snp.trailing).inset(16)
+            $0.leading.equalTo(icon.snp.trailing).offset(16)
         }
         
         extraView?.snp.makeConstraints {
