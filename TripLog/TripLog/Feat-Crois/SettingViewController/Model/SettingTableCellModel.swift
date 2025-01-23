@@ -7,13 +7,15 @@
 
 import UIKit
 
+/// 설정탭에서 사용할 테이블뷰의 Cell Model
 struct SettingTableCellModel {
     private let icon: UIImage
     private let title: String
     private let activeView: UIView?
     private let action: (() -> Void)?
     
-    static var setTableModels: [SettingTableCellModel] = [
+    // 설정탭에 넣을 셀을 정의하는 프로퍼티
+    static var defaultSettingModels: [SettingTableCellModel] = [
         SettingTableCellModel(
             icon: UIImage(named: "darkModeIcon") ?? UIImage(),
             title: "다크모드",

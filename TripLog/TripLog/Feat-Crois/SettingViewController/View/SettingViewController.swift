@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// 설정탭 뷰 컨트롤러
 final class SettingViewController: UIViewController {
     
 }
