@@ -14,28 +14,28 @@ struct SettingTableCellModel {
     let title: String
     let extraView: UIView?
     let action: (() -> Void)?
-    
+        
     // 설정탭에 넣을 셀을 정의하는 프로퍼티
     static var defaultSettingModels: [SettingTableCellModel] = [
-        SettingTableCellModel(
+        SettingTableCellModel( 
             icon: UIImage(named: "darkModeIcon") ?? UIImage(),
             title: "다크모드",
             extraView: setupSwitch(),
-            action: toggleDarkModeSwitch
+            action: changeDarkMode
         ),
         
         SettingTableCellModel(
             icon: UIImage(named: "reviewIcon") ?? UIImage(),
             title: "리뷰 작성하기",
             extraView: nil,
-            action: nil
+            action: moveAppstore
         ),
         
         SettingTableCellModel(
             icon: UIImage(named: "mailIcon") ?? UIImage(),
             title: "문의하기",
             extraView: nil,
-            action: nil
+            action: inquiry
         ),
         
         SettingTableCellModel(
@@ -56,14 +56,55 @@ private extension SettingTableCellModel {
     /// - Returns: UISwitch
     static func setupSwitch() -> UISwitch {
         let toggleSwitch = UISwitch()
-        toggleSwitch.isOn = false // 유저의 디바이스 상태에 따라 변화하도록 변경
-        toggleSwitch.onTintColor = UIColor.Personal.normal
-        
+        let isDarkMode = UITraitCollection.current.userInterfaceStyle == .dark
+        toggleSwitch.isOn = isDarkMode
+        toggleSwitch.thumbTintColor = .Light.base
+        toggleSwitch.onTintColor = .Personal.normal
+                
         return toggleSwitch
     }
     
-    static func toggleDarkModeSwitch() {
-        print("toggleTest")
+    /// 앱의 다크모드/라이트모드 상태를 변환하는 메소드
+    static func changeDarkMode() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first else { return }
+        
+        ThemeManager.loadTheme(for: window)
     }
     
+    /// 문의 기능을 Alert으로 구현한 메소드
+    static func inquiry() {
+        guard let view = AppHelpers.getTopViewController() else { return }
+        let alert = AlertManager(
+            title: "문의하기",
+            message: "이메일: triplog@gmail.com\n구글폼 문의는 아래 버튼을 눌러주세요!",
+            cancelTitle: "취소",
+            activeTitle: "구글폼 문의") {
+                debugPrint("구글폼 이동")
+                guard let url = URL(string: "https://forms.gle/wWMNkRJEfULDjLhr7") else { return }
+                if #available(iOS 10.0, *) {
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                } else {
+                    UIApplication.shared.openURL(url)
+                }
+            }
+        
+        alert.showAlert(on: view, .alert)
+    }
+    
+    /// 앱스토어 링크로 이동하는 메소드
+    ///
+    /// 앱 출시 후 구현 가능
+    static func moveAppstore() {
+        let url = "앱스토어 링크"
+        if let url = URL(string: url), UIApplication.shared.canOpenURL(url) {
+            if #available(iOS 10.0, *) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                UIApplication.shared.openURL(url)
+            }
+        }
+        
+        debugPrint("앱스토어 이동")
+    }
 }

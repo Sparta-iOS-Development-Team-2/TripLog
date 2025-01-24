@@ -11,20 +11,13 @@ import CoreData
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    var window: UIWindow?
+
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-            // UIWindow 설정
-        let window = UIWindow(frame: UIScreen.main.bounds)
-        let topViewController = TopViewController()
-        let navigationController = UINavigationController(rootViewController: topViewController)
-
-        window.rootViewController = navigationController
-        self.window = window
-        window.makeKeyAndVisible()
-            
+        // Override point for customization after application launch.
         return true
     }
+
     // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {

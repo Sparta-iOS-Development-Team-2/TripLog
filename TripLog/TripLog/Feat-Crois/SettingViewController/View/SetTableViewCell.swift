@@ -29,7 +29,7 @@ final class SetTableViewCell: UITableViewCell {
         $0.backgroundColor = .clear
     }
     
-    private var extraView: UIView?
+    private(set) var extraView: UIView?
     
     // Cell Selected Action
     private(set) var action: (() -> Void)?
@@ -87,7 +87,7 @@ private extension SetTableViewCell {
    
     func setupLayout() {
         icon.snp.makeConstraints {
-            $0.width.height.equalTo(26)
+            $0.width.height.equalTo(32)
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().inset(16)
         }
@@ -112,3 +112,4 @@ private extension SetTableViewCell {
     }
     
 }
+
