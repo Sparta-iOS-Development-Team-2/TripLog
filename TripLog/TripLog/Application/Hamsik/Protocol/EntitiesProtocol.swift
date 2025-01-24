@@ -6,17 +6,12 @@
 //
 
 import Foundation
+import CoreData
 
-protocol CurrencyEntitySaveable {
-    func save(data: Any)
-    func fetch() -> [Any]
-    func upadte(data: Any)
-    func delete(data: Any)
-}
-
-protocol CashBookEntitySaveable {
-    func save(data: Any)
-    func fetch() -> [Any]
-    func upadte(data: Any)
-    func delete(data: Any)
+protocol CoreDataManagable: AnyObject {
+    associatedtype Model
+    associatedtype Entity: NSManagedObject
+    
+    func save(_ data: Any, context: NSManagedObjectContext)
+    static func fetch(context: NSManagedObjectContext, predicate: NSPredicate?) -> [Entity]
 }

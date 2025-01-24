@@ -11,15 +11,20 @@ import UIKit
 class CoreDataManager {
     
     static let shared = CoreDataManager()
-    private init() {}
+    private let persistentContainer: NSPersistentContainer
     
-    private let context: NSManagedObjectContext? = {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            print("AppDelegate가 초기화되지 않았습니다.")
-            return nil
+    private init() {
+        persistentContainer = NSPersistentContainer(name: AppInfo.appId)
+        persistentContainer.loadPersistentStores { _, error in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
         }
-        return appDelegate.persistentContainer.viewContext
-    }()
+    }
+    
+    private var context: NSManagedObjectContext {
+        return persistentContainer.viewContext
+    }
     
     
     /// 환율 정보를 코어데이터에 저장하기
@@ -42,19 +47,19 @@ class CoreDataManager {
     
     /// CoreData에 환율정보 저장
     func saveCurrencyRates(from apiData: CurrencyRate) {
-        guard let context = CoreDataManager.shared.context else { return }
+        let keys = EntityKeys.CurrencyElement.self
         guard let entity = NSEntityDescription.entity(
-            forEntityName: "CurrencyEntity", in: context
+            forEntityName: EntityKeys.currencyEntity, in: context
         ) else { return }
         context.perform {
             for item in apiData {
-                let entity = NSManagedObject(entity: entity, insertInto: context)
-                entity.setValue(item.curUnit, forKey: "currencyCode")
-                entity.setValue(item.curNm, forKey: "currencyName")
-                entity.setValue(Double(item.dealBasR?.replacingOccurrences(of: ",", with: "") ?? "1") ?? 1.0, forKey: "baseRate")
+                let entity = NSManagedObject(entity: entity, insertInto: self.context)
+                entity.setValue(item.curUnit, forKey: keys.currencyCode)
+                entity.setValue(item.curNm, forKey: keys.currencyName)
+                entity.setValue(Double(item.dealBasR?.replacingOccurrences(of: ",", with: "") ?? "1") ?? 1.0, forKey: keys.baseRate)
             }
             do {
-                try CoreDataManager.shared.context?.save()
+                try self.context.save()
                 print("환율 저장 완료")
             } catch {
                 print("🚫환율 저장 실패: \(error)")
@@ -66,7 +71,7 @@ class CoreDataManager {
     func fetchStoredCurrencyRates() -> [CurrencyEntity] {
         let fetchRequest: NSFetchRequest<CurrencyEntity> = CurrencyEntity.fetchRequest()
         do {
-            guard let results = try CoreDataManager.shared.context?.fetch(fetchRequest) else { return [] }
+            let results = try self.context.fetch(fetchRequest)
             return results
         } catch {
             print("🚫 데이터 가져오기 실패: \(error)")
@@ -74,4 +79,37 @@ class CoreDataManager {
         }
     }
     
+    func save<T: CoreDataManagable>(type: T, data: T.Model) {
+        type.save(data, context: context)
+        saveContext()
+    }
+    
+    func fetch<T: CoreDataManagable>(type: T.Type, predicate: NSPredicate? = nil) -> [T.Entity] {
+        return type.fetch(context: context, predicate: predicate)
+    }
+    
+    func delete<T: NSManagedObject>(_ object: T) {
+        context.delete(object)
+        saveContext()
+    }
+    
+    func search<T: NSManagedObject>(_ objectType: T.Type, id: NSManagedObjectID) -> T? {
+        do {
+            return try context.existingObject(with: id) as? T
+        } catch {
+            print("🚫 Search failed: \(error)")
+            return nil
+        }
+    }
+    
+    private func saveContext() {
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
+        }
+    }
 }
