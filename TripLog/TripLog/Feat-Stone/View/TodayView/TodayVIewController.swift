@@ -44,7 +44,7 @@ class TodayViewController: UIViewController {
     
     private let floatingButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
-        $0.tintColor = .systemBlue
+        $0.tintColor = UIColor.Personal.normal
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 32
         $0.layer.shadowColor = UIColor.black.cgColor
@@ -53,7 +53,7 @@ class TodayViewController: UIViewController {
     }
     
     private let floatingButtonBackground = UIView().then {
-        $0.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+        $0.backgroundColor = UIColor.Personal.normal
         $0.layer.cornerRadius = 21.5
         $0.layer.shadowColor = UIColor.black.cgColor
         $0.layer.shadowOpacity = 0.3
@@ -110,7 +110,8 @@ class TodayViewController: UIViewController {
         
         tableView.snp.makeConstraints {
             $0.top.equalTo(topStackView.snp.bottom).offset(16)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(floatingButtonBackground.snp.top).offset(-16) // 버튼과 테이블 뷰 간격 추가
         }
         
         floatingButtonBackground.snp.makeConstraints {
@@ -132,7 +133,20 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        if expenses.isEmpty {
+            let emptyLabel = UILabel().then {
+                $0.text = "지출 내역이 없습니다."
+                $0.textColor = .gray
+                $0.textAlignment = .center
+                $0.font = UIFont.systemFont(ofSize: 16)
+            }
+            tableView.backgroundView = emptyLabel
+            tableView.separatorStyle = .none
+            return 0
+        } else {
+            tableView.backgroundView = nil
+            return 1
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -149,7 +163,7 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 120
+        return 108
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
@@ -160,6 +174,16 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
         return UIView().then {
             $0.backgroundColor = .clear
         }
+    }
+
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completionHandler in
+            self?.expenses.remove(at: indexPath.section)
+            tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
+            completionHandler(true)
+        }
+        deleteAction.backgroundColor = .red
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }
 
