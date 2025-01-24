@@ -53,13 +53,14 @@ private extension SettingViewController {
                     let cell = owner.settingView.tableView.cellForRow(at: indexPath) as? SetTableViewCell
                 else { return }
                 
-                guard let toggleSwitch = cell.extraView as? UISwitch else { return }
-                if toggleSwitch.isOn {
-                    toggleSwitch.setOn(false, animated: true)
-                    UserDefaults.standard.set(false, forKey: "isDarkModeEnabled")
-                } else {
-                    toggleSwitch.setOn(true, animated: true)
-                    UserDefaults.standard.set(true, forKey: "isDarkModeEnabled")
+                if let toggleSwitch = cell.extraView as? UISwitch {
+                    if toggleSwitch.isOn {
+                        toggleSwitch.setOn(false, animated: true)
+                        UserDefaults.standard.set(false, forKey: "isDarkModeEnabled")
+                    } else {
+                        toggleSwitch.setOn(true, animated: true)
+                        UserDefaults.standard.set(true, forKey: "isDarkModeEnabled")
+                    }
                 }
                 
                 cell.action?()
