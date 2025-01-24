@@ -18,7 +18,7 @@ class TodayViewController: UIViewController {
         $0.text = "지출 내역"
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
     }
-    
+    // 나중 TipKit을 위한 버튼
     private let helpButton = UIButton(type: .system).then {
         $0.setTitle("?", for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
@@ -72,6 +72,8 @@ class TodayViewController: UIViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
+        
+        updateEmptyState()
     }
     
     private func setupViews() {
@@ -125,14 +127,8 @@ class TodayViewController: UIViewController {
             $0.width.height.equalTo(64)
         }
     }
-}
-
-extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return expenses.count
-    }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    private func updateEmptyState() {
         if expenses.isEmpty {
             let emptyLabel = UILabel().then {
                 $0.text = "지출 내역이 없습니다."
@@ -141,12 +137,19 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
                 $0.font = UIFont.systemFont(ofSize: 16)
             }
             tableView.backgroundView = emptyLabel
-            tableView.separatorStyle = .none
-            return 0
         } else {
             tableView.backgroundView = nil
-            return 1
         }
+    }
+}
+
+extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return expenses.count
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -180,6 +183,7 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
         let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completionHandler in
             self?.expenses.remove(at: indexPath.section)
             tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
+            self?.updateEmptyState()
             completionHandler(true)
         }
         deleteAction.backgroundColor = .red
