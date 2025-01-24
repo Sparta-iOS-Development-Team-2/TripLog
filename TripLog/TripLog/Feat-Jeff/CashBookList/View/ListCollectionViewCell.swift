@@ -56,15 +56,24 @@ final class ListCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// 데이터에 저장된 값으로 UI update
+    func configureCell(data: ListCellData) {
+        tripNameLabel.text = data.tripName
+        noteLabel.text = data.note
+        bugetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.buget)))"
+        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
+    }
+    
+    
 }
 
 //MARK: - Method
 
-extension ListCollectionViewCell {
+private extension ListCollectionViewCell {
     
     /// setup UI
-    private func setupUI() {
-        backgroundColor = .white
+    func setupUI() {
+        backgroundColor = UIColor(resource: .Light.base)
         
         [
             noteLabel,
@@ -79,7 +88,7 @@ extension ListCollectionViewCell {
     }
     
     /// setup Constraints
-    private func setupConstraints() {
+    func setupConstraints() {
         tripNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
             $0.horizontalEdges.equalTo(contentView.snp.horizontalEdges).inset(24)
@@ -106,7 +115,7 @@ extension ListCollectionViewCell {
     }
     
     /// 셀에 그림자 추가(ContentView)
-    private func setupShadow() {
+    func setupShadow() {
         layer.borderWidth = 0.2
         layer.borderColor = UIColor.lightGray.cgColor
         
@@ -116,14 +125,6 @@ extension ListCollectionViewCell {
         layer.shadowOffset = CGSize(width: 0, height: 1)
         layer.shadowRadius = 4
         layer.masksToBounds = false
-    }
-    
-    /// 데이터에 저장된 값으로 UI update
-    func configureCell(data: ListCellData) {
-        tripNameLabel.text = data.tripName
-        noteLabel.text = data.note
-        bugetLabel.text = "💰 \(PriceFormatModel.wonFormat(Int(data.buget)))"
-        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
     }
     
 }

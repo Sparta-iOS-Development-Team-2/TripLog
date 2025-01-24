@@ -28,11 +28,11 @@ final class CashBookListViewController: UIViewController {
         $0.backgroundColor = .white
     }
     
-    lazy var listCollectionView = UICollectionView(
+    private lazy var listCollectionView = UICollectionView(
         frame: .zero,
         collectionViewLayout: listCollectionViewLayout()
     ).then {
-        $0.backgroundColor = .white
+        $0.backgroundColor = .clear
         $0.register(ListCollectionViewCell.self, forCellWithReuseIdentifier: ListCollectionViewCell.id)
     }
     
@@ -60,7 +60,7 @@ final class CashBookListViewController: UIViewController {
                 ) as? ListCollectionViewCell else {
                     return UICollectionViewCell()
                 }
-                cell.configureCell(data: item)
+                cell.configureCell(data: item) 
                 return cell
             }
         )
@@ -81,7 +81,7 @@ final class CashBookListViewController: UIViewController {
         super.viewWillAppear(animated)
         viewWillAppearSubject.onNext(())
     }
- 
+    
 }
 
 //MARK: - Method
@@ -152,8 +152,9 @@ extension CashBookListViewController {
         
         output.showAddListModal
             .asSignal(onErrorSignalWith: .empty())
-            .emit(onNext: {
-                ModalViewManager.showModal(on: self, state: .createNewCashBook)
+            .withUnretained(self)
+            .emit(onNext: { owner, _ in
+                ModalViewManager.showModal(on: owner, state: .createNewCashBook)
             })
             .disposed(by: disposeBag)
         

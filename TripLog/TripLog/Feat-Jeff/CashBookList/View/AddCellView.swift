@@ -37,10 +37,10 @@ final class AddCellView: UIView {
 
 //MARK: - Method
 
-extension AddCellView {
+private extension AddCellView {
     
     /// setup UI
-    private func setupUI() {
+    func setupUI() {
         backgroundColor = .white
         
         [
@@ -50,7 +50,7 @@ extension AddCellView {
     }
     
     /// setup Constraints
-    private func setupConstraints() {
+    func setupConstraints() {
         addNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
             $0.horizontalEdges.equalToSuperview().inset(24)
@@ -64,7 +64,7 @@ extension AddCellView {
     }
     
     /// 그림자 추가(추후 변경 예정)
-    private func setupShadow() {
+    func setupShadow() {
         layer.borderWidth = 0.2
         layer.borderColor = UIColor.lightGray.cgColor
         

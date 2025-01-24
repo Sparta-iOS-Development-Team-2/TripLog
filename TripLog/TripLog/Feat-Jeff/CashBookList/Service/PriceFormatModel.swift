@@ -6,7 +6,7 @@
 //
 import Foundation
 
-struct PriceFormatModel {
+extension NumberFormatter {
     
     /// 1000 단위 구분
     static let formatter: NumberFormatter = {
@@ -23,4 +23,6 @@ struct PriceFormatModel {
         let result = formatter.string(from: NSNumber(value: number)) ?? "0"
         return result + " 원"
     }
+    
 }
+

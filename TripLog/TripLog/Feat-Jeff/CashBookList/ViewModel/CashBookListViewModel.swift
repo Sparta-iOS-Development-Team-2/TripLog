@@ -12,7 +12,7 @@ class CashBookListViewModel: ViewModelType {
     // 임시 코어데이터 역할
     private let itemsRelay = BehaviorRelay<[ListCellData]>(value: [])
     
-    var items: [ListCellData] {
+    private(set) var items: [ListCellData] {
         get { itemsRelay.value }
         set { itemsRelay.accept(newValue) }
     }
@@ -103,7 +103,7 @@ class CashBookListViewModel: ViewModelType {
     }
     
     /// 임시 데이터 추가(itemsRelay)
-    func addItem(_ item: ListCellData) {
+    private func addItem(_ item: ListCellData) {
         items.append(item)
         print("\(item)")
     }

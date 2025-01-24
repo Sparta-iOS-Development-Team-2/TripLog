@@ -10,22 +10,18 @@ import RxDataSources
 /// Core Data의 엔티티를 기반으로 하는 가계부 데이터 모델
 /// - RxDataSource와 View에서 사용하기 위해 변환된 데이터 모델
 /// - 추후 identity의 사용 여부 고려(코어데이터의 NSManagedObjectID)
-struct ListCellData: Equatable, IdentifiableType {
-    var identity: UUID
+struct ListCellData: Hashable, IdentifiableType {
+    /* 추후 코어데이터로 변경시 적용 예정
+    typealias Identity = UUID
+    var identity: Identity { UUID() }
+     */
+    
+    var identity = UUID()
     let tripName: String
     let note: String
     let buget: Double
     let departure: String
     let homecoming: String
-    
-    init(tripName: String, note: String, buget: Double, departure: String, homecoming: String) {
-        self.identity = UUID()
-        self.tripName = tripName
-        self.note = note
-        self.buget = buget
-        self.departure = departure
-        self.homecoming = homecoming
-    }
 }
 
 /// RxDataSource에서 사용되는 모델
