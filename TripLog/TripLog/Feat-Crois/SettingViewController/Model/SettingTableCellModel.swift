@@ -28,14 +28,14 @@ struct SettingTableCellModel {
             icon: UIImage(named: "reviewIcon") ?? UIImage(),
             title: "리뷰 작성하기",
             extraView: nil,
-            action: nil
+            action: moveAppstore
         ),
         
         SettingTableCellModel(
             icon: UIImage(named: "mailIcon") ?? UIImage(),
             title: "문의하기",
             extraView: nil,
-            action: nil
+            action: inquiry
         ),
         
         SettingTableCellModel(
@@ -69,5 +69,31 @@ private extension SettingTableCellModel {
               let window = windowScene.windows.first else { return }
         
         ThemeManager.loadTheme(for: window)
+    }
+    
+    static func inquiry() {
+        guard let view = getTopViewController() else { return }
+        let alert = AlertManager(
+            title: "문의하기",
+            message: "이메일: triplog@gmail.com\n구글폼 문의는 아래 버튼을 눌러주세요!",
+            cancelTitle: "취소",
+            activeTitle: "구글폼 문의") {
+                debugPrint("구글폼 이동")
+            }
+        
+        alert.showAlert(on: view, .alert)
+    }
+    
+    static func moveAppstore() {
+        let url = "앱스토어 링크"
+        if let url = URL(string: url), UIApplication.shared.canOpenURL(url) {
+            if #available(iOS 10.0, *) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                UIApplication.shared.openURL(url)
+            }
+        }
+        
+        debugPrint("앱스토어 이동")
     }
 }
