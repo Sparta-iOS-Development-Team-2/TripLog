@@ -12,14 +12,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let scene = (scene as? UIWindowScene) else { return }
-        let window = UIWindow(windowScene: scene)
-        window.rootViewController = UINavigationController(rootViewController: MainViewController())
-        window.makeKeyAndVisible()
+        guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        self.window = window
-    }
+        let window = UIWindow(windowScene: windowScene)
+        let topViewController = TopViewController()
+        let navigationController = UINavigationController(rootViewController: topViewController) // 네비게이션 컨트롤러 생성
 
+        window.rootViewController = navigationController
+        self.window = window
+        window.makeKeyAndVisible()
+    }
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
