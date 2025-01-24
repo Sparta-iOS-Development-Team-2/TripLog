@@ -37,6 +37,7 @@ final class SettingViewController: UIViewController {
 
 private extension SettingViewController {
     
+    /// 데이터 바인딩 메소드
     func bind() {
         sections
             .take(1)
@@ -53,6 +54,7 @@ private extension SettingViewController {
                     let cell = owner.settingView.tableView.cellForRow(at: indexPath) as? SetTableViewCell
                 else { return }
                 
+                // 셀의 extraView가 토글 스위치인 경우 액션 구현
                 if let toggleSwitch = cell.extraView as? UISwitch {
                     if toggleSwitch.isOn {
                         toggleSwitch.setOn(false, animated: true)

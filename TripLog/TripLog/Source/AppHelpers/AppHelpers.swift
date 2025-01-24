@@ -7,7 +7,8 @@
 
 import UIKit
 
-final class AppHelpers {
+/// 앱의 전체에서 사용할 기능을 지원해주는 객체
+enum AppHelpers {
     
     /// 현재 최상위 뷰컨트롤러를 가져와서 해당 뷰 컨트롤러에 접근할 수 있도록 해주는 함수.
     ///
@@ -36,7 +37,7 @@ final class AppHelpers {
             topViewController = presentedVC
         }
         
-        print(topViewController ?? "root가 없어?")
+        debugPrint(topViewController ?? "root가 없습니다.")
         return topViewController
     }
 }

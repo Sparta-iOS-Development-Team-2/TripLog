@@ -64,6 +64,7 @@ private extension SettingTableCellModel {
         return toggleSwitch
     }
     
+    /// 앱의 다크모드/라이트모드 상태를 변환하는 메소드
     static func changeDarkMode() {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else { return }
@@ -71,8 +72,9 @@ private extension SettingTableCellModel {
         ThemeManager.loadTheme(for: window)
     }
     
+    /// 문의 기능을 Alert으로 구현한 메소드
     static func inquiry() {
-        guard let view = getTopViewController() else { return }
+        guard let view = AppHelpers.getTopViewController() else { return }
         let alert = AlertManager(
             title: "문의하기",
             message: "이메일: triplog@gmail.com\n구글폼 문의는 아래 버튼을 눌러주세요!",
@@ -84,6 +86,9 @@ private extension SettingTableCellModel {
         alert.showAlert(on: view, .alert)
     }
     
+    /// 앱스토어 링크로 이동하는 메소드
+    ///
+    /// 앱 출시 후 구현 가능
     static func moveAppstore() {
         let url = "앱스토어 링크"
         if let url = URL(string: url), UIApplication.shared.canOpenURL(url) {

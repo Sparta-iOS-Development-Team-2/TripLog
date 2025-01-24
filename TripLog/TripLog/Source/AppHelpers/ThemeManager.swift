@@ -7,7 +7,13 @@
 
 import UIKit
 
+/// 앱의 테마를 관리하는 객체
 final class ThemeManager {
+    
+    /// 앱의 테마를 변경하는 메소드
+    /// - Parameters:
+    ///   - isDarkMode: 현재 앱의 상태
+    ///   - window: 상태를 변경할 window
     private static func applyDarkMode(_ isDarkMode: Bool, for window: UIWindow?) {
         guard let window else { return }
         let transitionView = UIView(frame: window.bounds)
@@ -31,6 +37,8 @@ final class ThemeManager {
         
     }
     
+    /// 현재 앱의 테마 상태를 확인하고 테마를 변경시키는 메소드
+    /// - Parameter window: 테마를 변경할 window
     static func loadTheme(for window: UIWindow?) {
         let isDarkMode = UserDefaults.standard.bool(forKey: "isDarkModeEnabled")
         applyDarkMode(isDarkMode, for: window)
