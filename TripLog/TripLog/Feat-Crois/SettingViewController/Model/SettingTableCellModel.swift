@@ -14,14 +14,14 @@ struct SettingTableCellModel {
     let title: String
     let extraView: UIView?
     let action: (() -> Void)?
-    
+        
     // 설정탭에 넣을 셀을 정의하는 프로퍼티
     static var defaultSettingModels: [SettingTableCellModel] = [
-        SettingTableCellModel(
+        SettingTableCellModel( 
             icon: UIImage(named: "darkModeIcon") ?? UIImage(),
             title: "다크모드",
             extraView: setupSwitch(),
-            action: toggleDarkModeSwitch
+            action: changeDarkMode
         ),
         
         SettingTableCellModel(
@@ -56,14 +56,18 @@ private extension SettingTableCellModel {
     /// - Returns: UISwitch
     static func setupSwitch() -> UISwitch {
         let toggleSwitch = UISwitch()
-        toggleSwitch.isOn = false // 유저의 디바이스 상태에 따라 변화하도록 변경
-        toggleSwitch.onTintColor = UIColor.Personal.normal
-        
+        let isDarkMode = UITraitCollection.current.userInterfaceStyle == .dark
+        toggleSwitch.isOn = isDarkMode
+        toggleSwitch.thumbTintColor = .Light.base
+        toggleSwitch.onTintColor = .Personal.normal
+                
         return toggleSwitch
     }
     
-    static func toggleDarkModeSwitch() {
-        print("toggleTest")
+    static func changeDarkMode() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first else { return }
+        
+        ThemeManager.loadTheme(for: window)
     }
-    
 }
