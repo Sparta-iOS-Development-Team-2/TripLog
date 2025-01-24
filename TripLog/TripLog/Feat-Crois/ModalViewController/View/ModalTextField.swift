@@ -35,10 +35,7 @@ final class ModalTextField: UIView {
         $0.textColor = UIColor.Dark.base
         $0.borderStyle = .none
         $0.clipsToBounds = true
-        $0.backgroundColor = .clear
-        $0.layer.cornerRadius = 8
-        $0.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
-        $0.layer.borderWidth = 1
+        $0.applyTextFieldStyle()
         $0.leftView = UIView(frame: .init(x: 0, y: 0, width: 12, height: 12))
         $0.leftViewMode = .always
         $0.rightView = UIView(frame: .init(x: 0, y: 0, width: 12, height: 12))
@@ -72,7 +69,7 @@ final class ModalTextField: UIView {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            self.textField.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
+            self.textField.applyTextFieldStroke()
         }
     }
     

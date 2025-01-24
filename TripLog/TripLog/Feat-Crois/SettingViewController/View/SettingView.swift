@@ -57,7 +57,7 @@ private extension SettingView {
     }
     
     func configureSelf() {
-        self.backgroundColor = .Light.base
+        self.backgroundColor = UIColor.CustomColors.Background.background
         [title, tableView].forEach { self.addSubview($0) }
     }
     

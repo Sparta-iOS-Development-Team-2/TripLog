@@ -58,6 +58,11 @@ final class ModalViewController: UIViewController {
         self.view.endEditing(true)
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        self.view.layer.shadowPath = self.view.shadowPath()
+    }
 }
 
 // MARK: - UI Setting Method
