@@ -16,7 +16,9 @@ struct PriceFormatModel {
         return formatter
     }()
     
-    /// 세자릿 수 표현 (ex: 1,000,000 원)
+    /// 세자릿 수 표현
+    /// parmeter(Int) : 1000000
+    /// return(String) : 1,000,000 원
     static func wonFormat(_ number: Int) -> String {
         let result = formatter.string(from: NSNumber(value: number)) ?? "0"
         return result + " 원"

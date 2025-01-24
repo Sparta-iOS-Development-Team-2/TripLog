@@ -21,26 +21,6 @@ final class CashBookListViewController: UIViewController {
     private let testButtonTapped = PublishRelay<Void>()
     private let addButtonTapped = PublishRelay<Void>()
     
-    typealias DataSource = RxCollectionViewSectionedAnimatedDataSource<SectionOfListCellData>
-    
-    let dataSource: DataSource = {
-        let dataSource = DataSource(
-            configureCell: { dataSource, collectionView, indexPath, item -> UICollectionViewCell in
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: ListCollectionViewCell.id,
-                    for: indexPath
-                ) as? ListCollectionViewCell else {
-                    return UICollectionViewCell()
-                }
-                cell.configureCell(data: item)
-                return cell })
-        dataSource.canMoveItemAtIndexPath = { dataSource, indexPath in
-            return true
-        }
-        
-        return dataSource
-    }()
-    
     private let titleLabel = UILabel().then {
         $0.text = "나의 가계부"
         $0.font = UIFont.SCDream(size: .title, weight: .bold)
@@ -53,84 +33,63 @@ final class CashBookListViewController: UIViewController {
         collectionViewLayout: listCollectionViewLayout()
     ).then {
         $0.backgroundColor = .white
+        $0.register(ListCollectionViewCell.self, forCellWithReuseIdentifier: ListCollectionViewCell.id)
     }
     
-    /// 임시 버튼
+    // 임시 버튼
     private let testButton = UIButton().then {
         $0.backgroundColor = .lightGray
         $0.setTitle("버튼", for: .normal)
         $0.setTitleColor(.red, for: .normal)
     }
     
+    // RxdataSource(animated)
+    typealias DataSource = RxCollectionViewSectionedAnimatedDataSource<SectionOfListCellData>
+    private let dataSource: DataSource = {
+        let animationConfiguration = AnimationConfiguration(
+            insertAnimation: .bottom,
+            reloadAnimation: .none,
+            deleteAnimation: .automatic
+        )
+        let dataSource = DataSource(
+            animationConfiguration: animationConfiguration,
+            configureCell: { dataSource, collectionView, indexPath, item -> UICollectionViewCell in
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: ListCollectionViewCell.id,
+                    for: indexPath
+                ) as? ListCollectionViewCell else {
+                    return UICollectionViewCell()
+                }
+                cell.configureCell(data: item)
+                return cell
+            }
+        )
+        return dataSource
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         
-        listCollectionView.register(ListCollectionViewCell.self, forCellWithReuseIdentifier: ListCollectionViewCell.id)
-        
         setupUI()
-        setDataSource()
+        setupConstraints()
         bind()
     }
     
+    // 추후 구현 예정
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         viewWillAppearSubject.onNext(())
     }
+ 
+}
+
+//MARK: - Method
+
+extension CashBookListViewController {
     
-    /// Rx를 이용한 dataSource구현(타입에는 SectionModelType인 SectionOfListCellData으로 정의)
-    /// RxCollectionViewSectionedAnimatedDataSource -> // 변화....
-    private func setDataSource() {
-        
-    }
-    
-    func bind() {
-        let input = CashBookListViewModel.Input(
-            callViewWillAppear: viewWillAppearSubject.asObservable(),
-            testButtonTapped: testButtonTapped,
-            addButtonTapped: addButtonTapped
-        )
-        
-        testButton.rx.tap
-            .bind(to: testButtonTapped)
-            .disposed(by: disposeBag)
-        
-        addCellView.addButton.rx.tap
-            .bind(to: addButtonTapped)
-            .disposed(by: disposeBag)
-        
-        listCollectionView.rx.modelSelected(ListCellData.self)
-            .subscribe(onNext: { selectedItem in
-                print("\(selectedItem)")
-            })
-            .disposed(by: disposeBag)
-        
-        
-        let output = viewModel.transform(input: input)
-        
-        output.updatedData
-            .drive(listCollectionView.rx.items(dataSource: dataSource))
-            .disposed(by: disposeBag)
-        
-        output.showAddListModal
-            .asSignal(onErrorSignalWith: .empty())
-            .emit(onNext: {
-                print("호출")
-                ModalViewManager.showModal(on: self, state: .createNewCashBook)
-            })
-            .disposed(by: disposeBag)
-        
-        // MARK: - 히든 말고 알파값으로 조정해서 자연스러운
-        output.addCellViewHidden
-            .drive(onNext: { [weak self] isHidden in
-                self?.addCellView.isHidden = isHidden
-                self?.addCellView.alpha
-            }).disposed(by: disposeBag)
-    }
-    
-    /// ViewController 레이아웃
+    /// setup UI
     private func setupUI() {
-        let safeArea = view.safeAreaLayoutGuide
         navigationController?.navigationBar.isHidden = true
         
         [
@@ -139,6 +98,11 @@ final class CashBookListViewController: UIViewController {
             addCellView,
             testButton
         ].forEach { view.addSubview($0) }
+    }
+    
+    /// setup Constraints
+    private func setupConstraints() {
+        let safeArea = view.safeAreaLayoutGuide
         
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeArea.snp.top).offset(12)
@@ -163,14 +127,68 @@ final class CashBookListViewController: UIViewController {
             $0.bottom.equalTo(safeArea.snp.bottom).offset(-18)
             $0.height.equalTo(60)
         }
-        
     }
     
-    /// CollectionView Layout(UICollectionLayoutListConfiguration)
+    private func bind() {
+        /// Input
+        /// - callViewWillAppear : 추후 사용(코어데이터 fetch)
+        /// - testButtonTapped : 임시 데이터 추가 버튼(삭제 예정)
+        /// - addButtonTapped : 일정 추가하기 버튼
+        let input = CashBookListViewModel.Input(
+            callViewWillAppear: viewWillAppearSubject.asObservable(),
+            testButtonTapped: testButtonTapped,
+            addButtonTapped: addButtonTapped
+        )
+        
+        /// Output
+        /// - updatedData : RxDataSource로 CollectionView 업데이트
+        /// - showAddListModal : 새 일정 추가 모달을 사용
+        /// - addCellViewHidden : 일정 추가하기 뷰 fade in/out
+        let output = viewModel.transform(input: input)
+        
+        output.updatedData
+            .drive(listCollectionView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
+        
+        output.showAddListModal
+            .asSignal(onErrorSignalWith: .empty())
+            .emit(onNext: {
+                ModalViewManager.showModal(on: self, state: .createNewCashBook)
+            })
+            .disposed(by: disposeBag)
+        
+        output.addCellViewHidden
+            .drive(onNext: { [weak self] alpha in
+                guard let self = self else { return }
+                UIView.animate(withDuration: 0.3) {
+                    self.addCellView.alpha = alpha
+                }
+            }).disposed(by: disposeBag)
+        
+        // testButton 바인딩
+        testButton.rx.tap
+            .bind(to: testButtonTapped)
+            .disposed(by: disposeBag)
+        
+        // addButton 바인딩
+        addCellView.addButton.rx.tap
+            .bind(to: addButtonTapped)
+            .disposed(by: disposeBag)
+        
+        // 선택된 셀 동작처리(추후 구현)
+        listCollectionView.rx.modelSelected(ListCellData.self)
+            .subscribe(onNext: { selectedItem in
+                print("\(selectedItem)")
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    /// CollectionView Layout
     private func listCollectionViewLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection in
             var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
             
+            // 셀 삭제 기능
             configuration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath in
                 guard let self = self else {
                     return UISwipeActionsConfiguration(actions: [])
@@ -179,17 +197,16 @@ final class CashBookListViewController: UIViewController {
                 let item = self.viewModel.items[indexPath.row]
                 
                 let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
-                    print("삭제")
                     self.viewModel.deleteItem(with: item.identity)
-                    completion(true)
+                    completion(true) // 추후 기능 구현
                 }
                 return UISwipeActionsConfiguration(actions: [deletAction])
             }
             
+            // 셀 수정 기능
             configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
                 let editAction = UIContextualAction(style: .normal, title: "수정") { _, _, completion in
-                    print("수정")
-                    completion(true)
+                    completion(true) // 추후 기능 구현
                 }
                 return UISwipeActionsConfiguration(actions: [editAction])
             }
@@ -201,9 +218,5 @@ final class CashBookListViewController: UIViewController {
         }
         return layout
     }
+    
 }
-
-/// 어떻게 해야 첫번째 셀을 지울 수 있을지에 대해서 고민 V
-/// 가로 스크롤할 때 기능 구현(V)
-/// 버튼 연결
-/// pr올리는게 목표

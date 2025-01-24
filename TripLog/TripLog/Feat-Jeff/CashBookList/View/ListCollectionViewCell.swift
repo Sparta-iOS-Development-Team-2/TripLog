@@ -11,24 +11,28 @@ import Then
 final class ListCollectionViewCell: UICollectionViewCell {
     static let id = "ListCollectionViewCell"
     
-    private var tripNameLabel = UILabel().then {
-        $0.numberOfLines = 2
+    private let tripNameLabel = UILabel().then {
+        $0.numberOfLines = 1
+        $0.adjustsFontSizeToFitWidth = true
+        $0.minimumScaleFactor = 0.7
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
     }
     
-    private var noteLabel = UILabel().then {
-        $0.numberOfLines = 2
+    private let noteLabel = UILabel().then {
+        $0.numberOfLines = 1
+        $0.adjustsFontSizeToFitWidth = true
+        $0.minimumScaleFactor = 0.5
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
     }
     
-    private var bugetLabel = UILabel().then {
+    private let bugetLabel = UILabel().then {
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
     }
     
-    private var periodLabel = UILabel().then {
+    private let periodLabel = UILabel().then {
         $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
     }
@@ -44,14 +48,21 @@ final class ListCollectionViewCell: UICollectionViewCell {
         super.init(frame: frame)
         
         setupUI()
+        setupConstraints()
         setupShadow()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    /// setupUI
+}
+
+//MARK: - Method
+
+extension ListCollectionViewCell {
+    
+    /// setup UI
     private func setupUI() {
         backgroundColor = .white
         
@@ -65,7 +76,10 @@ final class ListCollectionViewCell: UICollectionViewCell {
             tripNameLabel,
             verticalStackView
         ].forEach { contentView.addSubview($0) }
-        
+    }
+    
+    /// setup Constraints
+    private func setupConstraints() {
         tripNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
             $0.horizontalEdges.equalTo(contentView.snp.horizontalEdges).inset(24)
@@ -103,7 +117,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
         layer.shadowRadius = 4
         layer.masksToBounds = false
     }
-   
+    
     /// 데이터에 저장된 값으로 UI update
     func configureCell(data: ListCellData) {
         tripNameLabel.text = data.tripName

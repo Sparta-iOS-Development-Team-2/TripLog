@@ -7,13 +7,8 @@
 import UIKit
 import SnapKit
 import Then
-import RxCocoa
-import RxSwift
 
 final class AddCellView: UIView {
-    
-    var disposeBag = DisposeBag()
-    let addButtonTapped = PublishRelay<Void>()
     
     private let addNameLabel = UILabel().then {
         $0.text = "여행 추가하기"
@@ -30,6 +25,7 @@ final class AddCellView: UIView {
         super.init(frame: frame)
         
         setupUI()
+        setupConstraints()
         setupShadow()
     }
     
@@ -37,7 +33,13 @@ final class AddCellView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    /// setupUI
+}
+
+//MARK: - Method
+
+extension AddCellView {
+    
+    /// setup UI
     private func setupUI() {
         backgroundColor = .white
         
@@ -45,7 +47,10 @@ final class AddCellView: UIView {
             addButton,
             addNameLabel
         ].forEach { addSubview($0) }
-        
+    }
+    
+    /// setup Constraints
+    private func setupConstraints() {
         addNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
             $0.horizontalEdges.equalToSuperview().inset(24)
@@ -58,7 +63,7 @@ final class AddCellView: UIView {
         }
     }
     
-    /// 셀에 그림자 추가
+    /// 그림자 추가(추후 변경 예정)
     private func setupShadow() {
         layer.borderWidth = 0.2
         layer.borderColor = UIColor.lightGray.cgColor
@@ -70,4 +75,5 @@ final class AddCellView: UIView {
         layer.shadowRadius = 4
         layer.masksToBounds = false
     }
+    
 }

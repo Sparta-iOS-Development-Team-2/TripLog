@@ -9,8 +9,7 @@ import RxSwift
 import RxCocoa
 
 class CashBookListViewModel: ViewModelType {
-    var disposeBag = DisposeBag()
-    let showAddListModal = PublishRelay<Void>()
+    // 임시 코어데이터 역할
     private let itemsRelay = BehaviorRelay<[ListCellData]>(value: [])
     
     var items: [ListCellData] {
@@ -21,6 +20,7 @@ class CashBookListViewModel: ViewModelType {
     private var currentIndex = 0
     private var dummyData =
     SectionOfListCellData(
+        identity: UUID(),
         items: [
             ListCellData(tripName: "여름방학 여행 2025",
                          note: "일본, 미국, 하와이, 스위스, 체코",
@@ -37,79 +37,63 @@ class CashBookListViewModel: ViewModelType {
                          buget: 5600000,
                          departure: "2025.12.12",
                          homecoming: "2025.12.21")
-        ],
-        identity: UUID()
+        ]
     )
     
-    //    func deleteItem1(with id: UUID) {
-    //        items = items.filter { $0.id != id }
-    //    }
-
-    /// Input
-    /// callViewWillAppear : ViewWillAppear 호출 시 방출
-    /// buttonTapped : 임시 버튼을 눌렀을 시 방출(임시)
     struct Input {
         let callViewWillAppear: Observable<Void>
         let testButtonTapped: PublishRelay<Void>
         let addButtonTapped: PublishRelay<Void>
     }
-    
-    /// Output
-    /// updatedData : SectionOfListCellData로 업데이트(임시)
+
     struct Output {
         let updatedData: Driver<[SectionOfListCellData]>
         let showAddListModal: PublishRelay<Void>
-        let addCellViewHidden: Driver<Bool>
+        let addCellViewHidden: Driver<CGFloat>
     }
     
+    let disposeBag = DisposeBag()
+    let showAddListModal = PublishRelay<Void>()
+
     init() {}
     
-    func addItem(_ item: ListCellData) {
-        items.append(item)
-        print("\(item)")
-    }
-    
-    // 섹션을 하나로 고정으로 변경(deletcellrow) index로 지우기 -> 지워진거 이벤트 다시 방출
-    func deleteItem(with id: UUID) {
-        if let index = items.firstIndex(where: { $0.identity == id }) {
-            items.remove(at: index)
-        }
-    }
-    
+    /// Input
+    /// - callViewWillAppear : ViewWillAppear 호출 시 이벤트
+    /// - testButtonTapped : 임시 버튼을 눌렀을 시 이벤트(임시)
+    /// - addButtonTapped : 일정 추가하기 버튼 눌렀을 시 이벤트
+    ///
+    /// Output
+    /// - updatedData : CollectionView데이터 SectionOfListCellData형태로 전달
+    /// - showAddListModal : 모달 불러오기 메서드 호출
+    /// - addCellViewHidden : 일정 추가하기 뷰의 alpha값 방출로 뷰 동작제어
     func transform(input: Input) -> Output {
         let updatedData = itemsRelay
             .map { items in
-                return [SectionOfListCellData(items: items, identity: UUID())]
+                return [SectionOfListCellData(identity: UUID(), items: items)]
             }.asDriver(onErrorJustReturn: [])
         
         let addCellViewHidden = itemsRelay
-            .map { !$0.isEmpty }
-            .asDriver(onErrorJustReturn: true)
-        
-        // testButtonTapped 이벤트 처리: dummyData에서 새로운 데이터를 추가
+            .map { items -> CGFloat in
+                return items.isEmpty ? 1.0 : 0.0
+            }.asDriver(onErrorJustReturn: 0.0)
+            
         input.testButtonTapped
             .asSignal(onErrorSignalWith: .empty())
             .emit(onNext: { [weak self] in
                 guard let self = self else { return }
                 
-                // dummyData에서 새로운 데이터 추가
-                guard self.currentIndex < self.dummyData.items.count else {
-                    return
-                }
+                guard self.currentIndex < self.dummyData.items.count else { return }
                 let newItem = self.dummyData.items[self.currentIndex]
                 self.addItem(newItem)
                 self.currentIndex += 1
-            })
-            .disposed(by: disposeBag)
+            }).disposed(by: disposeBag)
         
-        // addButtonTapped 이벤트 처리: 모달 표시
         input.addButtonTapped
             .asSignal(onErrorSignalWith: .empty())
             .emit(onNext: { [weak self] in
                 guard let self = self else { return }
                 self.showAddListModal.accept(())
-            })
-            .disposed(by: disposeBag)
+            }).disposed(by: disposeBag)
         
         return Output(
             updatedData: updatedData,
@@ -117,4 +101,18 @@ class CashBookListViewModel: ViewModelType {
             addCellViewHidden: addCellViewHidden
         )
     }
+    
+    /// 임시 데이터 추가(itemsRelay)
+    func addItem(_ item: ListCellData) {
+        items.append(item)
+        print("\(item)")
+    }
+    
+    /// 임시 데이터 삭제(itemsRelay) - 해당 UUID
+    func deleteItem(with id: UUID) {
+        if let index = items.firstIndex(where: { $0.identity == id }) {
+            items.remove(at: index)
+        }
+    }
+    
 }
