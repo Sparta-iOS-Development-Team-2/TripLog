@@ -103,25 +103,25 @@ class TodayViewController: UIViewController {
     }
     
     private func setupConstraints() {
-        topStackView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
+        topStackView.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
         
-        tableView.snp.makeConstraints { make in
-            make.top.equalTo(topStackView.snp.bottom).offset(16)
-            make.leading.trailing.bottom.equalToSuperview()
+        tableView.snp.makeConstraints {
+            $0.top.equalTo(topStackView.snp.bottom).offset(16)
+            $0.leading.trailing.bottom.equalToSuperview()
         }
         
-        floatingButtonBackground.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
-            make.trailing.equalToSuperview().offset(-16)
-            make.width.height.equalTo(43)
+        floatingButtonBackground.snp.makeConstraints {
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            $0.trailing.equalToSuperview().offset(-16)
+            $0.width.height.equalTo(43)
         }
         
-        floatingButton.snp.makeConstraints { make in
-            make.center.equalTo(floatingButtonBackground)
-            make.width.height.equalTo(64)
+        floatingButton.snp.makeConstraints {
+            $0.center.equalTo(floatingButtonBackground)
+            $0.width.height.equalTo(64)
         }
     }
 }

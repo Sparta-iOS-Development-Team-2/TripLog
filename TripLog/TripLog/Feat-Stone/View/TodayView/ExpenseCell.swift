@@ -67,17 +67,17 @@ class ExpenseCell: UITableViewCell {
     }
     
     private func setupLayout() {
-        shadowView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(8)
+        shadowView.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(8)
         }
         
-        containerView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+        containerView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
         
-        dateLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(16)
-            make.top.equalToSuperview().offset(8)
+        dateLabel.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(16)
+            $0.top.equalToSuperview().offset(8)
         }
         
         let firstRowStackView = UIStackView(arrangedSubviews: [titleLabel, amountLabel]).then {
@@ -87,9 +87,9 @@ class ExpenseCell: UITableViewCell {
         }
         containerView.addSubview(firstRowStackView)
         
-        firstRowStackView.snp.makeConstraints { make in
-            make.top.equalTo(dateLabel.snp.bottom)
-            make.leading.trailing.equalToSuperview().inset(16)
+        firstRowStackView.snp.makeConstraints {
+            $0.top.equalTo(dateLabel.snp.bottom)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
         
         let secondRowStackView = UIStackView(arrangedSubviews: [categoryLabel, exchangeRateLabel]).then {
@@ -99,10 +99,10 @@ class ExpenseCell: UITableViewCell {
         }
         containerView.addSubview(secondRowStackView)
         
-        secondRowStackView.snp.makeConstraints { make in
-            make.top.equalTo(firstRowStackView.snp.bottom)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.bottom.equalToSuperview().offset(-16)
+        secondRowStackView.snp.makeConstraints {
+            $0.top.equalTo(firstRowStackView.snp.bottom)
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.bottom.equalToSuperview().offset(-16)
         }
     }
     
