@@ -81,6 +81,12 @@ private extension SettingTableCellModel {
             cancelTitle: "취소",
             activeTitle: "구글폼 문의") {
                 debugPrint("구글폼 이동")
+                guard let url = URL(string: "https://forms.gle/wWMNkRJEfULDjLhr7") else { return }
+                if #available(iOS 10.0, *) {
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                } else {
+                    UIApplication.shared.openURL(url)
+                }
             }
         
         alert.showAlert(on: view, .alert)
