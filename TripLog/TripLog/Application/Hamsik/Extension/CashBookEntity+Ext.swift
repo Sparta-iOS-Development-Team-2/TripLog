@@ -9,26 +9,30 @@ import Foundation
 import CoreData
 
 // TODO: 삭제 예정
-struct MockCashBookModel { }
+struct MockCashBookModel {
+    let budget: Double
+    let departure: String
+    let homecoming: String
+    let note: String
+    let tripName: String
+}
 
 extension CashBookEntity: CoreDataManagable {
     
+    // TODO: 임시 데이터 적용 중, 수정 필요
     typealias Model = MockCashBookModel
     typealias Entity = CashBookEntity
     
-    func save(_ data: Any, context: NSManagedObjectContext) {
+    static func save(_ data: Model, context: NSManagedObjectContext) {
         let entityName = EntityKeys.cashBookEntity
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         context.perform {
-            // TODO: 추후 데이터 타입 파일이 병합되면 아래에 주석을 수정&활성화할 예정
-            /**
-             //            let att = NSManagedObject(entity: entity, insertInto: context)
-             //            att.setValue(data.budget, forKey: EntityKeys.CashBookElement.budget)
-             //            att.setValue(data.departure, forKey: EntityKeys.CashBookElement.departure)
-             //            att.setValue(data.homecoming, forKey: EntityKeys.CashBookElement.homecoming)
-             //            att.setValue(data.note, forKey: EntityKeys.CashBookElement.note)
-             //            att.setValue(data.tripName, forKey: EntityKeys.CashBookElement.tripName)
-             */
+                let att = NSManagedObject(entity: entity, insertInto: context)
+                att.setValue(data.budget, forKey: EntityKeys.CashBookElement.budget)
+                att.setValue(data.departure, forKey: EntityKeys.CashBookElement.departure)
+                att.setValue(data.homecoming, forKey: EntityKeys.CashBookElement.homecoming)
+                att.setValue(data.note, forKey: EntityKeys.CashBookElement.note)
+                att.setValue(data.tripName, forKey: EntityKeys.CashBookElement.tripName)
         }
     }
     
@@ -36,6 +40,7 @@ extension CashBookEntity: CoreDataManagable {
         let request: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
         request.predicate = predicate
         do {
+            print(try context.fetch(request))
             return try context.fetch(request)
         } catch {
             print("Fetch failed: \(error)")
