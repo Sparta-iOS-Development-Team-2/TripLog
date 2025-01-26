@@ -36,14 +36,14 @@ extension CashBookEntity: CoreDataManagable {
         }
     }
     
-    static func fetch(context: NSManagedObjectContext, predicate: NSPredicate?) -> [Entity] {
+    static func fetch(context: NSManagedObjectContext) -> [Entity] {
         let request: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
-        request.predicate = predicate
         do {
-            print(try context.fetch(request))
-            return try context.fetch(request)
+            let result = try context.fetch(request)
+            print("CashBookEntity fetch success")
+            return result
         } catch {
-            print("Fetch failed: \(error)")
+            print("CashBookEntity Fetch failed: \(error)")
             return []
         }
     }

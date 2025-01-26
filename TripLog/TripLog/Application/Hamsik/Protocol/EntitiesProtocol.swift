@@ -17,5 +17,5 @@ protocol CoreDataManagable: AnyObject {
     // 엔티티별 저장로직
     static func save(_ data: Model, context: NSManagedObjectContext)
     // 엔티티별 검색로직
-    static func fetch(context: NSManagedObjectContext, predicate: NSPredicate?) -> [Entity]
+    static func fetch(context: NSManagedObjectContext) -> [Entity]
 }

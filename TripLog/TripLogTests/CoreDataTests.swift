@@ -30,14 +30,14 @@ final class CoreDataTests: XCTestCase {
     }
     
     override func tearDownWithError() throws {
-        manager?.removeAll()
+//        manager?.removeAll()
         manager = nil
         try super.tearDownWithError()
     }
     
     func testFetchStoredCurrencyRates() throws {
         // Given: 데이터를 저장할 준비
-        manager?.fetchCurrenyRates()
+        manager?.save(type: CurrencyEntity.self, data: CurrencyRate())
         
         // Wait for async operation
         let expectation = XCTestExpectation(description: "Fetching data from API")
@@ -47,7 +47,7 @@ final class CoreDataTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
         
         // When: 저장된 데이터를 가져옴
-        let storedRates = manager?.fetchStoredCurrencyRates()
+        let storedRates = manager?.fetch(type: CurrencyEntity.self)
         debugPrint("storageRates: \(String(describing: storedRates?.count))")
         
         // Then: 데이터를 검증
