@@ -58,16 +58,6 @@ class CoreDataManager {
         saveContext()
     }
     
-    
-    func search<T: NSManagedObject>(_ objectType: T.Type, id: NSManagedObjectID) -> T? {
-        do {
-            return try context.existingObject(with: id) as? T
-        } catch {
-            print("🚫 Search failed: \(error)")
-            return nil
-        }
-    }
-    
     func removeAll() {
         let entitys = persistentContainer.managedObjectModel.entities.map{ $0.name ?? "" }
         
@@ -85,6 +75,7 @@ class CoreDataManager {
         }
     }
     
+    /// CoreData에 저장완료하는 코드를 간소화하기 위해 만든 함수
     private func saveContext() {
         if context.hasChanges {
             do {
