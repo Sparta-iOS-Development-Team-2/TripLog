@@ -1,10 +1,3 @@
-//
-//  TodayViewController.swift
-//  TripLog
-//
-//  Created by 김석준 on 1/23/25.
-//
-
 import UIKit
 import SnapKit
 import Then
@@ -18,7 +11,7 @@ class TodayViewController: UIViewController {
         $0.text = "지출 내역"
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
     }
-    // 나중 TipKit을 위한 버튼
+    
     private let helpButton = UIButton(type: .system).then {
         $0.setTitle("?", for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
@@ -147,11 +140,11 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
         return expenses.count
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ExpenseCell.identifier, for: indexPath) as! ExpenseCell
         let expense = expenses[indexPath.section]
@@ -162,32 +155,75 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
             amount: expense.amount,
             exchangeRate: expense.exchangeRate
         )
+        cell.selectionStyle = .none // 선택 효과 제거
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 108
     }
-    
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 4
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true) // 선택 효과 제거
     }
-    
+
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 4 // 기존 4에서 8로 수정하여 삭제 버튼과 다른 셀 간격 추가
+    }
+
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        return UIView().then {
-            $0.backgroundColor = .clear
+        let footerView = UIView().then {
+            $0.backgroundColor = .clear // 투명한 배경으로 간격만 추가
         }
+        return footerView
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completionHandler in
-            self?.expenses.remove(at: indexPath.section)
+            // 커스텀 삭제 뷰 생성
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
+            guard let self = self else { return }
+            self.expenses.remove(at: indexPath.section)
             tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
-            self?.updateEmptyState()
+            self.updateEmptyState()
             completionHandler(true)
         }
-        deleteAction.backgroundColor = .red
+            
+        // 삭제 버튼 커스텀 설정
+        deleteAction.backgroundColor = .white // 배경색 제거
+            
+        // 삭제 버튼의 커스텀 뷰 생성
+        let customView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 120)) // UIView 크기 설정
+        customView.backgroundColor = .red // 배경색을 흰색으로 설정
+        customView.layer.cornerRadius = 8
+        customView.clipsToBounds = true
+
+            
+        let deleteButton = UIButton(type: .system).then {
+            $0.setImage(UIImage(systemName: "trash"), for: .normal)
+            $0.tintColor = .white
+            $0.addTarget(self, action: #selector(deleteExpense(_:)), for: .touchUpInside)
+        }
+            
+        customView.addSubview(deleteButton)
+        deleteButton.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(24) // 아이콘 크기 설정
+        }
+            
+        // 삭제 버튼을 이미지로 렌더링
+        deleteAction.image = UIGraphicsImageRenderer(size: customView.frame.size).image { _ in
+            customView.drawHierarchy(in: customView.bounds, afterScreenUpdates: true)
+        }
+            
         return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+
+    @objc private func deleteExpense(_ sender: UIButton) {
+        if let indexPath = tableView.indexPath(for: sender.superview?.superview as! UITableViewCell) {
+            expenses.remove(at: indexPath.section)
+            tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
+            updateEmptyState()
+        }
     }
 }
 

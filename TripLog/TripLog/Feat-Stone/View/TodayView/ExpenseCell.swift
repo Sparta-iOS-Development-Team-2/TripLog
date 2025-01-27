@@ -63,6 +63,8 @@ class ExpenseCell: UITableViewCell {
         containerView.addSubview(amountLabel)
         containerView.addSubview(exchangeRateLabel)
         
+        selectionStyle = .none
+        
         setupLayout()
     }
     
