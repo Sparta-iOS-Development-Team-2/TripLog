@@ -1,3 +1,10 @@
+//
+//  ExpenseCell.swift
+//  TripLog
+//
+//  Created by 김석준 on 1/24/25.
+//
+
 import UIKit
 import SnapKit
 import Then
@@ -20,7 +27,7 @@ class TodayViewController: UIViewController {
     private let totalLabel = UILabel().then {
         $0.text = "오늘 사용 금액"
         $0.font = UIFont.SCDream(size: .body, weight: .medium)
-        $0.textColor = .gray
+        $0.textColor = UIColor(named: "textPrimary")
     }
     
     private let totalAmountLabel = UILabel().then {
@@ -32,33 +39,20 @@ class TodayViewController: UIViewController {
     private let tableView = UITableView().then {
         $0.register(ExpenseCell.self, forCellReuseIdentifier: ExpenseCell.identifier)
         $0.separatorStyle = .none
-        $0.backgroundColor = .white
+        $0.applyBackgroundColor()
     }
     
     private let floatingButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         $0.tintColor = UIColor.Personal.normal
-        $0.backgroundColor = .white
-        $0.layer.cornerRadius = 32
-        $0.layer.shadowColor = UIColor.black.cgColor
-        $0.layer.shadowOpacity = 0.3
-        $0.layer.shadowOffset = CGSize(width: 2, height: 2)
-    }
-    
-    private let floatingButtonBackground = UIView().then {
-        $0.backgroundColor = UIColor.Personal.normal
-        $0.layer.cornerRadius = 21.5
-        $0.layer.shadowColor = UIColor.black.cgColor
-        $0.layer.shadowOpacity = 0.3
-        $0.layer.shadowOffset = CGSize(width: 2, height: 2)
-        $0.layer.shadowRadius = 4
+        $0.applyFloatingButtonStyle() // 스타일 적용
     }
     
     private let topStackView = UIStackView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.applyBackgroundColor()
         
         setupViews()
         setupConstraints()
@@ -93,7 +87,6 @@ class TodayViewController: UIViewController {
         
         view.addSubview(topStackView)
         view.addSubview(tableView)
-        view.addSubview(floatingButtonBackground)
         view.addSubview(floatingButton)
     }
     
@@ -106,17 +99,12 @@ class TodayViewController: UIViewController {
         tableView.snp.makeConstraints {
             $0.top.equalTo(topStackView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(floatingButtonBackground.snp.top).offset(-16) // 버튼과 테이블 뷰 간격 추가
-        }
-        
-        floatingButtonBackground.snp.makeConstraints {
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
-            $0.trailing.equalToSuperview().offset(-16)
-            $0.width.height.equalTo(43)
+            $0.bottom.equalTo(floatingButton.snp.top).offset(-16) // 버튼과 테이블 뷰 간격 추가
         }
         
         floatingButton.snp.makeConstraints {
-            $0.center.equalTo(floatingButtonBackground)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            $0.trailing.equalToSuperview().offset(-16)
             $0.width.height.equalTo(64)
         }
     }
@@ -125,7 +113,7 @@ class TodayViewController: UIViewController {
         if expenses.isEmpty {
             let emptyLabel = UILabel().then {
                 $0.text = "지출 내역이 없습니다."
-                $0.textColor = .gray
+                $0.textColor = UIColor(named: "textPlaceholder")
                 $0.textAlignment = .center
                 $0.font = UIFont.systemFont(ofSize: 16)
             }
@@ -179,7 +167,6 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-            // 커스텀 삭제 뷰 생성
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
             guard let self = self else { return }
             self.expenses.remove(at: indexPath.section)
@@ -187,34 +174,30 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
             self.updateEmptyState()
             completionHandler(true)
         }
-            
-        // 삭제 버튼 커스텀 설정
-        deleteAction.backgroundColor = .white // 배경색 제거
-            
-        // 삭제 버튼의 커스텀 뷰 생성
-        let customView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 120)) // UIView 크기 설정
-        customView.backgroundColor = .red // 배경색을 흰색으로 설정
+        
+        deleteAction.backgroundColor = UIColor.CustomColors.Background.background
+        
+        let customView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 120))
+        customView.backgroundColor = .red
         customView.layer.cornerRadius = 8
         customView.clipsToBounds = true
-
-            
+        
         let deleteButton = UIButton(type: .system).then {
             $0.setImage(UIImage(systemName: "trash"), for: .normal)
-            $0.tintColor = .white
+            $0.tintColor = UIColor(named: "plus")
             $0.addTarget(self, action: #selector(deleteExpense(_:)), for: .touchUpInside)
         }
-            
+        
         customView.addSubview(deleteButton)
         deleteButton.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.width.height.equalTo(24) // 아이콘 크기 설정
+            $0.width.height.equalTo(24)
         }
-            
-        // 삭제 버튼을 이미지로 렌더링
+        
         deleteAction.image = UIGraphicsImageRenderer(size: customView.frame.size).image { _ in
             customView.drawHierarchy(in: customView.bounds, afterScreenUpdates: true)
         }
-            
+        
         return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 
