@@ -58,7 +58,7 @@ private extension SettingTableCellModel {
         let toggleSwitch = UISwitch()
         let isDarkMode = UITraitCollection.current.userInterfaceStyle == .dark
         toggleSwitch.isOn = isDarkMode
-        toggleSwitch.thumbTintColor = .Light.base
+        toggleSwitch.thumbTintColor = .CustomColors.Background.detailBackground
         toggleSwitch.onTintColor = .Personal.normal
                 
         return toggleSwitch

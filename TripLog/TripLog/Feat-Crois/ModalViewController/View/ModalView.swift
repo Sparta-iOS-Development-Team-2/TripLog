@@ -95,6 +95,12 @@ final class ModalView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        self.layer.shadowPath = self.shadowPath()
+    }
+    
     /// 모달뷰의 현재 상태를 반환하는 메소드
     /// - Returns: 모달뷰의 현재 state
     func checkModalStatus() -> ModalViewState {
@@ -114,7 +120,8 @@ private extension ModalView {
     }
     
     func configureSelf() {
-        self.backgroundColor = .Light.base
+        self.backgroundColor = UIColor.CustomColors.Background.background
+        self.applyViewShadow()
         [titleLabel,
          firstSection!,
          secondSection!,
