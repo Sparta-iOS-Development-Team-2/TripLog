@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA3030332D44B9CA0057DB35 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AA3030322D44B9CA0057DB35 /* Lottie */; };
 		AAC9B0962D3A721C006892A7 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0952D3A721C006892A7 /* SnapKit */; };
 		AAC9B0992D3A722B006892A7 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0982D3A722B006892A7 /* Alamofire */; };
 		AAC9B09C2D3A7257006892A7 /* RxDataSources in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B09B2D3A7257006892A7 /* RxDataSources */; };
@@ -82,6 +83,7 @@
 				AAC9B09C2D3A7257006892A7 /* RxDataSources in Frameworks */,
 				AAC9B09F2D3A7265006892A7 /* RxKeyboard in Frameworks */,
 				AAC9B0A22D3A72A9006892A7 /* RxCocoa in Frameworks */,
+				AA3030332D44B9CA0057DB35 /* Lottie in Frameworks */,
 				AAC9B0962D3A721C006892A7 /* SnapKit in Frameworks */,
 				AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */,
 				AAC9B0992D3A722B006892A7 /* Alamofire in Frameworks */,
@@ -155,6 +157,7 @@
 				AAC9B0A52D3A72A9006892A7 /* RxSwift */,
 				AAC9B0A82D3A72C9006892A7 /* FSCalendar */,
 				AAC9B0AB2D3A72E4006892A7 /* Then */,
+				AA3030322D44B9CA0057DB35 /* Lottie */,
 			);
 			productName = TripLog;
 			productReference = AAC9B05D2D3A7070006892A7 /* TripLog.app */;
@@ -246,6 +249,7 @@
 				AAC9B0A02D3A72A9006892A7 /* XCRemoteSwiftPackageReference "RxSwift" */,
 				AAC9B0A72D3A72C9006892A7 /* XCRemoteSwiftPackageReference "FSCalendar" */,
 				AAC9B0AA2D3A72E4006892A7 /* XCRemoteSwiftPackageReference "Then" */,
+				AA3030312D44B9CA0057DB35 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AAC9B05E2D3A7070006892A7 /* Products */;
@@ -640,6 +644,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		AA3030312D44B9CA0057DB35 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.1;
+			};
+		};
 		AAC9B0942D3A721C006892A7 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
@@ -699,6 +711,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AA3030322D44B9CA0057DB35 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA3030312D44B9CA0057DB35 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
 		AAC9B0952D3A721C006892A7 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AAC9B0942D3A721C006892A7 /* XCRemoteSwiftPackageReference "SnapKit" */;
