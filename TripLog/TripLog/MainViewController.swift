@@ -81,7 +81,9 @@ private extension MainViewController {
     
     /// Lottie 애니메이션 실행 메소드
     func playLottie() {
-        lottieAnimationView.play { _ in
+        lottieAnimationView.play { [weak self] _ in
+            guard let self else { return }
+            
             // lottie 애니메이션 재생 완료 후 동작
             UIView.animate(withDuration: 0.3, animations: {
                 [self.lottieAnimationView,
@@ -95,9 +97,9 @@ private extension MainViewController {
                  self.launchImageView,
                  self.launchTitle
                 ].forEach {
+                    $0.isHidden = true
                     $0.removeFromSuperview()
                     $0.snp.removeConstraints()
-                    $0.isHidden = true
                 }
             })
         }
