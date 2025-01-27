@@ -14,22 +14,30 @@ import FSCalendar
 final class CalendarViewController: UIViewController {
     
     // MARK: - Properties
-    private lazy var calendarView = CalendarView()
+    // 캘린더 뷰
+    private lazy var calendarView = CalendarView().then {
+        $0.calendar.delegate = self
+        $0.calendar.dataSource = self
+    }
+    // 커스텀 헤더 뷰
+    private lazy var customHeaderView = CalendarCustomHeaderView(frame: .zero).then {
+        $0.calendar = calendarView.calendar
+    }
+    
     private let disposeBag = DisposeBag()
     
-    // 지출 금액 표시 레이블
-    private lazy var expenseLabel = UILabel().then {
-        $0.textAlignment = .center
-        $0.font = .systemFont(ofSize: 16)
-        $0.textColor = .black
-        $0.text = "총 지출: ₩0" // Default text
-    }
     
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        setupCalendarDelegate()
+        setupCalendar()
+    }
+    
+    // 하위 뷰 레이아웃 업데이트 된 후 호출
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        calendarView.calendar.reloadData()
     }
     
     // MARK: - Setup
@@ -37,34 +45,38 @@ final class CalendarViewController: UIViewController {
         view.backgroundColor = .white
         
         // 서브뷰 추가
-        [calendarView, expenseLabel].forEach { view.addSubview($0) }
+        [customHeaderView, calendarView].forEach { view.addSubview($0) }
         
-        // SnapKit을 사용한 레이아웃 설정
-        calendarView.snp.makeConstraints {
+        customHeaderView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(400)
+            $0.height.equalTo(100)
         }
         
-        expenseLabel.snp.makeConstraints {
-            $0.top.equalTo(calendarView.snp.bottom).offset(20)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(30)
+        calendarView.snp.makeConstraints {
+            $0.top.equalTo(customHeaderView.snp.bottom)
+            $0.leading.trailing.bottom.equalToSuperview()
         }
     }
     
-    private func setupCalendarDelegate() {
-        calendarView.delegate = self
+    // 캘린더 헤더 타이틀 설정
+    private func setupCalendar() {
+        customHeaderView.updateTitle(date: calendarView.calendar.currentPage)
+    }
+    
+    // MARK: - Public Methods
+    /// 캘린더의 현재 페이지를 지정된 날짜로 변경
+    /// - Parameter date: 이동할 날짜
+    func changeMonth(to date: Date) {
+        calendarView.calendar.setCurrentPage(date, animated: true)
     }
 }
 
 // MARK: - FSCalendarDelegate Extension
 extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
-    func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-        let randomExpense = Int.random(in: 1000...100000)
-        expenseLabel.text = "선택한 날짜 지출: ₩\(randomExpense)"
-    }
-    
+    /// 캘린더의 현재 페이지가 변경되었을 때 호출
+    /// - Parameter calendar: 변경된 캘린더 객체
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
+        customHeaderView.updateTitle(date: calendar.currentPage)
     }
 }
