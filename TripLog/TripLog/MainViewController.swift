@@ -7,6 +7,7 @@
 
 import UIKit
 import Lottie
+import SnapKit
 import Then
 
 /// TripLog 앱의 메인 뷰 컨트롤러
@@ -15,8 +16,6 @@ class MainViewController: UIViewController {
     // MARK: - UI Compnents
     
     private lazy var lottieAnimationView = LottieAnimationView(name: "triplog").then {
-        $0.frame = view.bounds
-        $0.center = view.center
         $0.alpha = 1
         $0.loopMode = .repeat(3) // 애니메이션 재생 횟수
     }
@@ -25,9 +24,15 @@ class MainViewController: UIViewController {
         $0.contentMode = .scaleAspectFit
         $0.backgroundColor = .clear
         $0.image = UIImage(named: "launchImage")
-        $0.frame = view.bounds
-        $0.center = view.center
         $0.alpha = 1
+    }
+    
+    private let launchTitle = UILabel().then {
+        $0.text = "TripLog"
+        $0.backgroundColor = .clear
+        $0.textColor = .white
+        $0.font = .SCDream(size: .title, weight: .bold)
+        $0.textAlignment = .center
     }
     
     // MARK: - MainViewController LifeCycle
@@ -45,11 +50,32 @@ private extension MainViewController {
     
     func setupUI() {
         configureSelf()
+        setupLayout()
         playLottie()
     }
     
     func configureSelf() {
-        [launchImageView, lottieAnimationView].forEach { view.addSubview($0) }
+        [launchImageView,
+         lottieAnimationView,
+         launchTitle
+        ].forEach { view.addSubview($0) }
+    }
+    
+    func setupLayout() {
+        launchImageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        lottieAnimationView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.height.equalTo(self.view.bounds.height)
+            $0.bottom.equalToSuperview().inset(50)
+        }
+        
+        launchTitle.snp.makeConstraints {
+            $0.bottom.equalTo(self.view.safeAreaLayoutGuide).inset(50)
+            $0.centerX.equalToSuperview()
+        }
     }
     
     /// Lottie 애니메이션 실행 메소드
