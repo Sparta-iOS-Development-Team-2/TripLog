@@ -57,6 +57,10 @@ final class ModalDateView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// ModalDateView를 설정하는 메소드
+    /// - Parameters:
+    ///   - start: 여행 시작 일정
+    ///   - end: 여행 종료 일정
     func configureDate(start: Date, end: Date) {
         self.startDate = start
         self.endDate = end
