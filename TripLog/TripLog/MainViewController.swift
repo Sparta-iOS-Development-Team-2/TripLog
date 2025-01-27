@@ -29,10 +29,11 @@ class MainViewController: UIViewController {
     
     private let launchTitle = UILabel().then {
         $0.text = "TripLog"
-        $0.backgroundColor = .clear
         $0.textColor = .white
         $0.font = .SCDream(size: .title, weight: .bold)
         $0.textAlignment = .center
+        $0.backgroundColor = .clear
+        $0.alpha = 1
     }
     
     // MARK: - MainViewController LifeCycle
@@ -80,18 +81,26 @@ private extension MainViewController {
     
     /// Lottie 애니메이션 실행 메소드
     func playLottie() {
-        lottieAnimationView.play { _ in
+        lottieAnimationView.play { [weak self] _ in
+            guard let self else { return }
+            
             // lottie 애니메이션 재생 완료 후 동작
             UIView.animate(withDuration: 0.3, animations: {
-                self.lottieAnimationView.alpha = 0
-                self.launchImageView.alpha = 0
+                [self.lottieAnimationView,
+                 self.launchImageView,
+                 self.launchTitle
+                ].forEach { $0.alpha = 0 }
                 
                 // view 애니메이션 종료 후 동작
             }, completion: { _ in
-                self.lottieAnimationView.isHidden = true
-                self.launchImageView.isHidden = true
-                self.lottieAnimationView.removeFromSuperview()
-                self.launchImageView.removeFromSuperview()
+                [self.lottieAnimationView,
+                 self.launchImageView,
+                 self.launchTitle
+                ].forEach {
+                    $0.isHidden = true
+                    $0.removeFromSuperview()
+                    $0.snp.removeConstraints()
+                }
             })
         }
     }
