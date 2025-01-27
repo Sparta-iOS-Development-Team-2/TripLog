@@ -22,10 +22,7 @@ final class ModalButtons: UIView {
         $0.titleLabel?.font = .SCDream(size: .headline, weight: .medium)
         $0.titleLabel?.numberOfLines = 1
         $0.titleLabel?.textAlignment = .center
-        $0.backgroundColor = .clear
-        $0.layer.cornerRadius = 8
-        $0.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
-        $0.layer.borderWidth = 1
+        $0.applyButtonStyle()
     }
     
     fileprivate let createButton = UIButton().then {
@@ -61,7 +58,7 @@ final class ModalButtons: UIView {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            self.cancelButton.layer.borderColor = UIColor.Dark.base.withAlphaComponent(0.1).cgColor
+            self.cancelButton.applyButtonStroke()
         }
     }
     
