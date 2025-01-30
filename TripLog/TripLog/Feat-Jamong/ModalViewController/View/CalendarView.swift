@@ -18,6 +18,9 @@ final class CalendarView: UIView, FSCalendarDelegate, FSCalendarDataSource {
         // Delegate, DataSource 설정
         $0.delegate = self
         $0.dataSource = self
+        
+        $0.allowsMultipleSelection = false
+
 
         // MARK: - CalendarView Set UI
         $0.appearance.do {
@@ -26,9 +29,10 @@ final class CalendarView: UIView, FSCalendarDelegate, FSCalendarDataSource {
             $0.titleFont = .SCDream(size: .body, weight: .medium)
             $0.weekdayTextColor = .black
             $0.titleDefaultColor = .black
-            $0.selectionColor = .systemBlue
-            $0.todayColor = .gray
-            $0.todaySelectionColor = .systemBlue
+            $0.selectionColor = .clear
+            $0.todayColor = .clear
+            
+            $0.todaySelectionColor = .clear
             $0.caseOptions = .weekdayUsesSingleUpperCase
         }
         
