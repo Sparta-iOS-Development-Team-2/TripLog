@@ -22,7 +22,7 @@ extension CurrencyEntity: CoreDataManagable {
     static func save(_ data: CurrencyRate, context: NSManagedObjectContext) {
         let dataType = APIInfo.exchangeRate
         
-        APIManager.shared.fetchCurrencyRatesWithAlamofire(dataType: dataType, date: Date()) { result in
+        APIManager.shared.fetchCurrencyRatesWithAlamofire(dataType: dataType, date: "") { result in
             switch result {
             case .success(let currencyRates):
                 // API 상태 코드 출력 (1:성공, 2:DATA코드 오류, 3:인증코드 오류, 4: 일일제한횟수 마감
