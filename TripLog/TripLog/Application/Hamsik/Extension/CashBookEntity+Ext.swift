@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-// TODO: 삭제 예정
+// TODO: 임시데이터(삭제예정)
 struct MockCashBookModel {
     let budget: Double
     let departure: String

@@ -10,6 +10,7 @@ import Foundation
 enum EntityKeys {
     static let currencyEntity = "CurrencyEntity"
     static let cashBookEntity = "CashBookEntity"
+    static let myCashBookEntity = "MyCashBookEntity"
     
     enum CurrencyElement {
         static let baseRate = "baseRate"
@@ -23,5 +24,12 @@ enum EntityKeys {
         static let homecoming = "homecoming"
         static let note = "note"
         static let tripName = "tripName"
+    }
+    
+    enum MyCashBookElement {
+        static let note = "note"
+        static let category = "category"
+        static let amount = "amount"
+        static let payment = "payment"
     }
 }
