@@ -13,10 +13,8 @@ class ExpenseCell: UITableViewCell {
     static let identifier = "ExpenseCell"
 
     private let containerView = UIView().then {
-        $0.applyCornerRadius()// 모서리를 둥글게 설정
         $0.layer.masksToBounds = false // 그림자가 잘리면 안 되므로 false 설정
-        $0.applyBackgroundColor()
-        $0.applyBoxShadow()
+        $0.applyBoxStyle()
     }
 
     private let dateLabel = UILabel().then {
