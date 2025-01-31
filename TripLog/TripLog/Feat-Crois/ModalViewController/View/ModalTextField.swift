@@ -8,6 +8,8 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
+import RxCocoa
 
 /// 모달에서 텍스트 입력을 받을 텍스트 필드 공용 컴포넌츠
 final class ModalTextField: UIView {
@@ -30,7 +32,7 @@ final class ModalTextField: UIView {
         $0.backgroundColor = .clear
     }
     
-    private let textField = UITextField().then {
+    fileprivate let textField = UITextField().then {
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
         $0.textColor = UIColor.Dark.base
         $0.borderStyle = .none
@@ -111,5 +113,14 @@ private extension ModalTextField {
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
+    }
+}
+
+extension Reactive where Base: ModalTextField {
+    var isBlank: Observable<Bool> {
+        return base.textField.rx.text.orEmpty
+            .map { $0.count <= 0 }
+            .distinctUntilChanged()
+            .asObservable()
     }
 }
