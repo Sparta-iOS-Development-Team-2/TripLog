@@ -81,7 +81,7 @@ private extension ModalViewController {
         let input: ModalViewModel.Input = .init(
             cancelButtonTapped: self.modalView.rx.cancelButtonTapped,
             activeButtonTapped: self.modalView.rx.activeButtonTapped,
-            sectionIsBlank: self.modalView.rx.observeTextFields
+            sectionIsBlank: self.modalView.rx.checkBlankOfSections
         )
         
         let output = viewModel.transform(input: input)

@@ -19,6 +19,7 @@ final class ModalDateView: UIView {
     private let startDateIsBlank = BehaviorSubject<Bool>(value: true)
     private let endDateIsBlank = BehaviorSubject<Bool>(value: true)
     
+    /// 날짜가 모두 선택되었는지 검사하고 이벤트를 방출하는 옵저버블
     fileprivate lazy var dateIsBlank: Observable<Bool> = {
         return Observable
             .combineLatest(startDateIsBlank, endDateIsBlank)
@@ -114,6 +115,7 @@ private extension ModalDateView {
         }
     }
     
+    /// 데이터 바인딩 메소드
     func bind() {
         startDatePickerBind()
         endDatePickerBind()
@@ -140,11 +142,12 @@ private extension ModalDateView {
                 
             }.disposed(by: disposeBag)
         
-        startDatePicker.rx.isBlank
+        startDatePicker.rx.datePickerIsBlank
             .bind(to: startDateIsBlank)
             .disposed(by: disposeBag)
     }
     
+    /// EndDatePicker 바인딩 메소드
     func endDatePickerBind() {
         endDatePicker.rx.selectedDate
             .skip(2)
@@ -165,14 +168,17 @@ private extension ModalDateView {
                 
             }.disposed(by: disposeBag)
         
-        endDatePicker.rx.isBlank
+        endDatePicker.rx.datePickerIsBlank
             .bind(to: endDateIsBlank)
             .disposed(by: disposeBag)
     }
     
 }
 
+// MARK: - Reactive Extension
+
 extension Reactive where Base: ModalDateView {
+    /// 날짜가 선택되었는지 검사하고 이벤트를 방출하는 옵저버블
     var dateIsBlank: Observable<Bool> {
         return base.dateIsBlank
     }

@@ -166,6 +166,7 @@ private extension ModalView {
         }
     }
     
+    /// 모달뷰를 세팅하는 메소드
     func setupModal() {
         switch self.state {
         case .createNewCashBook:
@@ -174,15 +175,15 @@ private extension ModalView {
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalDateView
             {
-                firstSection.rx.isBlank
+                firstSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                secondSection.rx.isBlank
+                secondSection.rx.textFieldIsBlank
                     .bind(to: secondTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.isBlank
+                thirdSection.rx.textFieldIsBlank
                     .bind(to: thirdTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
@@ -202,15 +203,15 @@ private extension ModalView {
                 thirdSection.configureTextField(text: "\(data.budget)")
                 forthSection.configureDate(start: data.startDate, end: data.endDate)
                 
-                firstSection.rx.isBlank
+                firstSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                secondSection.rx.isBlank
+                secondSection.rx.textFieldIsBlank
                     .bind(to: secondTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.isBlank
+                thirdSection.rx.textFieldIsBlank
                     .bind(to: thirdTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
@@ -225,11 +226,11 @@ private extension ModalView {
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalAmoutView
             {
-                secondSection.rx.isBlank
+                secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.isBlank
+                thirdSection.rx.textFieldIsBlank
                     .bind(to: secondTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
@@ -249,11 +250,11 @@ private extension ModalView {
                 thirdSection.configureTextField(text: data.category)
                 forthSection.configureAmoutView(amout: data.amount, currency: data.carrency)
                 
-                secondSection.rx.isBlank
+                secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.isBlank
+                thirdSection.rx.textFieldIsBlank
                     .bind(to: secondTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
@@ -290,7 +291,8 @@ extension Reactive where Base: ModalView {
         return base.cancelButtonTapped
     }
     
-    var observeTextFields: Observable<Bool> {
+    /// 빈 값인 섹션이 있는지 검사하고 이벤트를 방출하는 옵저버블
+    var checkBlankOfSections: Observable<Bool> {
         return base.allSectionIsBlank
     }
 }

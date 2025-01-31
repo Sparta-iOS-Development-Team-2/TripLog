@@ -151,7 +151,8 @@ extension Reactive where Base: ModalDatePicker {
         return base.datePicker.rx.date.asObservable()
     }
     
-    var isBlank: Observable<Bool> {
+    /// DatePicker의 날짜가 선택되었는지 확인하는 옵저버블
+    var datePickerIsBlank: Observable<Bool> {
         return base.textField.rx.text.orEmpty
             .map { $0.count <= 0 }
             .distinctUntilChanged()
