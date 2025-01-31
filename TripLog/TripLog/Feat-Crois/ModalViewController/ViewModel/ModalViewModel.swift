@@ -15,17 +15,20 @@ final class ModalViewModel: ViewModelType {
     struct Input {
         let cancelButtonTapped: PublishRelay<Void>
         let activeButtonTapped: PublishRelay<Void>
+        let textFieldIsBlank: Observable<Bool>
     }
     
     struct Output {
         let modalDismiss: PublishRelay<Void>
-        let active: PublishRelay<Void>
+        let active: PublishRelay<Bool>
     }
     
     let disposeBag = DisposeBag()
     
     private let modalDismiss = PublishRelay<Void>()
-    private let active = PublishRelay<Void>()
+    private let active = PublishRelay<Bool>()
+    
+    private var textFieldIsBlank: Bool?
     
     /// input을 output으로 변환해주는 메소드
     /// - Parameter input:
@@ -41,7 +44,8 @@ final class ModalViewModel: ViewModelType {
             .withUnretained(self)
             .emit { owner, _ in
                 
-                owner.active.accept(())
+                guard let isBlank = owner.textFieldIsBlank else { return }
+                owner.active.accept(isBlank)
                 
             }.disposed(by: disposeBag)
         
@@ -51,6 +55,15 @@ final class ModalViewModel: ViewModelType {
             .emit { owner, _ in
                 
                 owner.modalDismiss.accept(())
+                
+            }.disposed(by: disposeBag)
+        
+        input.textFieldIsBlank
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, isBlank in
+                
+                owner.textFieldIsBlank = isBlank
                 
             }.disposed(by: disposeBag)
         
