@@ -19,17 +19,19 @@ final class ModalView: UIView {
     fileprivate let cancelButtonTapped = PublishRelay<Void>()
     fileprivate let activeButtonTapped = PublishRelay<Void>()
     
-    fileprivate let firstTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
-    fileprivate let secondTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
-    fileprivate let thirdTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
+    private let firstTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
+    private let secondTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
+    private let thirdTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
+    private let dateIsBlank = BehaviorSubject<Bool>(value: true)
     
-    lazy var allTextFieldsAreBlank: Observable<Bool> = {
+    fileprivate lazy var allSectionIsBlank: Observable<Bool> = {
         return Observable
             .combineLatest(firstTextFieldIsBlank,
                            secondTextFieldIsBlank,
-                           thirdTextFieldIsBlank
+                           thirdTextFieldIsBlank,
+                           dateIsBlank
             )
-            .map { $0 && $1 && $2 }
+            .map { $0 || $1 || $2 || $3 }
             .distinctUntilChanged()
             .share(replay: 1, scope: .whileConnected)
     }()
@@ -169,7 +171,8 @@ private extension ModalView {
         case .createNewCashBook:
             if let firstSection = self.firstSection as? ModalTextField,
                let secondSection = self.secondSection as? ModalTextField,
-               let thirdSection = self.thirdSection as? ModalTextField
+               let thirdSection = self.thirdSection as? ModalTextField,
+               let forthSection = self.forthSection as? ModalDateView
             {
                 firstSection.rx.isBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -181,6 +184,10 @@ private extension ModalView {
                 
                 thirdSection.rx.isBlank
                     .bind(to: thirdTextFieldIsBlank)
+                    .disposed(by: disposeBag)
+                
+                forthSection.rx.dateIsBlank
+                    .bind(to: dateIsBlank)
                     .disposed(by: disposeBag)
             }
             
@@ -205,6 +212,10 @@ private extension ModalView {
                 
                 thirdSection.rx.isBlank
                     .bind(to: thirdTextFieldIsBlank)
+                    .disposed(by: disposeBag)
+                
+                forthSection.rx.dateIsBlank
+                    .bind(to: dateIsBlank)
                     .disposed(by: disposeBag)
             }
             
@@ -280,6 +291,6 @@ extension Reactive where Base: ModalView {
     }
     
     var observeTextFields: Observable<Bool> {
-        return base.allTextFieldsAreBlank
+        return base.allSectionIsBlank
     }
 }
