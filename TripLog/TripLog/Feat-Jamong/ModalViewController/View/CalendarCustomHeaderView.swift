@@ -7,6 +7,8 @@
 
 import UIKit
 import FSCalendar
+import RxSwift
+import RxCocoa
 import Then
 import SnapKit
 
@@ -18,6 +20,7 @@ class CalendarCustomHeaderView: UIView {
     
     // MARK: - Properties
     weak var calendar: FSCalendar?
+    private let disposeBag = DisposeBag()
     
     // MARK: - Initalization
     override init(frame: CGRect) {
@@ -40,14 +43,12 @@ class CalendarCustomHeaderView: UIView {
         previousButton.do {
             $0.setImage(UIImage(systemName: "chevron.left"), for: .normal)
             $0.tintColor = .black
-            $0.addTarget(self, action: #selector(handlePreviousMonth), for: .touchUpInside)
         }
         
         // 다음 달 버튼 설정
         nextButton.do {
             $0.setImage(UIImage(systemName: "chevron.right"), for: .normal)
             $0.tintColor = .black
-            $0.addTarget(self, action: #selector(handleNextMonth), for: .touchUpInside)
         }
         
         // 날짜 라벨 설정
@@ -58,6 +59,7 @@ class CalendarCustomHeaderView: UIView {
         }
         
         setupConstraints()
+        setupBindings()
     }
     
     // MARK: - Constraints Setup
@@ -93,31 +95,28 @@ class CalendarCustomHeaderView: UIView {
         titleLabel.text = formatter.string(from: date)
     }
     
-    /// 이전 달로 이동하는 버튼 액션을 처리한다.
-    @objc func handlePreviousMonth() {
-        print("클릭")
-        calendar?.setCurrentPage(getPreviousMonth(date: calendar?.currentPage ?? Date()), animated: true)
-        updateTitle(date: calendar?.currentPage ?? Date())
-    }
-    
-    /// 다음 달로 이동하는 버튼 액션을 처리한다.
-    @objc func handleNextMonth() {
-        print("클릭")
-        calendar?.setCurrentPage(getNextMonth(date: calendar?.currentPage ?? Date()), animated: true)
-        updateTitle(date: calendar?.currentPage ?? Date())
-    }
-    
-    /// 주어진 날짜의 이전 달을 반환한다.
-    /// - Parameter date: 기준 날짜
-    /// - Returns: 이전 달의 날짜
-    private func getPreviousMonth(date: Date) -> Date {
-        return Calendar.current.date(byAdding: .month, value: -1, to: date) ?? date
-    }
-    
-    /// 주어진 날짜의 다음 달을 반환한다.
-    /// - Parameter date: 기준 날짜
-    /// - Returns: 다음 달의 날짜
-    private func getNextMonth(date: Date) -> Date {
-        return Calendar.current.date(byAdding: .month, value: 1, to: date) ?? date
+    // 버튼 조작 바인딩
+    private func setupBindings() {
+       previousButton.rx.tap
+           .subscribe(onNext: { [weak self] in
+               guard let self = self,
+                     let currentPage = self.calendar?.currentPage else { return }
+               let previousMonth = Calendar.current.date(byAdding: .month, value: -1, to: currentPage) ?? currentPage
+               self.calendar?.setCurrentPage(previousMonth, animated: true)
+               self.updateTitle(date: previousMonth)
+           })
+           .disposed(by: disposeBag)
+       
+       nextButton.rx.tap
+           .subscribe(onNext: { [weak self] in
+               guard let self = self,
+                     let currentPage = self.calendar?.currentPage else { return }
+               let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: currentPage) ?? currentPage
+               self.calendar?.setCurrentPage(nextMonth, animated: true)
+               self.updateTitle(date: nextMonth)
+           })
+           .disposed(by: disposeBag)
     }
 }
+
+
