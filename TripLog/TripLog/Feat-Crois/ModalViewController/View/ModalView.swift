@@ -22,7 +22,7 @@ final class ModalView: UIView {
     private let firstTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
     private let secondTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
     private let thirdTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
-    private let dateIsBlank = BehaviorSubject<Bool>(value: true)
+    private let dateIsBlank = BehaviorSubject<Bool>(value: false)
     
     fileprivate lazy var allSectionIsBlank: Observable<Bool> = {
         return Observable
