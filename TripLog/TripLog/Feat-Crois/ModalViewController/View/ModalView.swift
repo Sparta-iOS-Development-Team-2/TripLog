@@ -33,10 +33,10 @@ final class ModalView: UIView {
     
     private let buttons: ModalButtons
     
-    private let firstSection: UIView?
-    private let secondSection: UIView?
-    private let thirdSection: UIView?
-    private let forthSection: UIView?
+    private let firstSection: UIView
+    private let secondSection: UIView
+    private let thirdSection: UIView
+    private let forthSection: UIView
     
     // MARK: - Properties
     
@@ -142,10 +142,10 @@ private extension ModalView {
         self.backgroundColor = UIColor.CustomColors.Background.background
         self.applyViewShadow()
         [titleLabel,
-         firstSection!,
-         secondSection!,
-         thirdSection!,
-         forthSection!,
+         firstSection,
+         secondSection,
+         thirdSection,
+         forthSection,
          buttons].forEach { self.addSubview($0) }
     }
     
@@ -155,32 +155,32 @@ private extension ModalView {
             $0.horizontalEdges.equalToSuperview().inset(24)
         }
         
-        firstSection?.snp.makeConstraints {
+        firstSection.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(66)
         }
         
-        secondSection?.snp.makeConstraints {
-            $0.top.equalTo(firstSection!.snp.bottom).offset(16)
+        secondSection.snp.makeConstraints {
+            $0.top.equalTo(firstSection.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(66)
         }
         
-        thirdSection?.snp.makeConstraints {
-            $0.top.equalTo(secondSection!.snp.bottom).offset(16)
+        thirdSection.snp.makeConstraints {
+            $0.top.equalTo(secondSection.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(66)
         }
         
-        forthSection?.snp.makeConstraints {
-            $0.top.equalTo(thirdSection!.snp.bottom).offset(16)
+        forthSection.snp.makeConstraints {
+            $0.top.equalTo(thirdSection.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(66)
         }
         
         buttons.snp.makeConstraints {
-            $0.top.equalTo(forthSection!.snp.bottom).offset(16)
+            $0.top.equalTo(forthSection.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(44)
         }
