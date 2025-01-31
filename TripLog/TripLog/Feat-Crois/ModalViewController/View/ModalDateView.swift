@@ -16,6 +16,17 @@ final class ModalDateView: UIView {
     
     // MARK: - Rx Properties
     
+    private let startDateIsBlank = BehaviorSubject<Bool>(value: true)
+    private let endDateIsBlank = BehaviorSubject<Bool>(value: true)
+    
+    fileprivate lazy var dateIsBlank: Observable<Bool> = {
+        return Observable
+            .combineLatest(startDateIsBlank, endDateIsBlank)
+            .map { $0 || $1 }
+            .distinctUntilChanged()
+            .share(replay: 1, scope: .whileConnected)
+    }()
+    
     private let disposeBag = DisposeBag()
     
     // MARK: - UI Components
@@ -64,8 +75,8 @@ final class ModalDateView: UIView {
     func configureDate(start: Date, end: Date) {
         self.startDate = start
         self.endDate = end
-        self.startDatePicker.configureTextField(date: start)
-        self.endDatePicker.configureTextField(date: end)
+        self.startDatePicker.configureDatePicker(date: start)
+        self.endDatePicker.configureDatePicker(date: end)
     }
 }
 
@@ -103,8 +114,13 @@ private extension ModalDateView {
         }
     }
     
-    /// DatePicker 바인딩 메소드
     func bind() {
+        startDatePickerBind()
+        endDatePickerBind()
+    }
+    
+    /// StartDatePicker 바인딩 메소드
+    func startDatePickerBind() {
         startDatePicker.rx.selectedDate
             .skip(1)
             .asSignal(onErrorSignalWith: .empty())
@@ -113,17 +129,23 @@ private extension ModalDateView {
             .emit { owner, date in
                 
                 owner.startDate = date
-                owner.startDatePicker.configureTextField(date: date)
+                owner.startDatePicker.configureDatePicker(date: date)
                 
                 guard let endDate = owner.endDate,
                       endDate < date
                 else { return }
                 
                 owner.endDate = date
-                owner.endDatePicker.configureTextField(date: date)
+                owner.endDatePicker.configureDatePicker(date: date)
                 
             }.disposed(by: disposeBag)
         
+        startDatePicker.rx.isBlank
+            .bind(to: startDateIsBlank)
+            .disposed(by: disposeBag)
+    }
+    
+    func endDatePickerBind() {
         endDatePicker.rx.selectedDate
             .skip(2)
             .asSignal(onErrorSignalWith: .empty())
@@ -132,16 +154,26 @@ private extension ModalDateView {
             .emit { owner, date in
                 
                 owner.endDate = date
-                owner.endDatePicker.configureTextField(date: date)
+                owner.endDatePicker.configureDatePicker(date: date)
                 
                 guard let startDate = owner.startDate,
                       startDate > date
                 else { return }
                 
                 owner.startDate = date
-                owner.startDatePicker.configureTextField(date: date)
+                owner.startDatePicker.configureDatePicker(date: date)
                 
             }.disposed(by: disposeBag)
+        
+        endDatePicker.rx.isBlank
+            .bind(to: endDateIsBlank)
+            .disposed(by: disposeBag)
     }
     
+}
+
+extension Reactive where Base: ModalDateView {
+    var dateIsBlank: Observable<Bool> {
+        return base.dateIsBlank
+    }
 }
