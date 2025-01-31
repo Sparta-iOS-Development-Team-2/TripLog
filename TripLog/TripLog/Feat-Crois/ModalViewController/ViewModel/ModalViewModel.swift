@@ -15,7 +15,7 @@ final class ModalViewModel: ViewModelType {
     struct Input {
         let cancelButtonTapped: PublishRelay<Void>
         let activeButtonTapped: PublishRelay<Void>
-        let textFieldIsBlank: Observable<Bool>
+        let sectionIsBlank: Observable<Bool>
     }
     
     struct Output {
@@ -58,7 +58,7 @@ final class ModalViewModel: ViewModelType {
                 
             }.disposed(by: disposeBag)
         
-        input.textFieldIsBlank
+        input.sectionIsBlank
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, isBlank in
