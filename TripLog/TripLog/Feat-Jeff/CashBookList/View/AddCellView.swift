@@ -12,13 +12,16 @@ final class AddCellView: UIView {
     
     private let addNameLabel = UILabel().then {
         $0.text = "여행 추가하기"
-        $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
+        $0.textColor = .Dark.base
+        $0.numberOfLines = 1
+        $0.textAlignment = .left
+        $0.backgroundColor = .clear
     }
     
     let addButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.tintColor = UIColor.Light.r200
+        $0.tintColor = UIColor.Light.r200 // 컬러 에셋에 값이 없음(938989 / ffffff)
     }
     
     override init(frame: CGRect) {
@@ -26,13 +29,11 @@ final class AddCellView: UIView {
         
         setupUI()
         setupConstraints()
-        setupShadow()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
 }
 
 //MARK: - Method
@@ -41,7 +42,6 @@ private extension AddCellView {
     
     /// setup UI
     func setupUI() {
-        backgroundColor = .white
         
         [
             addButton,
@@ -62,18 +62,4 @@ private extension AddCellView {
             $0.height.equalTo(152)
         }
     }
-    
-    /// 그림자 추가(추후 변경 예정)
-    func setupShadow() {
-        layer.borderWidth = 0.2
-        layer.borderColor = UIColor.lightGray.cgColor
-        
-        layer.cornerRadius = 8
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.2
-        layer.shadowOffset = CGSize(width: 0, height: 1)
-        layer.shadowRadius = 4
-        layer.masksToBounds = false
-    }
-    
 }

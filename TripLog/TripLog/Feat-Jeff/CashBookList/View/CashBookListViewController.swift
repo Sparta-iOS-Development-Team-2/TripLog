@@ -25,20 +25,19 @@ final class CashBookListViewController: UIViewController {
         $0.text = "나의 가계부"
         $0.font = UIFont.SCDream(size: .title, weight: .bold)
         $0.textAlignment = .left
-        $0.backgroundColor = .white
+        $0.backgroundColor = .clear
     }
     
     private lazy var listCollectionView = UICollectionView(
         frame: .zero,
         collectionViewLayout: listCollectionViewLayout()
     ).then {
-        $0.backgroundColor = .clear
         $0.register(ListCollectionViewCell.self, forCellWithReuseIdentifier: ListCollectionViewCell.id)
     }
     
     // 임시 버튼
     private let testButton = UIButton().then {
-        $0.backgroundColor = .lightGray
+        $0.backgroundColor = .clear
         $0.setTitle("버튼", for: .normal)
         $0.setTitleColor(.red, for: .normal)
     }
@@ -60,7 +59,7 @@ final class CashBookListViewController: UIViewController {
                 ) as? ListCollectionViewCell else {
                     return UICollectionViewCell()
                 }
-                cell.configureCell(data: item) 
+                cell.configureCell(data: item)
                 return cell
             }
         )
@@ -69,7 +68,6 @@ final class CashBookListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
         
         setupUI()
         setupConstraints()
@@ -81,7 +79,6 @@ final class CashBookListViewController: UIViewController {
         super.viewWillAppear(animated)
         viewWillAppearSubject.onNext(())
     }
-    
 }
 
 //MARK: - Method
@@ -90,7 +87,9 @@ extension CashBookListViewController {
     
     /// setup UI
     private func setupUI() {
+        
         navigationController?.navigationBar.isHidden = true
+        view.backgroundColor = UIColor.CustomColors.Background.background
         
         [
             titleLabel,
@@ -98,6 +97,9 @@ extension CashBookListViewController {
             addCellView,
             testButton
         ].forEach { view.addSubview($0) }
+        
+        // 셀 추가 버튼 그림자 설정
+        addCellView.applyBoxStyle()
     }
     
     /// setup Constraints
@@ -123,7 +125,7 @@ extension CashBookListViewController {
         
         testButton.snp.makeConstraints {
             $0.top.equalTo(listCollectionView.snp.bottom).offset(18)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview().inset(60)
             $0.bottom.equalTo(safeArea.snp.bottom).offset(-18)
             $0.height.equalTo(60)
         }
@@ -188,6 +190,9 @@ extension CashBookListViewController {
     private func listCollectionViewLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection in
             var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+            
+            // 셀 뒤의 스크롤뷰 색상 변경
+            configuration.backgroundColor = UIColor.CustomColors.Background.background
             
             // 셀 삭제 기능
             configuration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath in
