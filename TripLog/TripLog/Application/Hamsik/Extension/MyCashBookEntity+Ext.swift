@@ -23,7 +23,7 @@ extension MyCashBookEntity: CoreDataManagable {
     typealias Entity = MyCashBookEntity
     
     static func save(_ data: Model, context: NSManagedObjectContext) {
-        let entityName = EntityKeys.myCashBookEntity
+        let entityName = EntityKeys.Name.MyCashBookEntity.rawValue
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         context.perform {
             let att = NSManagedObject(entity: entity, insertInto: context)

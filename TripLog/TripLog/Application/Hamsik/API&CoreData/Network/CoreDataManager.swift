@@ -11,7 +11,7 @@ import UIKit
 /// CoreData 저장, 로드관련 매니져
 class CoreDataManager {
     
-    static var shared = CoreDataManager()
+    static let shared = CoreDataManager()
     private let persistentContainer: NSPersistentContainer
     
     private init(container: NSPersistentContainer = NSPersistentContainer(name: AppInfo.appId)) {
