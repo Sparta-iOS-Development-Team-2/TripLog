@@ -8,6 +8,8 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
+import RxCocoa
 
 /// 모달뷰에서 금액을 입력하는 공용 컴포넌츠
 final class ModalAmoutView: UIView {
@@ -33,7 +35,7 @@ final class ModalAmoutView: UIView {
         $0.backgroundColor = .clear
     }
     
-    private let textField = UITextField().then {
+    fileprivate let textField = UITextField().then {
         $0.setPlaceholder(title: "0", color: .Light.r400)
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
         $0.textColor = UIColor.Dark.base
@@ -135,4 +137,13 @@ private extension ModalAmoutView {
         }
     }
     
+}
+
+extension Reactive where Base: ModalAmoutView {
+    var isBlank: Observable<Bool> {
+        return base.textField.rx.text.orEmpty
+            .map { $0.isEmpty }
+            .distinctUntilChanged()
+            .asObservable()
+    }
 }
