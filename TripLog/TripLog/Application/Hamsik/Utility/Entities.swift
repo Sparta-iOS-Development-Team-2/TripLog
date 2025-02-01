@@ -8,11 +8,13 @@
 import Foundation
 
 enum EntityKeys {
-    static let currencyEntity = "CurrencyEntity"
+    
     enum Name: String {
         case CurrencyEntity, CashBookEntity, MyCashBookEntity
+    }
     
     enum CurrencyElement {
+        static let rateDate = "rateDate"
         static let baseRate = "baseRate"
         static let currencyCode = "currencyCode"
         static let currencyName = "currencyName"

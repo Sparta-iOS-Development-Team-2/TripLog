@@ -19,13 +19,12 @@ class APIManager {
     ///   - dataType: 검색요청API타입
     ///   - date: 검색 일자
     ///   - completion: 네트워크 요청 시 동작 로직
-    func fetchCurrencyRatesWithAlamofire(dataType: String, date: Date, completion: @escaping (Result<CurrencyRate, Error>) -> Void) {
+    func fetchCurrencyRatesWithAlamofire(dataType: String, date: String, completion: @escaping (Result<CurrencyRate, Error>) -> Void) {
         let url = "https://www.koreaexim.go.kr/site/program/financial/exchangeJSON"
-        let searchDate = Date.formattedDateString(from: date)
         let apiKey = APIInfo.apiKey
         let parameters: Parameters = [
             "authkey": apiKey,
-            "searchdate": searchDate,
+            "searchdate": date,
             "data": dataType
         ]
         
