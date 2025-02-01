@@ -41,8 +41,8 @@ final class ModalDateView: UIView {
         $0.backgroundColor = .clear
     }
     
-    private let startDatePicker = ModalDatePicker(direction: .left)
-    private let endDatePicker = ModalDatePicker(direction: .right)
+    private let startDatePicker = ModalDatePicker(direction: .left, title: "시작일")
+    private let endDatePicker = ModalDatePicker(direction: .right, title: "종료일")
     
     private let datePickerStack = UIStackView().then {
         $0.axis = .horizontal
