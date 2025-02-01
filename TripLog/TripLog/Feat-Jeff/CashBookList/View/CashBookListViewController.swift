@@ -84,7 +84,6 @@ final class CashBookListViewController: UIViewController {
 }
 
 //MARK: - Private Method
-
 private extension CashBookListViewController {
     
     /// setup UI
