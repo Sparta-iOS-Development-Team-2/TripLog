@@ -58,6 +58,11 @@ final class ModalViewController: UIViewController {
         self.view.endEditing(true)
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        self.view.layer.shadowPath = self.view.shadowPath()
+    }
 }
 
 // MARK: - UI Setting Method
@@ -88,6 +93,8 @@ private extension ModalViewController {
                 switch owner.modalView.checkModalStatus() {
                 case .createNewCashBook: break
                     // 가계부를 코어 데이터에 추가하는 로직
+                case .editCashBook: break
+                    // 가계부를 코어 데이터에 업데이트 하는 로직
                 case .createNewbudget: break
                     // 지출 내역을 코어 데이터에 추가하는 로직
                 case .editBudget: break

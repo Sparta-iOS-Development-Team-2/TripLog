@@ -10,6 +10,7 @@ import UIKit
 
 extension UIFont {
     enum FontSize: CGFloat {
+        case subcaption = 6
         case caption = 10
         case body = 12
         case headline = 14

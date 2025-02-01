@@ -10,6 +10,7 @@ import Foundation
 /// 모달 뷰의 상태를 정의하는 enum
 enum ModalViewState {
     case createNewCashBook
+    case editCashBook(data: TestCashBookData) // 가계부 수정시 데이터 입력
     case createNewbudget
     case editBudget(data: TestModalViewData) // 지출 내역 수정 시 데이터 입력
     
@@ -18,6 +19,8 @@ enum ModalViewState {
         switch self {
         case .createNewCashBook:
             return "새 가계부 만들기"
+        case .editCashBook:
+            return "가계부 수정하기"
         case .createNewbudget:
             return "새 지출내역 추가하기"
         case .editBudget:

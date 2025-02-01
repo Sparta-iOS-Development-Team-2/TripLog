@@ -12,7 +12,7 @@ class ProgressView: UIView {
 
     private let progressBar = UIProgressView(progressViewStyle: .default).then {
         $0.progressTintColor = .systemBlue   // 진행 상태 색상 (파란색)
-        $0.trackTintColor = .white       // 배경색을 하얀색으로 설정
+        $0.applyBackgroundColor()     // 배경색을 하얀색으로 설정
         $0.layer.cornerRadius = 8           // 테두리 둥글게
         $0.layer.borderColor = UIColor.black.cgColor   // 테두리 색상 (검은색)
         $0.layer.borderWidth = 1             // 테두리 두께
@@ -21,18 +21,18 @@ class ProgressView: UIView {
     
     private let progressLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .caption, weight: .medium)
-        $0.textColor = .black
+        $0.textColor = UIColor(named: "plus")
         $0.textAlignment = .center
         $0.text = "0%"  // 초기값 설정
     }
     
     private let expenseLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .caption, weight: .medium)
-        $0.textColor = .black
+        $0.textColor = UIColor(named: "textPrimary")
     }
     private let budgetLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .caption, weight: .medium)
-        $0.textColor = .black
+        $0.textColor = UIColor(named: "textPrimary")
         $0.textAlignment = .right
     }
     private let balanceLabel = UILabel().then {

@@ -17,7 +17,8 @@ final class ThemeManager {
     private static func applyDarkMode(_ isDarkMode: Bool, for window: UIWindow?) {
         guard let window else { return }
         let transitionView = UIView(frame: window.bounds)
-        transitionView.backgroundColor = isDarkMode ? .black : .white
+        let darkColor: UIColor = UIColor(red: 17/256, green: 24/256, blue: 39/256, alpha: 1.0)
+        transitionView.backgroundColor = isDarkMode ? darkColor : .white
         transitionView.alpha = 0
         window.addSubview(transitionView)
         

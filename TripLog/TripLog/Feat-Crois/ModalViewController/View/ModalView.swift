@@ -59,6 +59,25 @@ final class ModalView: UIView {
             self.forthSection = ModalDateView()
             self.buttons = ModalButtons(buttonTitle: "생성")
             
+        case .editCashBook(data: let data):
+            self.titleLabel.text = state.modalTitle
+            self.firstSection = ModalTextField(title: "가계부 이름", subTitle: nil, placeholder: "예: 도쿄 여행 2024", keyboardType: .default)
+            self.secondSection = ModalTextField(title: "여행 국가", subTitle: nil, placeholder: "예: 일본", keyboardType: .default)
+            self.thirdSection = ModalTextField(title: "예산 설정", subTitle: "원(한화)", placeholder: "0", keyboardType: .numberPad)
+            self.forthSection = ModalDateView()
+            self.buttons = ModalButtons(buttonTitle: "생성")
+            
+            if let firstSection = self.firstSection as? ModalTextField,
+               let secondSection = self.secondSection as? ModalTextField,
+               let thirdSection = self.thirdSection as? ModalTextField,
+               let forthSection = self.forthSection as? ModalDateView
+            {
+                firstSection.configureTextField(text: data.cashBookName)
+                secondSection.configureTextField(text: data.country)
+                thirdSection.configureTextField(text: "\(data.budget)")
+                forthSection.configureDate(start: data.startDate, end: data.endDate)
+            }
+            
         case .createNewbudget:
             self.titleLabel.text = state.modalTitle
             self.firstSection = ModalSegmentView()
@@ -95,6 +114,12 @@ final class ModalView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        self.layer.shadowPath = self.shadowPath()
+    }
+    
     /// 모달뷰의 현재 상태를 반환하는 메소드
     /// - Returns: 모달뷰의 현재 state
     func checkModalStatus() -> ModalViewState {
@@ -114,7 +139,8 @@ private extension ModalView {
     }
     
     func configureSelf() {
-        self.backgroundColor = .Light.base
+        self.backgroundColor = UIColor.CustomColors.Background.background
+        self.applyViewShadow()
         [titleLabel,
          firstSection!,
          secondSection!,

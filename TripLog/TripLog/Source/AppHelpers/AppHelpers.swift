@@ -12,10 +12,9 @@ enum AppHelpers {
     
     /// 현재 최상위 뷰컨트롤러를 가져와서 해당 뷰 컨트롤러에 접근할 수 있도록 해주는 함수.
     ///
-    /// - **요약** : 현재 보이는 ViewController를 모르는 상황에서, 어디서든 Alert나 Modal을 띄울 수 있는 능력
     ///   - 일반적으로 iOS 앱에서 Alert, Modal, Navigation 등과 같이 현재 보이는 화면에 무언가를 추가하거나 보여줘야 할 때 사용하는 용도. 일단은 모달과 Alert 용으로 제작.
     ///   - NavigationController, TabBarController, Modal 등이 다양하게 생성될 경우 현재 뷰 컨트롤러 추적이 어려울 수 있으며, 뷰가 아닌 전역 함수 등에서 alert 등을 구현하고자 할때 작성해야할 코드가 많아지는 것을 방지.
-    /// - Returns: ?
+    /// - Returns: 현재 window의 최상위 뷰 컨트롤러(없을 경우 nil)
     static func getTopViewController() -> UIViewController? {
         // 1. 현재 활성화된 UIWindowScene을 가져옵니다.
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,

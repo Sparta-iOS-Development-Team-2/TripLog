@@ -13,11 +13,11 @@ class TitleDateView: UIView {
 
     private let subtitleLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
-        $0.textColor = .black
+        $0.textColor = UIColor(named: "textPrimary")
     }
     private let dateLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
-        $0.textColor = .black
+        $0.textColor = UIColor(named: "textPrimary")
     }
 
     init() {
