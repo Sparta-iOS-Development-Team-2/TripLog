@@ -10,24 +10,28 @@ import Then
 import RxSwift
 import RxCocoa
 
-class TabBarView: UIView {
-    
-    private var buttonWidth: CGFloat = 0
-    private var sideEmptyInset: CGFloat = 0
-    private var buttonSpacing: CGFloat = 0
+final class TabBarView: UIView {
     
     private var disposeBag = DisposeBag()
+    let cashBookTapped = PublishRelay<Void>()
+    let settingTapped = PublishRelay<Void>()
+    let tabBarAddButtonTapped = PublishRelay<Void>()
+    
+    // 탭바 아이템 제스처 생성
+    private let cashBookTap = UITapGestureRecognizer()
+    private let settingTap = UITapGestureRecognizer()
     
     private let cashBookImageView = UIImageView().then {
         $0.image = UIImage(systemName: "book")
-        $0.tintColor = .blue
+        $0.tintColor = UIColor.CustomColors.Accent.blue
+        $0.backgroundColor = .clear
     }
     
     private let cashBookLabel = UILabel().then {
         $0.text = "가계부"
-        $0.textColor = .blue
+        $0.font = UIFont.SCDream(size: .body, weight: .bold)
+        $0.textColor = UIColor.CustomColors.Accent.blue
         $0.textAlignment = .center
-        $0.font = .systemFont(ofSize: 10, weight: .medium)
     }
     
     private let cashBookVerticalStackView = UIStackView().then {
@@ -40,17 +44,17 @@ class TabBarView: UIView {
         $0.backgroundColor = .clear
     }
     
-    //MARK: -
     private let settingImageView = UIImageView().then {
         $0.image = UIImage(systemName: "gearshape")
-        $0.tintColor = .blue
+        $0.tintColor = UIColor.CustomColors.Accent.blue
+        $0.backgroundColor = .clear
     }
     
     private let settingLabel = UILabel().then {
         $0.text = "설정"
-        $0.textColor = .blue
+        $0.font = UIFont.SCDream(size: .body, weight: .bold)
+        $0.textColor = UIColor.CustomColors.Accent.blue
         $0.textAlignment = .center
-        $0.font = .systemFont(ofSize: 10, weight: .medium)
     }
     
     private let settingVerticalStackView = UIStackView().then {
@@ -63,99 +67,72 @@ class TabBarView: UIView {
         $0.backgroundColor = .clear
     }
     
-    //MARK: -
-    
-    private let addButton = UIButton().then {
-        $0.backgroundColor = .blue
-        $0.layer.cornerRadius = (64 - 10) / 2
+    let tabBarAddButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.contentVerticalAlignment = .fill
-        $0.contentHorizontalAlignment = .fill
-        $0.tintColor = .white
+        $0.tintColor = UIColor.Dark.r700 // #색상 이슈
+        $0.layer.cornerRadius = (64 - 10) / 2  // ((버튼 뷰 크기 - 버튼 패딩) / 2)
     }
     
-    private let addButtonView = UIView().then {
-        $0.backgroundColor = .white
-        $0.layer.cornerRadius = 32
+    private let tabBarAddButtonView = UIView().then {
+        $0.backgroundColor = .white // 버튼 밖 테두리 색상이 흰색으로 고정
+        $0.layer.cornerRadius = 32 // (버튼 뷰 크기 / 2)
     }
     
-    //MARK: -
-    
-    let cashBookTapped = PublishSubject<Void>()
-    let settingTapped = PublishSubject<Void>()
-    
+    //MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         setupUI()
+        setupUIConstraints()
         setupGestureRecognizers()
-        
+        bind()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
 }
 
-extension TabBarView {
+//MARK: - Private Method
+private extension TabBarView {
     
-    private func setupGestureRecognizers() {
-        let cashBookTap = UITapGestureRecognizer()
-        let settingTap = UITapGestureRecognizer()
+    /// setupUI
+    func setupUI() {
         
-        cashBookTabView.addGestureRecognizer(cashBookTap)
-        settingTabView.addGestureRecognizer(settingTap)
+        // 탭바 추가 버튼 스타일 적용
+        tabBarAddButton.applyTabBarButton()
         
-        // RxSwift로 Gesture Recognizer 이벤트 바인딩
-        cashBookTap.rx.event
-            .map { _ in }
-            .bind(to: cashBookTapped)
-            .disposed(by: disposeBag)
+        // 탭바 그림자 적용
+        tabBarAddButtonView.applyViewShadow()
         
-        settingTap.rx.event
-            .map { _ in }
-            .bind(to: settingTapped)
-            .disposed(by: disposeBag)
-    }
-    
-    private func setupUI() {
+        cashBookTabView.addSubview(cashBookVerticalStackView)
+        settingTabView.addSubview(settingVerticalStackView)
+        tabBarAddButtonView.addSubview(tabBarAddButton)
+        
         [
             cashBookImageView,
             cashBookLabel
         ].forEach { cashBookVerticalStackView.addArrangedSubview($0) }
-        
         
         [
             settingImageView,
             settingLabel
         ].forEach { settingVerticalStackView.addArrangedSubview($0) }
         
-        cashBookTabView.addSubview(cashBookVerticalStackView)
-        settingTabView.addSubview(settingVerticalStackView)
-        addButtonView.addSubview(addButton)
-        
         [
             cashBookTabView,
-            addButtonView,
+            tabBarAddButtonView,
             settingTabView
         ].forEach { addSubview($0) }
     }
     
-    // 전달받은 값을 저장하고 레이아웃 업데이트
-    func configureLayout(buttonWidth: CGFloat, sideEmptyInset: CGFloat, buttonSpacing: CGFloat) {
-        self.buttonWidth = buttonWidth
-        self.sideEmptyInset = sideEmptyInset
-        self.buttonSpacing = buttonSpacing
+    /// setupUIConstraints
+    func setupUIConstraints() {
         
-        setupConstraints()
-    }
-    
-    private func setupConstraints() {
-        
-        // 가계부 탭뷰
         cashBookTabView.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(60)
+            //중앙에서 왼쪽으로 50% 이동
+            $0.centerX.equalToSuperview().multipliedBy(0.5)
             $0.verticalEdges.equalToSuperview()
         }
         
@@ -164,21 +141,19 @@ extension TabBarView {
             $0.width.equalTo(50)
         }
         
-        // 플로팅 버튼
-        addButtonView.snp.makeConstraints {
+        tabBarAddButtonView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.width.height.equalTo(64)
             $0.top.equalToSuperview().offset(-24)
         }
         
-        addButton.snp.makeConstraints {
+        tabBarAddButton.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(5)
         }
         
-        // 설정 탭뷰
         settingTabView.snp.makeConstraints {
-            $0.leading.equalTo(cashBookTabView.snp.trailing).offset(buttonWidth)
-            $0.trailing.equalToSuperview().inset(60)
+            //중앙에서 오른쪽으로 50% 이동
+            $0.centerX.equalToSuperview().multipliedBy(1.5)
             $0.verticalEdges.equalToSuperview()
         }
         
@@ -186,11 +161,54 @@ extension TabBarView {
             $0.edges.equalToSuperview().inset(8)
             $0.width.equalTo(50)
         }
+    }
+    
+    /// Gesture Recognizer 추가
+    func setupGestureRecognizers() {
+       
+        cashBookTabView.addGestureRecognizer(cashBookTap)
+        settingTabView.addGestureRecognizer(settingTap)
+    }
+    
+    /// 탭바 아이템, 버튼 바인딩
+    func bind() {
         
-        // 버튼 간격을 buttonWidth 값으로 적용 (가계부 <-> 설정 사이)
-        settingTabView.snp.makeConstraints {
-            $0.leading.equalTo(cashBookTabView.snp.trailing).offset(buttonWidth)
-        }
+        // 가계부 리스트 탭
+        cashBookTap.rx.event
+            .map { _ in }
+            .bind(to: cashBookTapped)
+            .disposed(by: disposeBag)
+        
+        // 설정 탭
+        settingTap.rx.event
+            .map { _ in }
+            .bind(to: settingTapped)
+            .disposed(by: disposeBag)
+        
+        // 탭바 추가 버튼
+        tabBarAddButton.rx.tap
+            .bind(to: tabBarAddButtonTapped)
+            .disposed(by: disposeBag)
     }
 }
 
+//MARK: - Method
+extension TabBarView {
+    
+    /// 탭바 상태에 따른 탭바 아이템 컬러 변경
+    func updateTabItem(for state: TabBarState) {
+        switch state {
+        case .cashBookList:
+            cashBookImageView.tintColor = UIColor.CustomColors.Accent.blue
+            cashBookLabel.textColor = UIColor.CustomColors.Accent.blue
+            settingImageView.tintColor = UIColor.CustomColors.Text.textSecondary
+            settingLabel.textColor = UIColor.CustomColors.Text.textSecondary
+            
+        case .setting:
+            settingImageView.tintColor = UIColor.CustomColors.Accent.blue
+            settingLabel.textColor = UIColor.CustomColors.Accent.blue
+            cashBookImageView.tintColor = UIColor.CustomColors.Text.textSecondary
+            cashBookLabel.textColor = UIColor.CustomColors.Text.textSecondary
+        }
+    }
+}
