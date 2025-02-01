@@ -219,4 +219,11 @@ extension UIView {
         applyViewStroke()
         applyBackgroundColor()
     }
+    
+    /// Center button(tabbar)
+    func applyTabBarButton() {
+        applyCornerRadius(((64 - 10) / 2))
+        applyButtonStroke()
+        backgroundColor = UIColor.CustomColors.Accent.blue
+    }
 }
