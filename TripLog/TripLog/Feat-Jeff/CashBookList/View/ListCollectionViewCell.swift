@@ -54,6 +54,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.spacing = 8
     }
     
+    //MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -65,18 +66,9 @@ final class ListCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    /// 데이터에 저장된 값으로 UI update
-    func configureCell(data: ListCellData) {
-        tripNameLabel.text = data.tripName
-        noteLabel.text = data.note
-        bugetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.buget)))"
-        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
-    }
-    
 }
 
-//MARK: - Method
-
+//MARK: - Private Method
 private extension ListCollectionViewCell {
     
     /// setup UI
@@ -123,6 +115,19 @@ private extension ListCollectionViewCell {
         periodLabel.snp.makeConstraints {
             $0.height.equalTo(20)
         }
+    }
+    
+}
+
+//MARK: - Method
+extension ListCollectionViewCell {
+    
+    /// 데이터에 저장된 값으로 UI update
+    func configureCell(data: ListCellData) {
+        tripNameLabel.text = data.tripName
+        noteLabel.text = data.note
+        bugetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.buget)))"
+        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
     }
     
 }

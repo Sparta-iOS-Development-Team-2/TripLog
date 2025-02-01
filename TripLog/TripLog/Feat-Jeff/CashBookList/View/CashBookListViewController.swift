@@ -66,6 +66,7 @@ final class CashBookListViewController: UIViewController {
         return dataSource
     }()
     
+    //MARK: - Initializer
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -79,14 +80,15 @@ final class CashBookListViewController: UIViewController {
         super.viewWillAppear(animated)
         viewWillAppearSubject.onNext(())
     }
+    
 }
 
-//MARK: - Method
+//MARK: - Private Method
 
-extension CashBookListViewController {
+private extension CashBookListViewController {
     
     /// setup UI
-    private func setupUI() {
+    func setupUI() {
         
         navigationController?.navigationBar.isHidden = true
         view.backgroundColor = UIColor.CustomColors.Background.background
@@ -103,7 +105,7 @@ extension CashBookListViewController {
     }
     
     /// setup Constraints
-    private func setupConstraints() {
+    func setupConstraints() {
         let safeArea = view.safeAreaLayoutGuide
         
         titleLabel.snp.makeConstraints {
@@ -131,7 +133,7 @@ extension CashBookListViewController {
         }
     }
     
-    private func bind() {
+    func bind() {
         /// Input
         /// - callViewWillAppear : 추후 사용(코어데이터 fetch)
         /// - testButtonTapped : 임시 데이터 추가 버튼(삭제 예정)
@@ -187,7 +189,7 @@ extension CashBookListViewController {
     }
     
     /// CollectionView Layout
-    private func listCollectionViewLayout() -> UICollectionViewLayout {
+    func listCollectionViewLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection in
             var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
             

@@ -24,6 +24,7 @@ final class AddCellView: UIView {
         $0.tintColor = UIColor.Light.r200 // 컬러 에셋에 값이 없음(938989 / ffffff)
     }
     
+    //MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -34,9 +35,10 @@ final class AddCellView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
 }
 
-//MARK: - Method
+//MARK: - Private Method
 
 private extension AddCellView {
     
