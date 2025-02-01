@@ -9,11 +9,20 @@ import UIKit
 
 class MainViewController: UIViewController {
 
+    private let mainVC = CustomTabBarController()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        setupUI()
     }
 
+    func setupUI() {
+        
+        addChild(mainVC)
+        view.addSubview(mainVC.view)
+    }
 
 }
 
