@@ -11,6 +11,7 @@
         <attribute name="baseRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="currencyCode" optional="YES" attributeType="String"/>
         <attribute name="currencyName" optional="YES" attributeType="String"/>
+        <attribute name="rateDate" optional="YES" attributeType="String"/>
     </entity>
     <entity name="MyCashBookEntity" representedClassName="MyCashBookEntity" syncable="YES" codeGenerationType="class">
         <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>

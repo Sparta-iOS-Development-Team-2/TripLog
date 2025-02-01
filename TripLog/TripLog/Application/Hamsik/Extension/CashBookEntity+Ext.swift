@@ -24,7 +24,7 @@ extension CashBookEntity: CoreDataManagable {
     typealias Entity = CashBookEntity
     
     static func save(_ data: Model, context: NSManagedObjectContext) {
-        let entityName = EntityKeys.cashBookEntity
+        let entityName = EntityKeys.Name.CashBookEntity.rawValue
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         context.perform {
                 let att = NSManagedObject(entity: entity, insertInto: context)
@@ -36,14 +36,38 @@ extension CashBookEntity: CoreDataManagable {
         }
     }
     
-    static func fetch(context: NSManagedObjectContext) -> [Entity] {
+    
+    /// CashBookEntity의 전체/특정 데이터를 가져오는 함수
+    /// predicate를 입력하지 않으면 전체 데이터 / 입력하면 특정 데이터
+    /// - Parameters:
+    ///   - context: CoreData 인스턴스
+    ///   - predicate: 찾고자하는 가계부 이름(tripName)
+    /// - Returns: 검색 결과
+    static func fetch(context: NSManagedObjectContext, predicate: String? = nil) -> [Entity] {
         let request: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
+        
+        guard let predicate = predicate else {
+            // 검색 조건이 없을 때 동작
+            do {
+                let result = try context.fetch(request)
+                print("모든 CashBookEntity fetch 성공")
+                return result
+            } catch {
+                print("CashBookEntity Fetch 실패: \(error)")
+                return []
+            }
+        }
+        
+        // 검색 조건이 있을 때 동작
+        request.predicate = NSPredicate(format: "tripName == $@", predicate)
         do {
             let result = try context.fetch(request)
-            print("CashBookEntity fetch success")
+            for item in result {
+                print("검색 결과: \n이름: \(item.value(forKey: "tripName") ?? "")")
+            }
             return result
         } catch {
-            print("CashBookEntity Fetch failed: \(error)")
+            print("데이터 읽기 실패: \(error)")
             return []
         }
     }

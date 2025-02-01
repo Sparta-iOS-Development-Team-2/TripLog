@@ -11,7 +11,7 @@ import UIKit
 /// CoreData 저장, 로드관련 매니져
 class CoreDataManager {
     
-    static var shared = CoreDataManager()
+    static let shared = CoreDataManager()
     private let persistentContainer: NSPersistentContainer
     
     private init(container: NSPersistentContainer = NSPersistentContainer(name: AppInfo.appId)) {
@@ -45,8 +45,8 @@ class CoreDataManager {
     ///   - predicate: 검색할 특정 문자
     ///   (예: let predicate = NSPredicate(format: "tripName CONTAINS[cd] %@", "trip1"))
     /// - Returns: 검색결과
-    func fetch<T: CoreDataManagable>(type: T.Type, predicate: NSPredicate? = nil) -> [T.Entity] {
-        return type.fetch(context: context)
+    func fetch<T: CoreDataManagable>(type: T.Type, predicate: String? = nil) -> [T.Entity] {
+        return type.fetch(context: context, predicate: predicate)
     }
     
     
@@ -60,14 +60,14 @@ class CoreDataManager {
     }
     
     /// 특정 Entity를 삭제하는 함수
-    func removeEntity(entityName: String) {
+    func removeEntity(entityName: EntityKeys.Name) {
         // Core Data 모델에서 해당 entity가 존재하는지 확인
-        guard persistentContainer.managedObjectModel.entities.contains(where: { $0.name == entityName }) else {
-            debugPrint("⚠️ 삭제하려는 엔티티 '\(entityName)'가 존재하지 않습니다.")
+        guard persistentContainer.managedObjectModel.entities.contains(where: { $0.name == entityName.rawValue }) else {
+            debugPrint("⚠️ 삭제하려는 엔티티 '\(entityName.rawValue)'가 존재하지 않습니다.")
             return
         }
 
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName.rawValue)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
 
         do {
