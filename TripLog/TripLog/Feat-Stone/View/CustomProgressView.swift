@@ -16,7 +16,7 @@ final class CustomProgressView: UIView {
     
     private lazy var progress = UIView().then {
         $0.backgroundColor = UIColor.Personal.normal
-        $0.frame = CGRect(x: 0, y: 0, width: 0, height: 16)
+        $0.frame = CGRect(x: 1, y: 1, width: 0, height: 14)
     }
     
     private let progressLabel = UILabel().then {
@@ -57,7 +57,7 @@ final class CustomProgressView: UIView {
     func updateProgress(_ value: CGFloat) {
         if value > 1 {
             progressLabel.text = "100%"
-            let progressValue = UIScreen.main.bounds.width - 32
+            let progressValue = UIScreen.main.bounds.width - 34
             UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear) {
                 self.progress.frame.size.width = progressValue
                 self.progress.layer.layoutIfNeeded()
@@ -65,7 +65,7 @@ final class CustomProgressView: UIView {
             
         } else {
             progressLabel.text = "\(Int(value * 100))%"
-            let progressValue = (UIScreen.main.bounds.width - 32) * value
+            let progressValue = (UIScreen.main.bounds.width - 34) * value
             UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear) {
                 self.progress.frame.size.width = progressValue
                 self.progress.layer.layoutIfNeeded()
@@ -99,7 +99,7 @@ private extension CustomProgressView {
     
     func configureSubViews() {
         layer.cornerRadius = self.bounds.height / 2
-        progress.layer.cornerRadius = self.bounds.height / 2
+        progress.layer.cornerRadius = (self.bounds.height - 2) / 2
         progress.applyGradientAnimation(colors: [
             UIColor.Personal.normal,
             UIColor(red: 98/256, green: 208/256, blue: 1.0, alpha: 1.0)

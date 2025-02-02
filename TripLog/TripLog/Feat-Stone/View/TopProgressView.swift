@@ -46,7 +46,7 @@ class TopProgressView: UIView {
 
         expenseLabel.text = "지출: \(expense)원"
         budgetLabel.text = "예산: \(budget)원"
-        balanceLabel.text = "잔액: \(balance)원"
+        balanceLabel.text = "잔액: \(balance)"
         balanceLabel.textColor = UIColor.Personal.normal
     }
 
