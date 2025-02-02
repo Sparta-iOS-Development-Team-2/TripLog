@@ -23,6 +23,13 @@ class CustomButtonStackView: UIStackView {
         setupButtons()
         setupLayout()
     }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        self.todayExpenseButton.applyTextFieldStroke()
+        self.calendarButton.applyTextFieldStroke()
+    }
 
     private func setupButtons() {
         // 버튼 공통 설정
@@ -38,8 +45,7 @@ class CustomButtonStackView: UIStackView {
         button.setTitle(title, for: .normal)
         button.setTitleColor(titleColor, for: .normal)
         button.titleLabel?.font = UIFont.SCDream(size: .display, weight: weight)
-        button.layer.borderColor = UIColor.CustomColors.Border.plus.cgColor
-        button.layer.borderWidth = 1
+        button.applyTextFieldStroke()
     }
 
     private func setupLayout() {

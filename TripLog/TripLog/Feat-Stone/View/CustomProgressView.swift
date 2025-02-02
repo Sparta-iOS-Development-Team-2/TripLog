@@ -44,6 +44,14 @@ final class CustomProgressView: UIView {
         configureSubViews()
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            self.applyTextFieldStroke()
+        }
+    }
+    
     /// 프로그레스바의 상태를 업데이트 하는 메소드
     /// - Parameter value: 프로그레스바의 진행도(%)
     func updateProgress(_ value: CGFloat) {
@@ -68,8 +76,7 @@ private extension CustomProgressView {
     
     func configureSelf() {
         self.backgroundColor = .clear
-        self.layer.borderColor = UIColor.CustomColors.Border.plus.cgColor
-        self.layer.borderWidth = 1
+        self.applyTextFieldStroke()
         self.clipsToBounds = true
         [progress, progressLabel].forEach { addSubview($0) }
     }
@@ -86,7 +93,7 @@ private extension CustomProgressView {
         progress.layer.cornerRadius = self.bounds.height / 2
         progress.applyGradientAnimation(colors: [
             UIColor.Personal.normal,
-            UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0)
+            UIColor(red: 98/256, green: 208/256, blue: 1.0, alpha: 1.0)
         ])
     }
 }
