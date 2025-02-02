@@ -31,4 +31,26 @@ extension UIView {
             .filter { $0 is CAGradientLayer }
             .forEach { $0.removeFromSuperlayer() }
     }
+    
+    /// UIView에 GradientAnimation을 적용하는 메소드
+    /// - Parameter colors: Gradient를 적용할 컬러
+    func applyGradientAnimation(colors: [UIColor]) {
+        let cgColors: [CGColor] = colors.map { $0.cgColor }
+        let changeColors: [CGColor] = cgColors.reversed()
+        
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.frame = self.bounds
+        gradientLayer.colors = cgColors
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+        gradientLayer.cornerRadius = self.layer.cornerRadius
+        self.layer.addSublayer(gradientLayer)
+        
+        let colorAnimation = CABasicAnimation(keyPath: "colors")
+        colorAnimation.toValue = changeColors
+        colorAnimation.duration = 2
+        colorAnimation.autoreverses = true
+        colorAnimation.repeatCount = .infinity
+        gradientLayer.add(colorAnimation, forKey: "colorChangeAnimation")
+    }
 }
