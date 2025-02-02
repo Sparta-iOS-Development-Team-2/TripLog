@@ -9,11 +9,6 @@ import RxSwift
 import RxCocoa
 import UIKit
 
-enum TabBarState {
-    case cashBookList
-    case setting
-}
-
 final class CustomTabBarViewModel: ViewModelType {
     
     let disposeBag = DisposeBag()

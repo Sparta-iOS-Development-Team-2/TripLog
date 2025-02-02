@@ -10,6 +10,11 @@ import Then
 import RxSwift
 import RxCocoa
 
+enum TabBarState {
+    case cashBookList
+    case setting
+}
+
 final class TabBarView: UIView {
     
     private var disposeBag = DisposeBag()
@@ -69,12 +74,12 @@ final class TabBarView: UIView {
     
     let tabBarAddButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.tintColor = UIColor.Dark.r700 // #색상 이슈
+        $0.tintColor = UIColor.CustomColors.Background.background
         $0.layer.cornerRadius = (64 - 10) / 2  // ((버튼 뷰 크기 - 버튼 패딩) / 2)
     }
     
     private let tabBarAddButtonView = UIView().then {
-        $0.backgroundColor = .white // 버튼 밖 테두리 색상이 흰색으로 고정
+        $0.backgroundColor = UIColor.CustomColors.Background.background
         $0.layer.cornerRadius = 32 // (버튼 뷰 크기 / 2)
     }
     

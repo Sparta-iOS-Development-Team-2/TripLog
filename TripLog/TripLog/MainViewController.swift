@@ -59,6 +59,7 @@ private extension MainViewController {
         // TabBarController 삽입
         addChild(mainVC)
         view.addSubview(mainVC.view)
+        mainVC.didMove(toParent: self)
     }
     
     func configureSelf() {
