@@ -56,6 +56,7 @@ private extension MainViewController {
     }
     
     func configureSelf() {
+        navigationItem.title = ""
         [launchImageView,
          lottieAnimationView,
          launchTitle
