@@ -55,14 +55,23 @@ final class CustomProgressView: UIView {
     /// 프로그레스바의 상태를 업데이트 하는 메소드
     /// - Parameter value: 프로그레스바의 진행도(%)
     func updateProgress(_ value: CGFloat) {
-        progressLabel.text = "\(Int(value * 100))%"
-        let progressValue = (UIScreen.main.bounds.width - 32) * value
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear) {
-            self.progress.frame.size.width = progressValue
-            self.progress.layer.layoutIfNeeded()
+        if value > 1 {
+            progressLabel.text = "100%"
+            let progressValue = UIScreen.main.bounds.width - 32
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear) {
+                self.progress.frame.size.width = progressValue
+                self.progress.layer.layoutIfNeeded()
+            }
+            
+        } else {
+            progressLabel.text = "\(Int(value * 100))%"
+            let progressValue = (UIScreen.main.bounds.width - 32) * value
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear) {
+                self.progress.frame.size.width = progressValue
+                self.progress.layer.layoutIfNeeded()
+            }
         }
     }
-    
 }
 
 // MARK: - UI Setting Method
