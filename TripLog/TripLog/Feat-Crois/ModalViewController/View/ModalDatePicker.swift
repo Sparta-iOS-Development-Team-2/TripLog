@@ -25,7 +25,6 @@ final class ModalDatePicker: UIView {
     }
     
     fileprivate let textField = UITextField().then {
-        $0.setPlaceholder(title: "mm/dd/yyyy", color: .Light.r400)
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
         $0.textColor = UIColor.Dark.base
         $0.borderStyle = .none
@@ -52,10 +51,11 @@ final class ModalDatePicker: UIView {
     
     /// DatePicker뷰의 기본 생성자
     /// - Parameter direction: 데이트 픽커의 방향(방향에 따라 cornerRadius 값이 바뀜)
-    init(direction: ModalDatePickerDirection) {
+    init(direction: ModalDatePickerDirection, title: String) {
         super.init(frame: .zero)
         
         setupUI()
+        self.textField.setPlaceholder(title: title, color: .Light.r400)
         switch direction {
         case .right:
             textField.layer.maskedCorners = [.layerMaxXMinYCorner
@@ -130,7 +130,7 @@ private extension ModalDatePicker {
     
     func bind() {
         datePicker.rx.date
-            .skip(1)
+            .skip(2)
             .distinctUntilChanged()
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)

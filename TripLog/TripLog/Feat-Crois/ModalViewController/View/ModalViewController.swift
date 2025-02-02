@@ -72,7 +72,7 @@ private extension ModalViewController {
     func configureSelf() {
         self.modalPresentationStyle = .formSheet
         self.sheetPresentationController?.preferredCornerRadius = 12
-        self.sheetPresentationController?.detents = [.medium()]
+        self.sheetPresentationController?.detents = [.custom(resolver: { _ in 464 })]
     }
     
     /// 뷰 모델 바인딩 메소드

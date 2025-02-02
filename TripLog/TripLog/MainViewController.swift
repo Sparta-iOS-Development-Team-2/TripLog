@@ -21,7 +21,7 @@ class MainViewController: UIViewController {
     }
     
     private lazy var launchImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
+        $0.contentMode = .scaleAspectFill
         $0.backgroundColor = .clear
         $0.image = UIImage(named: "launchImage")
         $0.alpha = 1
@@ -56,6 +56,7 @@ private extension MainViewController {
     }
     
     func configureSelf() {
+        navigationItem.title = ""
         [launchImageView,
          lottieAnimationView,
          launchTitle
