@@ -91,7 +91,7 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 class CustomTableViewCell: UITableViewCell {
 
     private let titleDateView = TitleDateView()
-    private let progressView = ProgressView()
+    private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
 
     func configure(subtitle: String, date: String, expense: String, budget: String) {
@@ -126,7 +126,7 @@ class CustomTableViewCell: UITableViewCell {
     }
 }
 
-@available(iOS 17.0, *)
-#Preview("TopViewController") {
-    UINavigationController(rootViewController: TopViewController())
-}
+//@available(iOS 17.0, *)
+//#Preview("TopViewController") {
+//    UINavigationController(rootViewController: TopViewController())
+//}

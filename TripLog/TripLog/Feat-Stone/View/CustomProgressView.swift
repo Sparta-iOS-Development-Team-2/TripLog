@@ -16,8 +16,7 @@ final class CustomProgressView: UIView {
     
     private lazy var progress = UIView().then {
         $0.backgroundColor = UIColor.Personal.normal
-        $0.layer.cornerRadius = (self.bounds.height - 2) / 2
-        $0.frame = CGRect(x: 0, y: 0, width: 0, height: bounds.height)
+        $0.frame = CGRect(x: 0, y: 0, width: 0, height: 16)
     }
     
     private let progressLabel = UILabel().then {
@@ -29,23 +28,27 @@ final class CustomProgressView: UIView {
         $0.backgroundColor = .clear
     }
     
-    // MARK: - Override Method
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        setupUI()
-        progress.applyGradientAnimation(colors: [
-            UIColor.Personal.normal,
-            UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0)
-        ])
+        configureSubViews()
     }
     
     /// 프로그레스바의 상태를 업데이트 하는 메소드
     /// - Parameter value: 프로그레스바의 진행도(%)
     func updateProgress(_ value: CGFloat) {
-        progressLabel.text = "\(Int(value))%"
-        let progressValue = self.bounds.width * (value / 100)
+        progressLabel.text = "\(Int(value * 100))%"
+        let progressValue = (UIScreen.main.bounds.width - 32) * value
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear) {
             self.progress.frame.size.width = progressValue
             self.progress.layer.layoutIfNeeded()
@@ -67,7 +70,6 @@ private extension CustomProgressView {
         self.backgroundColor = .clear
         self.layer.borderColor = UIColor.CustomColors.Border.plus.cgColor
         self.layer.borderWidth = 1
-        self.layer.cornerRadius = bounds.height / 2
         self.clipsToBounds = true
         [progress, progressLabel].forEach { addSubview($0) }
     }
@@ -79,4 +81,12 @@ private extension CustomProgressView {
         }
     }
     
+    func configureSubViews() {
+        layer.cornerRadius = self.bounds.height / 2
+        progress.layer.cornerRadius = self.bounds.height / 2
+        progress.applyGradientAnimation(colors: [
+            UIColor.Personal.normal,
+            UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0)
+        ])
+    }
 }
