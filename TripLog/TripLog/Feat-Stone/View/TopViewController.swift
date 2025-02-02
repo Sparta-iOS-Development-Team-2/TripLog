@@ -13,6 +13,9 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 
     private let tableView = UITableView().then {
         $0.separatorStyle = .none
+        $0.showsVerticalScrollIndicator = false
+        $0.showsHorizontalScrollIndicator = false
+        $0.rowHeight = 192
         $0.backgroundColor = UIColor.CustomColors.Background.background
     }
 
