@@ -12,6 +12,8 @@ import Then
 
 /// TripLog 앱의 메인 뷰 컨트롤러
 class MainViewController: UIViewController {
+
+    private let mainVC = CustomTabBarController()
     
     // MARK: - UI Compnents
     
@@ -53,6 +55,11 @@ private extension MainViewController {
         configureSelf()
         setupLayout()
         playLottie()
+        
+        // TabBarController 삽입
+        addChild(mainVC)
+        view.addSubview(mainVC.view)
+        mainVC.didMove(toParent: self)
     }
     
     func configureSelf() {
