@@ -128,10 +128,12 @@ private extension CustomTabBarController {
             .disposed(by: disposeBag)
     }
     
-    /// 선택한 탭바의 화면으로 전환
+    /// 선택한 탭바의 화면으로 전환 (애니메이션 추가)
     func switchToViewController(_ viewController: UIViewController) {
-        view.bringSubviewToFront(viewController.view)
-        view.bringSubviewToFront(customTabBar) // 탭바가 항상 위에 있도록 추가
+        UIView.transition(with: view, duration: 0.3, options: .transitionCrossDissolve, animations: {
+            view.bringSubviewToFront(viewController.view)
+            view.bringSubviewToFront(customTabBar) // 탭바가 항상 위에 있도록 추가
+        }, completion: nil)
     }
     
 }
