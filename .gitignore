@@ -67,3 +67,5 @@ fastlane/test_output
 *.xcconfig
 
 TripLog/TripLog/Application/GoogleService-Info.plist
+
+TripLog/TripLog/GoogleService-Info.plist
