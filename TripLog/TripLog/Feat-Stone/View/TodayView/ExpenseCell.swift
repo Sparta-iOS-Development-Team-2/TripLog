@@ -75,6 +75,7 @@ class ExpenseCell: UITableViewCell {
         selectionStyle = .none
 
         setupLayout()
+        applyBackgroundColor()
     }
 
     private func setupLayout() {

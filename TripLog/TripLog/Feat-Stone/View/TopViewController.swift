@@ -13,6 +13,7 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 
     private let tableView = UITableView().then {
         $0.separatorStyle = .none
+        $0.applyBackgroundColor()
     }
 
     private let data = TestDummyData.sampleData() // Model에서 가져옴
@@ -48,6 +49,7 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
         tableView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
+        tableView.applyBackgroundColor()
     }
 
     // MARK: - UITableViewDataSource

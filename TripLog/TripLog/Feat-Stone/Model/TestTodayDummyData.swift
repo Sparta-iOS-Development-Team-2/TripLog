@@ -11,7 +11,7 @@ struct TestTodayExpense {
     let date: String        // 날짜
     let title: String       // 제목
     let category: String    // 카테고리
-    let amount: String      // 지출 금액
+    let amount: String     // 지출 금액
     let exchangeRate: String // 환율 금액
 }
 

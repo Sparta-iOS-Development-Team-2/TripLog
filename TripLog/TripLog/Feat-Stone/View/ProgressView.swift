@@ -67,6 +67,7 @@ class ProgressView: UIView {
 
         // 진행 상태에 따라 progressLabel 위치 업데이트
         updateProgressLabelPosition(progressValue)
+        applyBackgroundColor()
     }
 
 

@@ -21,6 +21,7 @@ class CustomTableViewCell: UITableViewCell {
         progressView.configure(expense: expense, budget: budget)
 
         setupLayout()
+        applyBackgroundColor()
     }
 
     private func setupLayout() {
@@ -53,10 +54,13 @@ class CustomTableViewCell: UITableViewCell {
 
         todayView.snp.makeConstraints {
             $0.top.equalTo(buttonStackView.snp.bottom).offset(16) // buttonStackView 아래 배치
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.equalToSuperview()
+            $0.trailing.equalToSuperview()
             $0.bottom.equalToSuperview().offset(-16) // 하단 여백 추가
             $0.height.equalTo(screenHeight * 0.6).priority(.required) // 기기 화면 높이의 50%를 사용
         }
+        
+//        applyBackgroundColor()
     }
 
     override func layoutSubviews() {

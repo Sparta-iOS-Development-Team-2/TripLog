@@ -32,6 +32,7 @@ class CustomButtonStackView: UIStackView {
         // 스택 뷰에 버튼 추가
         addArrangedSubview(todayExpenseButton)
         addArrangedSubview(calendarButton)
+        applyBackgroundColor()
     }
 
     private func configureButton(_ button: UIButton, title: String, titleColor: UIColor?) {

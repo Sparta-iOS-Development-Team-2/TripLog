@@ -8,11 +8,15 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
+import RxCocoa
 
 class TodayViewController: UIViewController {
     
     // Dummy Data
     private var expenses: [TestTodayExpense] = TestTodayExpense.sampleData()
+    
+    private let disposeBag = DisposeBag()
     
     private let headerTitleLabel = UILabel().then {
         $0.text = "지출 내역"
@@ -45,13 +49,14 @@ class TodayViewController: UIViewController {
     private let floatingButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         $0.tintColor = UIColor.Personal.normal
-        $0.applyFloatingButtonStyle() // 스타일 적용
+        //$0.applyFloatingButtonStyle() // 스타일 적용
     }
     
     private let topStackView = UIStackView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.applyBackgroundColor()
         
         setupViews()
@@ -60,8 +65,19 @@ class TodayViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         
+        floatingButton.addTarget(self, action: #selector(presentExpenseAddModal), for: .touchUpInside)
+        
         updateEmptyState()
     }
+
+    @objc private func presentExpenseAddModal() {
+        ModalViewManager.showModal(on: self, state: .createNewbudget)
+            .subscribe(onNext: { _ in
+                print("Expense added successfully.")
+            })
+            .disposed(by: disposeBag)
+    }
+
     
     private func setupViews() {
         let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel, helpButton]).then {
@@ -107,6 +123,7 @@ class TodayViewController: UIViewController {
             $0.trailing.equalToSuperview().offset(-16)
             $0.width.height.equalTo(64)
         }
+        
     }
     
     private func updateEmptyState() {
@@ -175,7 +192,7 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
             completionHandler(true)
         }
         
-        deleteAction.backgroundColor = UIColor.CustomColors.Background.background
+//        deleteAction.backgroundColor = UIColor.CustomColors.Background.background
         
         let customView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 120))
         customView.backgroundColor = .red
