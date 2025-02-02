@@ -72,12 +72,26 @@ class TodayViewController: UIViewController {
 
     @objc private func presentExpenseAddModal() {
         ModalViewManager.showModal(on: self, state: .createNewbudget)
-            .subscribe(onNext: { _ in
-                print("Expense added successfully.")
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+
+                // ✅ 기본값으로 새로운 지출 항목 생성
+                let newExpense = TestTodayExpense(
+                    date: "2024.01.16",          // 현재 날짜
+                    title: "새 지출",       // 기본 제목
+                    category: "기타",       // 기본 카테고리
+                    amount: "$ 10,000",         // 기본 금액
+                    exchangeRate: "140,444 원"       // 기본 환율
+                )
+
+                // ✅ 배열에 추가하고 UI 업데이트
+                self.expenses.append(newExpense)
+                self.tableView.reloadData()
+
+                print("✅ 새로운 지출 내역 추가: \(newExpense)")
             })
             .disposed(by: disposeBag)
     }
-
     
     private func setupViews() {
         let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel, helpButton]).then {

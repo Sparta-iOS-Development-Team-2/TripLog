@@ -11,7 +11,7 @@ import SnapKit
 class CustomTableViewCell: UITableViewCell {
 
     private let titleDateView = TitleDateView()
-    private let progressView = ProgressView()
+    private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
     private let todayViewController = TodayViewController() // TodayViewController 인스턴스 생성
 

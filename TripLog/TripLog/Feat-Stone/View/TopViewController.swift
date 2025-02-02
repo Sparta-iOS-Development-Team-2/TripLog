@@ -14,6 +14,10 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     private let tableView = UITableView().then {
         $0.separatorStyle = .none
         $0.applyBackgroundColor()
+        $0.showsVerticalScrollIndicator = false
+        $0.showsHorizontalScrollIndicator = false
+        $0.rowHeight = 192
+
     }
 
     private let data = TestDummyData.sampleData() // Model에서 가져옴
@@ -86,3 +90,4 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 #Preview("TopViewController") {
     UINavigationController(rootViewController: TopViewController())
 }
+
