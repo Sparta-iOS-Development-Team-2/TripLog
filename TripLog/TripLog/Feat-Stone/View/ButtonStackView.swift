@@ -26,26 +26,26 @@ class CustomButtonStackView: UIStackView {
 
     private func setupButtons() {
         // 버튼 공통 설정
-        configureButton(todayExpenseButton, title: "오늘 지출", titleColor: UIColor(named: "normal"))
-        configureButton(calendarButton, title: "캘린더", titleColor: UIColor(red: 0x73 / 255.0, green: 0x73 / 255.0, blue: 0x73 / 255.0, alpha: 1.0))
+        configureButton(todayExpenseButton, title: "오늘 지출", titleColor: UIColor.Personal.normal, weight: .bold)
+        configureButton(calendarButton, title: "캘린더", titleColor: UIColor.CustomColors.Text.textSecondary, weight: .regular)
 
         // 스택 뷰에 버튼 추가
         addArrangedSubview(todayExpenseButton)
         addArrangedSubview(calendarButton)
     }
 
-    private func configureButton(_ button: UIButton, title: String, titleColor: UIColor?) {
+    private func configureButton(_ button: UIButton, title: String, titleColor: UIColor?, weight: UIFont.Weight) {
         button.setTitle(title, for: .normal)
         button.setTitleColor(titleColor, for: .normal)
-        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: .bold)
-        button.layer.borderColor = UIColor.lightGray.cgColor
+        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: weight)
+        button.layer.borderColor = UIColor.CustomColors.Border.plus.cgColor
         button.layer.borderWidth = 1
     }
 
     private func setupLayout() {
         // 스택 뷰 레이아웃 설정
         axis = .horizontal
-        spacing = 0
+        spacing = -0.5
         distribution = .fillEqually
     }
 }
