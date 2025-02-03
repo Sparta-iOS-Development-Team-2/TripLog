@@ -44,6 +44,14 @@ final class ModalSegmentView: UIView {
         self.segmentView.selectedSegmentIndex = isCardPayment ? 1 : 0
     }
     
+    func paymentExtraction() -> Bool {
+        if segmentView.selectedSegmentIndex == 0 {
+            return false
+        } else {
+            return true
+        }
+    }
+    
 }
 
 // MARK: - UI Setting Method
