@@ -12,6 +12,8 @@ import Then
 
 /// TripLog 앱의 메인 뷰 컨트롤러
 class MainViewController: UIViewController {
+
+    private let mainVC = CustomTabBarController()
     
     // MARK: - UI Compnents
     
@@ -21,7 +23,7 @@ class MainViewController: UIViewController {
     }
     
     private lazy var launchImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
+        $0.contentMode = .scaleAspectFill
         $0.backgroundColor = .clear
         $0.image = UIImage(named: "launchImage")
         $0.alpha = 1
@@ -53,9 +55,15 @@ private extension MainViewController {
         configureSelf()
         setupLayout()
         playLottie()
+        
+        // TabBarController 삽입
+        addChild(mainVC)
+        view.addSubview(mainVC.view)
+        mainVC.didMove(toParent: self)
     }
     
     func configureSelf() {
+        navigationItem.title = ""
         [launchImageView,
          lottieAnimationView,
          launchTitle

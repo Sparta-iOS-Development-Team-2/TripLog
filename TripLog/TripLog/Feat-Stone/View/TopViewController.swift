@@ -13,6 +13,10 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 
     private let tableView = UITableView().then {
         $0.separatorStyle = .none
+        $0.showsVerticalScrollIndicator = false
+        $0.showsHorizontalScrollIndicator = false
+        $0.rowHeight = 192
+        $0.backgroundColor = UIColor.CustomColors.Background.background
     }
 
     // Model 데이터
@@ -20,7 +24,7 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor.CustomColors.Background.background
 
         navigationController?.navigationBar.isHidden = false
 
@@ -91,7 +95,7 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 class CustomTableViewCell: UITableViewCell {
 
     private let titleDateView = TitleDateView()
-    private let progressView = ProgressView()
+    private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
 
     func configure(subtitle: String, date: String, expense: String, budget: String) {
@@ -101,7 +105,18 @@ class CustomTableViewCell: UITableViewCell {
 
         setupLayout()
     }
-
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        self.backgroundColor = .clear
+        self.selectionStyle = .none
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     private func setupLayout() {
         // 모든 서브뷰 추가
         [titleDateView, progressView, buttonStackView].forEach {
@@ -126,7 +141,7 @@ class CustomTableViewCell: UITableViewCell {
     }
 }
 
-@available(iOS 17.0, *)
-#Preview("TopViewController") {
-    UINavigationController(rootViewController: TopViewController())
-}
+//@available(iOS 17.0, *)
+//#Preview("TopViewController") {
+//    UINavigationController(rootViewController: TopViewController())
+//}
