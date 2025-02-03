@@ -35,7 +35,7 @@ class TodayViewController: UIViewController {
     }
     
     private let totalAmountLabel = UILabel().then {
-        $0.text = "1,000,000 원"
+        $0.text = "0 원"
         $0.font = UIFont.SCDream(size: .body, weight: .bold)
         $0.textColor = UIColor.Personal.normal
     }
@@ -49,7 +49,6 @@ class TodayViewController: UIViewController {
     private let floatingButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         $0.tintColor = UIColor.Personal.normal
-        //$0.applyFloatingButtonStyle() // 스타일 적용
     }
     
     private let topStackView = UIStackView()
@@ -67,6 +66,7 @@ class TodayViewController: UIViewController {
         
         floatingButton.addTarget(self, action: #selector(presentExpenseAddModal), for: .touchUpInside)
         
+        updateTotalAmount()
         updateEmptyState()
     }
 
@@ -77,16 +77,17 @@ class TodayViewController: UIViewController {
 
                 // ✅ 기본값으로 새로운 지출 항목 생성
                 let newExpense = TestTodayExpense(
-                    date: "2024.01.16",          // 현재 날짜
-                    title: "새 지출",       // 기본 제목
-                    category: "기타",       // 기본 카테고리
-                    amount: "$ 10,000",         // 기본 금액
-                    exchangeRate: "140,444 원"       // 기본 환율
+                    date: "2024.01.16",  // 현재 날짜
+                    title: "새 지출",     // 기본 제목
+                    category: "기타",     // 기본 카테고리
+                    amount: "10,000",     // 기본 금액
+                    exchangeRate: "140,444 원"
                 )
 
                 // ✅ 배열에 추가하고 UI 업데이트
                 self.expenses.append(newExpense)
                 self.tableView.reloadData()
+                self.updateTotalAmount()  // ✅ 총 금액 업데이트
 
                 print("✅ 새로운 지출 내역 추가: \(newExpense)")
             })
@@ -129,7 +130,7 @@ class TodayViewController: UIViewController {
         tableView.snp.makeConstraints {
             $0.top.equalTo(topStackView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(floatingButton.snp.top).offset(-16) // 버튼과 테이블 뷰 간격 추가
+            $0.bottom.equalTo(floatingButton.snp.top).offset(-16)
         }
         
         floatingButton.snp.makeConstraints {
@@ -137,7 +138,14 @@ class TodayViewController: UIViewController {
             $0.trailing.equalToSuperview().offset(-16)
             $0.width.height.equalTo(64)
         }
-        
+    }
+    
+    /// ✅ **총 금액 업데이트 메서드**
+    private func updateTotalAmount() {
+        let totalAmount = expenses
+            .compactMap { Int($0.amount.replacingOccurrences(of: ",", with: "")) } // 숫자로 변환
+            .reduce(0, +) // 합산
+        totalAmountLabel.text = "\(totalAmount) 원"
     }
     
     private func updateEmptyState() {
@@ -182,60 +190,11 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
         return 108
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true) // 선택 효과 제거
-    }
-
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 4 // 기존 4에서 8로 수정하여 삭제 버튼과 다른 셀 간격 추가
-    }
-
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        let footerView = UIView().then {
-            $0.backgroundColor = .clear // 투명한 배경으로 간격만 추가
-        }
-        return footerView
-    }
-
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
-            guard let self = self else { return }
-            self.expenses.remove(at: indexPath.section)
-            tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
-            self.updateEmptyState()
-            completionHandler(true)
-        }
-        
-//        deleteAction.backgroundColor = UIColor.CustomColors.Background.background
-        
-        let customView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 120))
-        customView.backgroundColor = .red
-        customView.layer.cornerRadius = 8
-        customView.clipsToBounds = true
-        
-        let deleteButton = UIButton(type: .system).then {
-            $0.setImage(UIImage(systemName: "trash"), for: .normal)
-            $0.tintColor = UIColor(named: "plus")
-            $0.addTarget(self, action: #selector(deleteExpense(_:)), for: .touchUpInside)
-        }
-        
-        customView.addSubview(deleteButton)
-        deleteButton.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.width.height.equalTo(24)
-        }
-        
-        deleteAction.image = UIGraphicsImageRenderer(size: customView.frame.size).image { _ in
-            customView.drawHierarchy(in: customView.bounds, afterScreenUpdates: true)
-        }
-        
-        return UISwipeActionsConfiguration(actions: [deleteAction])
-    }
-
     @objc private func deleteExpense(_ sender: UIButton) {
         if let indexPath = tableView.indexPath(for: sender.superview?.superview as! UITableViewCell) {
             expenses.remove(at: indexPath.section)
             tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
+            updateTotalAmount()  // ✅ 삭제 후 총 금액 업데이트
             updateEmptyState()
         }
     }
