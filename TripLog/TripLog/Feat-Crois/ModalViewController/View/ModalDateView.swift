@@ -79,6 +79,13 @@ final class ModalDateView: UIView {
         self.startDatePicker.configureDatePicker(date: start)
         self.endDatePicker.configureDatePicker(date: end)
     }
+    
+    func datePickerExtraction() -> (start: String, end: String) {
+        guard let start = startDate, let end = endDate else { return ("","") }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        return (formatter.string(from: start), formatter.string(from: end))
+    }
 }
 
 // MARK: - UI Setting Method
