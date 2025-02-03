@@ -146,7 +146,7 @@ class TodayViewController: UIViewController {
     /// 업데이트 후 TopProgressView로 전달
     private func updateTotalAmount() {
         let totalAmount = expenses
-            .compactMap { Int($0.amount.replacingOccurrences(of: ",", with: "")) }
+            .compactMap { Int($0.exchangeRate.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) }
             .reduce(0, +)
 
         totalAmountLabel.text = "\(totalAmount) 원"
