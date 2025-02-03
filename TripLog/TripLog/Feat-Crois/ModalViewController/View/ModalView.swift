@@ -61,6 +61,7 @@ final class ModalView: UIView {
     // MARK: - Properties
     
     private var state: ModalViewState
+    private var id: UUID?
     
     // MARK: - Initializer
     
@@ -201,10 +202,10 @@ private extension ModalView {
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalDateView
             {
-                firstSection.configureTextField(text: data.cashBookName)
-                secondSection.configureTextField(text: data.country)
+                firstSection.configureTextField(text: data.tripName)
+                secondSection.configureTextField(text: data.note)
                 thirdSection.configureTextField(text: "\(data.budget)")
-                forthSection.configureDate(start: data.startDate, end: data.endDate)
+                forthSection.configureDate(start: data.departure, end: data.homecoming)
                 
                 firstSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -248,10 +249,10 @@ private extension ModalView {
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalAmoutView
             {
-                firstSection.configureSegment(to: data.isCardPayment)
-                secondSection.configureTextField(text: data.expenseDetails)
+                firstSection.configureSegment(to: data.payment)
+                secondSection.configureTextField(text: data.note)
                 thirdSection.configureTextField(text: data.category)
-                forthSection.configureAmoutView(amout: data.amount, currency: data.carrency)
+                forthSection.configureAmoutView(amout: data.amount, currency: Currency.KRW)
                 
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
