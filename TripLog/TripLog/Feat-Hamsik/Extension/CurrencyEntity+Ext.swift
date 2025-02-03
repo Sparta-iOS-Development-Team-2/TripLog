@@ -18,10 +18,50 @@ extension CurrencyEntity: CoreDataManagable {
     /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
     static func save(_ data: CurrencyRate, context: NSManagedObjectContext) { }
     
+    /// CoreData에 저장된 환율정보를 불러오는 함수
+    /// - Parameters:
+    ///   - context: CoreData 인스턴스
+    ///   - predicate: 검색 값(미 입력 시 전체 환율 반환)
+    /// - Returns: 검색결과(특정 검색 결과)
+    static func fetch(context: NSManagedObjectContext, predicate: String? = nil) -> [Entity] {
+        let request: NSFetchRequest<CurrencyEntity> = CurrencyEntity.fetchRequest()
+        
+        guard let predicate = predicate else {
+            // 검색 조건이 없을 때 동작
+            do {
+                let result = try context.fetch(request)
+                print("모든 CurrencyEntity fetch 성공")
+                return result
+            } catch {
+                print("CurrencyEntity Fetch 실패: \(error)")
+                return []
+            }
+        }
+        
+        // 검색 조건이 있을 때 동작
+        request.predicate = NSPredicate(format: "tripName == $@", predicate)
+        do {
+            let result = try context.fetch(request)
+            for item in result {
+                print("검색 결과: \n이름: \(item.value(forKey: "tripName") ?? "")")
+            }
+            return result
+        } catch {
+            print("데이터 읽기 실패: \(error)")
+            self.getCurrencyRate(date: predicate, context: context)
+            return []
+        }
+    }
+    
     /// (사용X)
     ///
     /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
     static func update(data: CurrencyRate, entityID: UUID, context: NSManagedObjectContext) { }
+    
+    /// (사용X)
+    ///
+    /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
+    static func delete(entityID: UUID, context: NSManagedObjectContext) { }
     
     /// 새로운 환율정보를 생성하는 함수
     /// - Parameters:
@@ -69,41 +109,6 @@ extension CurrencyEntity: CoreDataManagable {
                     print("🚫환율 저장 실패: \(error)")
                 }
             }
-        }
-    }
-    
-    /// CoreData에 저장된 환율정보를 불러오는 함수
-    /// - Parameters:
-    ///   - context: CoreData 인스턴스
-    ///   - predicate: 검색 값(미 입력 시 전체 환율 반환)
-    /// - Returns: 검색결과(특정 검색 결과)
-    static func fetch(context: NSManagedObjectContext, predicate: String? = nil) -> [Entity] {
-        let request: NSFetchRequest<CurrencyEntity> = CurrencyEntity.fetchRequest()
-        
-        guard let predicate = predicate else {
-            // 검색 조건이 없을 때 동작
-            do {
-                let result = try context.fetch(request)
-                print("모든 CurrencyEntity fetch 성공")
-                return result
-            } catch {
-                print("CurrencyEntity Fetch 실패: \(error)")
-                return []
-            }
-        }
-        
-        // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "tripName == $@", predicate)
-        do {
-            let result = try context.fetch(request)
-            for item in result {
-                print("검색 결과: \n이름: \(item.value(forKey: "tripName") ?? "")")
-            }
-            return result
-        } catch {
-            print("데이터 읽기 실패: \(error)")
-            self.getCurrencyRate(date: predicate, context: context)
-            return []
         }
     }
     
