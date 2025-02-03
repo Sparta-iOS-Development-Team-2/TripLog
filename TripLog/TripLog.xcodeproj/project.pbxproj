@@ -17,6 +17,7 @@
 		AAC9B0A62D3A72A9006892A7 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A52D3A72A9006892A7 /* RxSwift */; };
 		AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A82D3A72C9006892A7 /* FSCalendar */; };
 		AAC9B0AC2D3A72E4006892A7 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0AB2D3A72E4006892A7 /* Then */; };
+		C334FC182D4D1291008DDC8E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C334FC172D4D1291008DDC8E /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +88,7 @@
 				AAC9B0962D3A721C006892A7 /* SnapKit in Frameworks */,
 				AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */,
 				AAC9B0992D3A722B006892A7 /* Alamofire in Frameworks */,
+				C334FC182D4D1291008DDC8E /* FirebaseFirestore in Frameworks */,
 				AAC9B0A62D3A72A9006892A7 /* RxSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -158,6 +160,7 @@
 				AAC9B0A82D3A72C9006892A7 /* FSCalendar */,
 				AAC9B0AB2D3A72E4006892A7 /* Then */,
 				AA3030322D44B9CA0057DB35 /* Lottie */,
+				C334FC172D4D1291008DDC8E /* FirebaseFirestore */,
 			);
 			productName = TripLog;
 			productReference = AAC9B05D2D3A7070006892A7 /* TripLog.app */;
@@ -250,6 +253,7 @@
 				AAC9B0A72D3A72C9006892A7 /* XCRemoteSwiftPackageReference "FSCalendar" */,
 				AAC9B0AA2D3A72E4006892A7 /* XCRemoteSwiftPackageReference "Then" */,
 				AA3030312D44B9CA0057DB35 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				C334FC162D4D1291008DDC8E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AAC9B05E2D3A7070006892A7 /* Products */;
@@ -706,6 +710,14 @@
 				minimumVersion = 3.0.0;
 			};
 		};
+		C334FC162D4D1291008DDC8E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.7.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -758,6 +770,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AAC9B0AA2D3A72E4006892A7 /* XCRemoteSwiftPackageReference "Then" */;
 			productName = Then;
+		};
+		C334FC172D4D1291008DDC8E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C334FC162D4D1291008DDC8E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
