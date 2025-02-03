@@ -109,6 +109,11 @@ final class ModalView: UIView {
         return self.state
     }
     
+    func getDataId() -> UUID {
+        guard let id else { return UUID() }
+        return id
+    }
+    
 }
 
 // MARK: - UI Setting Method
@@ -207,6 +212,8 @@ private extension ModalView {
                 thirdSection.configureTextField(text: "\(data.budget)")
                 forthSection.configureDate(start: data.departure, end: data.homecoming)
                 
+                id = data.id
+                
                 firstSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
                     .disposed(by: disposeBag)
@@ -253,6 +260,8 @@ private extension ModalView {
                 secondSection.configureTextField(text: data.note)
                 thirdSection.configureTextField(text: data.category)
                 forthSection.configureAmoutView(amout: data.amount, currency: Currency.KRW)
+                
+                id = data.id
                 
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
