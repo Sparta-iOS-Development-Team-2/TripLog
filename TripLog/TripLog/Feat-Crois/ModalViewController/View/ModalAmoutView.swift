@@ -79,6 +79,8 @@ final class ModalAmoutView: UIView {
         self.currencyButton.setTitle(currency.rawValue, for: .normal)
     }
     
+    /// 금액뷰의 데이터를 추출하는 메소드
+    /// - Returns: 금액
     func amountExtraction() -> Double {
         guard
             let text = textField.text,
@@ -149,7 +151,8 @@ private extension ModalAmoutView {
 }
 
 extension Reactive where Base: ModalAmoutView {
-    var isBlank: Observable<Bool> {
+    /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
+    var amountViewIsBlank: Observable<Bool> {
         return base.textField.rx.text.orEmpty
             .map { $0.isEmpty }
             .distinctUntilChanged()

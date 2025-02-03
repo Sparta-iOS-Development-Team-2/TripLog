@@ -109,6 +109,8 @@ final class ModalView: UIView {
         return self.state
     }
     
+    /// 모달뷰의 ID를 추출하는 메소드
+    /// - Returns: 모달뷰의 ID
     func getDataId() -> UUID {
         guard let id else { return UUID() }
         return id
@@ -245,7 +247,7 @@ private extension ModalView {
                     .bind(to: secondTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                forthSection.rx.isBlank
+                forthSection.rx.amountViewIsBlank
                     .bind(to: thirdTextFieldIsBlank)
                     .disposed(by: disposeBag)
             }
@@ -271,13 +273,15 @@ private extension ModalView {
                     .bind(to: secondTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                forthSection.rx.isBlank
+                forthSection.rx.amountViewIsBlank
                     .bind(to: thirdTextFieldIsBlank)
                     .disposed(by: disposeBag)
             }
         }
     }
     
+    /// 모달뷰의 가계부 데이터를 추출하는 메소드
+    /// - Returns: 모달뷰 가계부 데이터
     func cashBookDataExtraction() -> ModalCashBookData? {
         switch state {
         case .createNewCashBook, .editCashBook:
@@ -303,6 +307,8 @@ private extension ModalView {
         }
     }
     
+    /// 모달뷰의 지출 내역 데이터를 추출하는 메소드
+    /// - Returns: 모달뷰의 지출 내역 데이터
     func consumptionDataExtraction() -> ModalConsumptionData? {
         switch state {
         case .createNewConsumption, .editConsumption:

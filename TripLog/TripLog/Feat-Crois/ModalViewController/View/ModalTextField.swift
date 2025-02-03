@@ -81,6 +81,8 @@ final class ModalTextField: UIView {
         textField.text = text
     }
     
+    /// 텍스트필드의 데이터를 추출하는 메소드
+    /// - Returns: 텍스트필드의 텍스트
     func textFieldExtraction() -> String {
         guard let text = textField.text else { return "" }
         return text

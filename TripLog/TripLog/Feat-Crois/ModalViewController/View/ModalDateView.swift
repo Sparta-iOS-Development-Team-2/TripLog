@@ -88,6 +88,8 @@ final class ModalDateView: UIView {
         self.endDatePicker.configureDatePicker(date: endDate)
     }
     
+    /// DatePicker뷰의 데이터를 추출하는 메소드
+    /// - Returns: DatePicker뷰가 가진 날짜 데이터 튜플타입
     func datePickerExtraction() -> (start: String, end: String) {
         guard let start = startDate, let end = endDate else { return ("","") }
         let formatter = DateFormatter()
