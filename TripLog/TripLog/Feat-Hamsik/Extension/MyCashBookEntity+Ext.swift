@@ -30,36 +30,26 @@ extension MyCashBookEntity: CoreDataManagable {
     ///   - context: CoreData 인스턴스
     static func save(_ data: Model, context: NSManagedObjectContext) {
         let entityName = EntityKeys.Name.MyCashBookEntity.rawValue
+        let element = EntityKeys.MyCashBookElement.self
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         
         let fetchRequest: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@", data.id as CVarArg)
         
-        do {
-            let existingItems = try context.fetch(fetchRequest)
-            if existingItems.isEmpty {
-                // 중복된 항목이 없으면 저장
-                context.perform {
-                    let att = NSManagedObject(entity: entity, insertInto: context)
-                    att.setValue(data.amount, forKey: EntityKeys.MyCashBookElement.amount)
-                    att.setValue(data.category, forKey: EntityKeys.MyCashBookElement.category)
-                    att.setValue(data.note, forKey: EntityKeys.MyCashBookElement.note)
-                    att.setValue(data.payment, forKey: EntityKeys.MyCashBookElement.payment)
-                }
-                do {
-                    try context.save()
-                    print("저장 성공: \(data.note)")
-                } catch {
-                    print("데이터 저장 실패: \(error)")
-                }
-                
-            } else {
-                print("이미 존재하는 항목입니다.")
+        context.performAndWait {
+            let att = NSManagedObject(entity: entity, insertInto: context)
+            att.setValue(data.id, forKey: element.id)
+            att.setValue(data.amount, forKey: element.amount)
+            att.setValue(data.category, forKey: element.category)
+            att.setValue(data.note, forKey: element.note)
+            att.setValue(data.payment, forKey: element.payment)
+            do {
+                try context.save()
+                print("저장 성공: \(data.note)")
+            } catch {
+                print("데이터 저장 실패: \(error)")
             }
-        } catch {
-            print("Fetch 오류: \(error.localizedDescription)")
         }
-        
         
     }
     
@@ -85,7 +75,7 @@ extension MyCashBookEntity: CoreDataManagable {
         }
         
         // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "note == $@", predicate)
+        request.predicate = NSPredicate(format: "note == %@", predicate)
         do {
             let result = try context.fetch(request)
             for item in result {
@@ -112,7 +102,7 @@ extension MyCashBookEntity: CoreDataManagable {
             let results = try context.fetch(fetchRequest)
             
             if let entityToUpdate = results.first {
-                context.perform {
+                context.performAndWait {
                     entityToUpdate.setValue(data.amount, forKey: EntityKeys.MyCashBookElement.amount)
                     entityToUpdate.setValue(data.category, forKey: EntityKeys.MyCashBookElement.category)
                     entityToUpdate.setValue(data.note, forKey: EntityKeys.MyCashBookElement.note)

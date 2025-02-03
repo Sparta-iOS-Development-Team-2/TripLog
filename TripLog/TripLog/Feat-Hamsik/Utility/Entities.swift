@@ -21,6 +21,7 @@ enum EntityKeys {
     }
     
     enum CashBookElement {
+        static let id = "id"
         static let budget = "budget"
         static let departure = "departure"
         static let homecoming = "homecoming"
@@ -29,6 +30,7 @@ enum EntityKeys {
     }
     
     enum MyCashBookElement {
+        static let id = "id"
         static let note = "note"
         static let category = "category"
         static let amount = "amount"

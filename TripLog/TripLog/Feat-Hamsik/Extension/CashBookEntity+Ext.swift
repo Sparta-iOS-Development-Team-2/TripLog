@@ -26,27 +26,29 @@ extension CashBookEntity: CoreDataManagable {
     
     static func save(_ data: Model, context: NSManagedObjectContext) {
         let entityName = EntityKeys.Name.CashBookEntity.rawValue
+        let element = EntityKeys.CashBookElement.self
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", data.id as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "tripName == %@", data.tripName as CVarArg)
         
         do {
             let existingItems = try context.fetch(fetchRequest)
             if existingItems.isEmpty {
                 // 중복된 항목이 없으면 저장
-                context.perform {
+                context.performAndWait {
                     let att = NSManagedObject(entity: entity, insertInto: context)
-                    att.setValue(data.budget, forKey: EntityKeys.CashBookElement.budget)
-                    att.setValue(data.departure, forKey: EntityKeys.CashBookElement.departure)
-                    att.setValue(data.homecoming, forKey: EntityKeys.CashBookElement.homecoming)
-                    att.setValue(data.note, forKey: EntityKeys.CashBookElement.note)
-                    att.setValue(data.tripName, forKey: EntityKeys.CashBookElement.tripName)
-                }
-                do {
-                    try context.save()
-                    print("저장 성공: \(data.note)")
-                } catch {
-                    print("데이터 저장 실패: \(error)")
+                    att.setValue(data.id, forKey: "id")
+                    att.setValue(data.budget, forKey: element.budget)
+                    att.setValue(data.departure, forKey: element.departure)
+                    att.setValue(data.homecoming, forKey: element.homecoming)
+                    att.setValue(data.note, forKey: element.note)
+                    att.setValue(data.tripName, forKey: element.tripName)
+                    do {
+                        try context.save()
+                        print("저장 성공: \(data.note)")
+                    } catch {
+                        print("데이터 저장 실패: \(error)")
+                    }
                 }
             } else {
                 print("이미 존재하는 항목입니다.")
@@ -70,7 +72,7 @@ extension CashBookEntity: CoreDataManagable {
             // 검색 조건이 없을 때 동작
             do {
                 let result = try context.fetch(request)
-                print("모든 CashBookEntity fetch 성공")
+                print("모든 CashBookEntity fetch 성공: \(result.count)")
                 return result
             } catch {
                 print("CashBookEntity Fetch 실패: \(error)")
@@ -79,7 +81,7 @@ extension CashBookEntity: CoreDataManagable {
         }
         
         // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "tripName == $@", predicate)
+        request.predicate = NSPredicate(format: "tripName == %@", predicate)
         do {
             let result = try context.fetch(request)
             for item in result {
@@ -105,7 +107,7 @@ extension CashBookEntity: CoreDataManagable {
             let results = try context.fetch(fetchRequest)
             
             if let entityToUpdate = results.first {
-                context.perform {
+                context.performAndWait {
                     entityToUpdate.setValue(data.budget, forKey: EntityKeys.CashBookElement.budget)
                     entityToUpdate.setValue(data.departure, forKey: EntityKeys.CashBookElement.departure)
                     entityToUpdate.setValue(data.homecoming, forKey: EntityKeys.CashBookElement.homecoming)
