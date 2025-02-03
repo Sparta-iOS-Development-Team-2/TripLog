@@ -81,6 +81,11 @@ final class ModalTextField: UIView {
         textField.text = text
     }
     
+    func textFieldExtraction() -> String {
+        guard let text = textField.text else { return "" }
+        return text
+    }
+    
 }
 
 // MARK: - UI Setting Method
