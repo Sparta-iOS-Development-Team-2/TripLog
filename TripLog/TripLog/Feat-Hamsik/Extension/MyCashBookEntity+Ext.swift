@@ -33,9 +33,7 @@ extension MyCashBookEntity: CoreDataManagable {
         let element = EntityKeys.MyCashBookElement.self
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         
-        let fetchRequest: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", data.id as CVarArg)
-        
+        // 비동기 저장
         context.performAndWait {
             let att = NSManagedObject(entity: entity, insertInto: context)
             att.setValue(data.id, forKey: element.id)
@@ -75,11 +73,11 @@ extension MyCashBookEntity: CoreDataManagable {
         }
         
         // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "note == %@", predicate)
+        request.predicate = NSPredicate(format: "\(EntityKeys.MyCashBookElement.note) == %@", predicate)
         do {
             let result = try context.fetch(request)
             for item in result {
-                print("검색 결과: \n이름: \(item.value(forKey: "note") ?? "")")
+                print("검색 결과: \n이름: \(item.value(forKey: EntityKeys.MyCashBookElement.note) ?? "")")
             }
             return result
         } catch {
@@ -96,12 +94,13 @@ extension MyCashBookEntity: CoreDataManagable {
     ///   - context: CoreData 인스턴스
     static func update(data: MockMyCashBookModel, entityID: UUID, context: NSManagedObjectContext) {
         let fetchRequest: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", entityID as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "\(EntityKeys.MyCashBookElement.id) == %@", entityID as CVarArg)
         
         do {
             let results = try context.fetch(fetchRequest)
             
             if let entityToUpdate = results.first {
+                // 비동기 저장
                 context.performAndWait {
                     entityToUpdate.setValue(data.amount, forKey: EntityKeys.MyCashBookElement.amount)
                     entityToUpdate.setValue(data.category, forKey: EntityKeys.MyCashBookElement.category)
@@ -127,12 +126,12 @@ extension MyCashBookEntity: CoreDataManagable {
         let persistantContainer = CoreDataManager.shared.persistentContainer
         let entityName = EntityKeys.Name.MyCashBookEntity.rawValue
         // Core Data 모델에서 해당 entity가 존재하는지 확인
-        guard persistantContainer.managedObjectModel.entities.contains(where: { $0.value(forKey: "id") as! UUID == entityID }) else {
+        guard persistantContainer.managedObjectModel.entities.contains(where: { $0.value(forKey: EntityKeys.MyCashBookElement.id) as! UUID == entityID }) else {
             debugPrint("삭제하려는 엔티티 '\(entityID)'가 존재하지 않습니다.")
             return
         }
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
-        fetchRequest.predicate = NSPredicate(format: "id == %@", entityID as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "\(EntityKeys.MyCashBookElement.id) == %@", entityID as CVarArg)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         
         do {

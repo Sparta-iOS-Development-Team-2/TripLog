@@ -29,15 +29,16 @@ extension CashBookEntity: CoreDataManagable {
         let element = EntityKeys.CashBookElement.self
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "tripName == %@", data.tripName as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "\(EntityKeys.CashBookElement.tripName) == %@", data.tripName as CVarArg)
         
         do {
             let existingItems = try context.fetch(fetchRequest)
             if existingItems.isEmpty {
                 // 중복된 항목이 없으면 저장
+                // 비동기 저장
                 context.performAndWait {
                     let att = NSManagedObject(entity: entity, insertInto: context)
-                    att.setValue(data.id, forKey: "id")
+                    att.setValue(data.id, forKey: element.id)
                     att.setValue(data.budget, forKey: element.budget)
                     att.setValue(data.departure, forKey: element.departure)
                     att.setValue(data.homecoming, forKey: element.homecoming)
@@ -81,11 +82,11 @@ extension CashBookEntity: CoreDataManagable {
         }
         
         // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "tripName == %@", predicate)
+        request.predicate = NSPredicate(format: "\(EntityKeys.CashBookElement.tripName) == %@", predicate)
         do {
             let result = try context.fetch(request)
             for item in result {
-                print("검색 결과: \n이름: \(item.value(forKey: "tripName") ?? "")")
+                print("검색 결과: \n이름: \(item.value(forKey: EntityKeys.CashBookElement.tripName) ?? "")")
             }
             return result
         } catch {
@@ -101,12 +102,13 @@ extension CashBookEntity: CoreDataManagable {
     ///   - context: CoreData 인스턴스
     static func update(data: MockCashBookModel, entityID: UUID, context: NSManagedObjectContext) {
         let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", entityID as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "\(EntityKeys.CashBookElement.id) == %@", entityID as CVarArg)
         
         do {
             let results = try context.fetch(fetchRequest)
             
             if let entityToUpdate = results.first {
+                // 비동기 저장
                 context.performAndWait {
                     entityToUpdate.setValue(data.budget, forKey: EntityKeys.CashBookElement.budget)
                     entityToUpdate.setValue(data.departure, forKey: EntityKeys.CashBookElement.departure)
@@ -133,20 +135,20 @@ extension CashBookEntity: CoreDataManagable {
         let persistantContainer = CoreDataManager.shared.persistentContainer
         let entityName = EntityKeys.Name.CashBookEntity.rawValue
         // Core Data 모델에서 해당 entity가 존재하는지 확인
-        guard persistantContainer.managedObjectModel.entities.contains(where: { $0.value(forKey: "id") as! UUID == entityID }) else {
-            debugPrint("⚠️ 삭제하려는 엔티티 '\(entityID)'가 존재하지 않습니다.")
+        guard persistantContainer.managedObjectModel.entities.contains(where: { $0.value(forKey: EntityKeys.CashBookElement.id) as! UUID == entityID }) else {
+            debugPrint("삭제하려는 엔티티 '\(entityID)'가 존재하지 않습니다.")
             return
         }
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
-        fetchRequest.predicate = NSPredicate(format: "id == %@", entityID as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "\(EntityKeys.CashBookElement.id) == %@", entityID as CVarArg)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         
         do {
             try context.execute(deleteRequest)
             try context.save()
-            debugPrint("✅ \(entityName)에서 id \(entityID) 데이터 삭제 완료")
+            debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 완료")
         } catch {
-            debugPrint("❌ \(entityName)에서 id \(entityID) 데이터 삭제 실패: \(error)")
+            debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 실패: \(error)")
         }
     }
 }
