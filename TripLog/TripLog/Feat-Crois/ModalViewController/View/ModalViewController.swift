@@ -72,7 +72,7 @@ private extension ModalViewController {
     func configureSelf() {
         self.modalPresentationStyle = .formSheet
         self.sheetPresentationController?.preferredCornerRadius = 12
-        self.sheetPresentationController?.detents = [.medium()]
+        self.sheetPresentationController?.detents = [.custom(resolver: { _ in 464 })]
     }
     
     /// 뷰 모델 바인딩 메소드
@@ -80,7 +80,8 @@ private extension ModalViewController {
         
         let input: ModalViewModel.Input = .init(
             cancelButtonTapped: self.modalView.rx.cancelButtonTapped,
-            activeButtonTapped: self.modalView.rx.activeButtonTapped
+            activeButtonTapped: self.modalView.rx.activeButtonTapped,
+            sectionIsBlank: self.modalView.rx.checkBlankOfSections
         )
         
         let output = viewModel.transform(input: input)
@@ -88,7 +89,14 @@ private extension ModalViewController {
         output.active
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
-            .emit { owner, _ in
+            .emit { owner, isBlank in
+                
+                guard !isBlank else {
+                    guard let vc = AppHelpers.getTopViewController() else { return }
+                    let alert = AlertManager(title: "알림", message: "모든 입력을 채워주세요!!", cancelTitle: "확인")
+                    alert.showAlert(on: vc, .alert)
+                    return
+                }
                 
                 switch owner.modalView.checkModalStatus() {
                 case .createNewCashBook: break

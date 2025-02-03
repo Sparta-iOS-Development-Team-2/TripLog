@@ -12,29 +12,39 @@ final class ListCollectionViewCell: UICollectionViewCell {
     static let id = "ListCollectionViewCell"
     
     private let tripNameLabel = UILabel().then {
-        $0.numberOfLines = 1
-        $0.adjustsFontSizeToFitWidth = true
-        $0.minimumScaleFactor = 0.7
-        $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
+        $0.textColor = .Dark.base
+        $0.numberOfLines = 1
+        $0.textAlignment = .left
+        $0.backgroundColor = .clear
+        $0.minimumScaleFactor = 0.7
+        $0.adjustsFontSizeToFitWidth = true
     }
     
     private let noteLabel = UILabel().then {
-        $0.numberOfLines = 1
-        $0.adjustsFontSizeToFitWidth = true
-        $0.minimumScaleFactor = 0.5
-        $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
+        $0.textColor = .Dark.base
+        $0.numberOfLines = 1
+        $0.textAlignment = .left
+        $0.backgroundColor = .clear
+        $0.minimumScaleFactor = 0.5
+        $0.adjustsFontSizeToFitWidth = true
     }
     
     private let bugetLabel = UILabel().then {
-        $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
+        $0.textColor = .Dark.base
+        $0.numberOfLines = 1
+        $0.textAlignment = .left
+        $0.backgroundColor = .clear
     }
     
     private let periodLabel = UILabel().then {
-        $0.textAlignment = .left
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
+        $0.textColor = .Dark.base
+        $0.numberOfLines = 1
+        $0.textAlignment = .left
+        $0.backgroundColor = .clear
     }
     
     private let verticalStackView = UIStackView().then {
@@ -44,36 +54,29 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.spacing = 8
     }
     
+    //MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         setupUI()
         setupConstraints()
-        setupShadow()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    /// 데이터에 저장된 값으로 UI update
-    func configureCell(data: ListCellData) {
-        tripNameLabel.text = data.tripName
-        noteLabel.text = data.note
-        bugetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.buget)))"
-        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
-    }
-    
-    
 }
 
-//MARK: - Method
-
+//MARK: - Private Method
 private extension ListCollectionViewCell {
     
     /// setup UI
     func setupUI() {
-        backgroundColor = UIColor(resource: .Light.base)
+        
+        backgroundColor = .clear
+        // 그림자 적용
+        contentView.applyBoxStyle()
         
         [
             noteLabel,
@@ -114,17 +117,17 @@ private extension ListCollectionViewCell {
         }
     }
     
-    /// 셀에 그림자 추가(ContentView)
-    func setupShadow() {
-        layer.borderWidth = 0.2
-        layer.borderColor = UIColor.lightGray.cgColor
-        
-        layer.cornerRadius = 8
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.2
-        layer.shadowOffset = CGSize(width: 0, height: 1)
-        layer.shadowRadius = 4
-        layer.masksToBounds = false
+}
+
+//MARK: - Method
+extension ListCollectionViewCell {
+    
+    /// 데이터에 저장된 값으로 UI update
+    func configureCell(data: ListCellData) {
+        tripNameLabel.text = data.tripName
+        noteLabel.text = data.note
+        bugetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.buget)))"
+        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
     }
     
 }
