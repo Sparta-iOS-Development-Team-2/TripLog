@@ -23,7 +23,7 @@ extension TestTodayExpense {
                 date: "2024.01.15",
                 title: "스시 오마카세",
                 category: "식비 / 현금",
-                amount: "15,000",
+                amount: "150,000",
                 exchangeRate: "140,044 원"
             ),
             TestTodayExpense(

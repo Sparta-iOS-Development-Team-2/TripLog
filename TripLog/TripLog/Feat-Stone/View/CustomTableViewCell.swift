@@ -1,10 +1,3 @@
-//
-//  CustomTableViewCell.swift
-//  TripLog
-//
-//  Created by 김석준 on 1/31/25.
-//
-
 import UIKit
 import SnapKit
 
@@ -13,28 +6,39 @@ class CustomTableViewCell: UITableViewCell {
     private let titleDateView = TitleDateView()
     private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
-    private let todayViewController = TodayViewController() // TodayViewController 인스턴스 생성
+//    private let todayViewController = TodayViewController()
+
+    private let todayViewController = TodayViewController()
+    private let calendarViewController = CalendarViewController()
+
+    private let containerView = UIView() // ✅ TodayViewController와 CalendarViewController를 담을 컨테이너 뷰
 
     func configure(subtitle: String, date: String, expense: String, budget: String) {
-        // 데이터 설정
         titleDateView.configure(subtitle: subtitle, date: date)
         progressView.configure(expense: expense, budget: budget)
 
         setupLayout()
         applyBackgroundColor()
+        
+        // ✅ TodayViewController에서 지출이 변경될 때 progressView 업데이트
+        todayViewController.onExpenseUpdated = { [weak self] updatedExpense in
+            self?.progressView.configure(expense: updatedExpense, budget: budget)
+        }
     }
 
     private func setupLayout() {
         // 모든 서브뷰 추가
-        [titleDateView, progressView, buttonStackView].forEach {
+        [titleDateView, progressView, buttonStackView, containerView].forEach {
             contentView.addSubview($0)
         }
 
-        // TodayViewController의 view를 추가
-        let todayView = todayViewController.view!
-        contentView.addSubview(todayView)
+        // `TodayViewController`와 `CalendarViewController`의 `view`를 `containerView`에 추가
+        containerView.addSubview(todayViewController.view)
+        containerView.addSubview(calendarViewController.view)
 
-        let screenHeight = UIScreen.main.bounds.height // 기기의 전체 화면 높이 가져오기
+        // 기본적으로 `TodayViewController`를 보이게 하고 `CalendarViewController`는 숨김
+        todayViewController.view.isHidden = false
+        calendarViewController.view.isHidden = true
 
         titleDateView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(4)
@@ -52,15 +56,41 @@ class CustomTableViewCell: UITableViewCell {
             $0.height.equalTo(50)
         }
 
-        todayView.snp.makeConstraints {
-            $0.top.equalTo(buttonStackView.snp.bottom).offset(16) // buttonStackView 아래 배치
-            $0.leading.equalToSuperview()
-            $0.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview().offset(-16) // 하단 여백 추가
-            $0.height.equalTo(screenHeight * 0.6).priority(.required) // 기기 화면 높이의 50%를 사용
+        containerView.snp.makeConstraints {
+            $0.top.equalTo(buttonStackView.snp.bottom).offset(16)
+            $0.leading.trailing.bottom.equalToSuperview()
+            $0.height.equalTo(UIScreen.main.bounds.height * 0.6).priority(.required) // 화면의 60% 차지
         }
-        
-//        applyBackgroundColor()
+
+        todayViewController.view.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        calendarViewController.view.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        // 버튼 액션 추가
+        buttonStackView.setButtonActions(
+            todayAction: { [weak self] in
+                self?.switchToTodayView()
+            },
+            calendarAction: { [weak self] in
+                self?.switchToCalendarView()
+            }
+        )
+    }
+
+    // `TodayViewController`로 전환
+    private func switchToTodayView() {
+        todayViewController.view.isHidden = false
+        calendarViewController.view.isHidden = true
+    }
+
+    // `CalendarViewController`로 전환
+    private func switchToCalendarView() {
+        todayViewController.view.isHidden = true
+        calendarViewController.view.isHidden = false
     }
 
     override func layoutSubviews() {

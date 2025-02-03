@@ -17,7 +17,6 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
         $0.rowHeight = 192
-
     }
 
     private let data = TestDummyData.sampleData() // Model에서 가져옴
@@ -65,12 +64,14 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as! CustomTableViewCell
         let trip = data[indexPath.row]
+
         cell.configure(
             subtitle: trip.subtitle,
             date: trip.date,
             expense: trip.expense,
             budget: trip.budget
         )
+
         return cell
     }
 
@@ -90,4 +91,3 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 #Preview("TopViewController") {
     UINavigationController(rootViewController: TopViewController())
 }
-
