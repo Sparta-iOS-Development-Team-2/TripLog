@@ -73,11 +73,18 @@ final class ModalDateView: UIView {
     /// - Parameters:
     ///   - start: 여행 시작 일정
     ///   - end: 여행 종료 일정
-    func configureDate(start: Date, end: Date) {
-        self.startDate = start
-        self.endDate = end
-        self.startDatePicker.configureDatePicker(date: start)
-        self.endDatePicker.configureDatePicker(date: end)
+    func configureDate(start: String, end: String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        guard
+            let startDate = formatter.date(from: start),
+            let endDate = formatter.date(from: end)
+        else { return }
+        
+        self.startDate = startDate
+        self.endDate = endDate
+        self.startDatePicker.configureDatePicker(date: startDate)
+        self.endDatePicker.configureDatePicker(date: endDate)
     }
     
     func datePickerExtraction() -> (start: String, end: String) {
