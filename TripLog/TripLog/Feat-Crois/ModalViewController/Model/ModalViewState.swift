@@ -10,9 +10,9 @@ import Foundation
 /// 모달 뷰의 상태를 정의하는 enum
 enum ModalViewState {
     case createNewCashBook
-    case editCashBook(data: TestCashBookData) // 가계부 수정시 데이터 입력
+    case editCashBook(data: MockCashBookModel) // 가계부 수정시 데이터 입력
     case createNewConsumption
-    case editConsumption(data: TestModalViewData) // 지출 내역 수정 시 데이터 입력
+    case editConsumption(data: MockMyCashBookModel) // 지출 내역 수정 시 데이터 입력
     
     /// 각 상태에 따라 모달 뷰의 타이틀을 결정하는 프로퍼티
     var modalTitle: String {
