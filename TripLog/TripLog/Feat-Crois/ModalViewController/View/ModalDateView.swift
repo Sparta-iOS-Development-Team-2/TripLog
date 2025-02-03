@@ -76,6 +76,7 @@ final class ModalDateView: UIView {
     func configureDate(start: String, end: String) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd"
+        
         guard
             let startDate = formatter.date(from: start),
             let endDate = formatter.date(from: end)

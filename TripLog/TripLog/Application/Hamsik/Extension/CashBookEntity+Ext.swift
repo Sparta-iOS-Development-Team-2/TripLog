@@ -10,7 +10,7 @@ import CoreData
 
 // TODO: 임시데이터(삭제예정)
 struct MockCashBookModel {
-    let budget: Double
+    let budget: Int
     let departure: String
     let homecoming: String
     let note: String
