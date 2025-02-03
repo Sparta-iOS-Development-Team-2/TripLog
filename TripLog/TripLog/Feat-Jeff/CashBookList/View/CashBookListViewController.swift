@@ -18,7 +18,6 @@ final class CashBookListViewController: UIViewController {
     private let viewModel = CashBookListViewModel()
     
     private let viewWillAppearSubject = PublishSubject<Void>()
-    private let testButtonTapped = PublishRelay<Void>()
     private let addButtonTapped = PublishRelay<Void>()
     
     private let titleLabel = UILabel().then {
@@ -35,13 +34,6 @@ final class CashBookListViewController: UIViewController {
         $0.register(ListCollectionViewCell.self, forCellWithReuseIdentifier: ListCollectionViewCell.id)
     }
     
-    // 임시 버튼
-    private let testButton = UIButton().then {
-        $0.backgroundColor = .clear
-        $0.setTitle("버튼", for: .normal)
-        $0.setTitleColor(.red, for: .normal)
-    }
-    
     // RxdataSource(animated)
     typealias DataSource = RxCollectionViewSectionedAnimatedDataSource<SectionOfListCellData>
     private let dataSource: DataSource = {
@@ -50,6 +42,7 @@ final class CashBookListViewController: UIViewController {
             reloadAnimation: .none,
             deleteAnimation: .automatic
         )
+        
         let dataSource = DataSource(
             animationConfiguration: animationConfiguration,
             configureCell: { dataSource, collectionView, indexPath, item -> UICollectionViewCell in
@@ -96,7 +89,6 @@ private extension CashBookListViewController {
             titleLabel,
             listCollectionView,
             addCellView,
-            testButton
         ].forEach { view.addSubview($0) }
         
         // 셀 추가 버튼 그림자 설정
@@ -122,35 +114,27 @@ private extension CashBookListViewController {
         listCollectionView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(16)
-        }
-        
-        testButton.snp.makeConstraints {
-            $0.top.equalTo(listCollectionView.snp.bottom).offset(18)
-            $0.horizontalEdges.equalToSuperview().inset(60)
-            $0.bottom.equalTo(safeArea.snp.bottom).offset(-18)
-            $0.height.equalTo(60)
+            $0.bottom.equalTo(safeArea.snp.bottom)
         }
     }
     
     func bind() {
         /// Input
         /// - callViewWillAppear : 추후 사용(코어데이터 fetch)
-        /// - testButtonTapped : 임시 데이터 추가 버튼(삭제 예정)
         /// - addButtonTapped : 일정 추가하기 버튼
         let input = CashBookListViewModel.Input(
             callViewWillAppear: viewWillAppearSubject.asObservable(),
-            testButtonTapped: testButtonTapped,
             addButtonTapped: addButtonTapped
         )
         
         /// Output
         /// - updatedData : RxDataSource로 CollectionView 업데이트
         /// - showAddListModal : 새 일정 추가 모달을 사용
-        /// - addCellViewHidden : 일정 추가하기 뷰 fade in/out
+        /// - addCellViewHidden : 일정 추가하기 셀 뷰 fade in/out
         let output = viewModel.transform(input: input)
         
         output.updatedData
-            .drive(listCollectionView.rx.items(dataSource: dataSource))
+            .bind(to: listCollectionView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
         output.showAddListModal
@@ -169,20 +153,16 @@ private extension CashBookListViewController {
                 }
             }).disposed(by: disposeBag)
         
-        // testButton 바인딩
-        testButton.rx.tap
-            .bind(to: testButtonTapped)
-            .disposed(by: disposeBag)
-        
         // addButton 바인딩
         addCellView.addButton.rx.tap
             .bind(to: addButtonTapped)
             .disposed(by: disposeBag)
-        
+  
         // 선택된 셀 동작처리(추후 구현)
         listCollectionView.rx.modelSelected(ListCellData.self)
             .subscribe(onNext: { selectedItem in
                 print("\(selectedItem)")
+                self.navigationController?.pushViewController(TopViewController(), animated: true)
             })
             .disposed(by: disposeBag)
     }
@@ -201,10 +181,13 @@ private extension CashBookListViewController {
                     return UISwipeActionsConfiguration(actions: [])
                 }
                 
-                let item = self.viewModel.items[indexPath.row]
+                // indexPath를 기반으로 CoreData에서 item 가져오기
+                let sections = try? self.dataSource.model(at: indexPath) as? SectionOfListCellData
+                guard let section = sections else { return nil }
+                let item = section.items[indexPath.row]
                 
                 let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
-                    self.viewModel.deleteItem(with: item.identity)
+                    self.viewModel.deleteCashBook(with: item.identity)
                     completion(true) // 추후 기능 구현
                 }
                 return UISwipeActionsConfiguration(actions: [deletAction])
