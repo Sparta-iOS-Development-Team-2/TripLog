@@ -4,6 +4,7 @@
         <attribute name="budget" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="departure" optional="YES" attributeType="String"/>
         <attribute name="homecoming" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="note" optional="YES" attributeType="String"/>
         <attribute name="tripName" optional="YES" attributeType="String"/>
     </entity>
@@ -11,11 +12,13 @@
         <attribute name="baseRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="currencyCode" optional="YES" attributeType="String"/>
         <attribute name="currencyName" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="rateDate" optional="YES" attributeType="String"/>
     </entity>
     <entity name="MyCashBookEntity" representedClassName="MyCashBookEntity" syncable="YES" codeGenerationType="class">
         <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="note" optional="YES" attributeType="String"/>
         <attribute name="payment" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
     </entity>

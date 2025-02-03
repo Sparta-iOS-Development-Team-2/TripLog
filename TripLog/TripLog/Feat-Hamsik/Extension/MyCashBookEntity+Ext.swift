@@ -10,6 +10,7 @@ import CoreData
 
 // TODO: 임시데이터(삭제예정)
 struct MockMyCashBookModel {
+    var id = UUID()
     let note: String
     let category: String
     let amount: Double
@@ -30,13 +31,29 @@ extension MyCashBookEntity: CoreDataManagable {
     static func save(_ data: Model, context: NSManagedObjectContext) {
         let entityName = EntityKeys.Name.MyCashBookEntity.rawValue
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
-        context.perform {
-            let att = NSManagedObject(entity: entity, insertInto: context)
-            att.setValue(data.amount, forKey: EntityKeys.MyCashBookElement.amount)
-            att.setValue(data.category, forKey: EntityKeys.MyCashBookElement.category)
-            att.setValue(data.note, forKey: EntityKeys.MyCashBookElement.note)
-            att.setValue(data.payment, forKey: EntityKeys.MyCashBookElement.payment)
+        
+        let fetchRequest: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", data.id as CVarArg)
+        
+        do {
+            let existingItems = try context.fetch(fetchRequest)
+            if existingItems.isEmpty {
+                // 중복된 항목이 없으면 저장
+                context.perform {
+                    let att = NSManagedObject(entity: entity, insertInto: context)
+                    att.setValue(data.amount, forKey: EntityKeys.MyCashBookElement.amount)
+                    att.setValue(data.category, forKey: EntityKeys.MyCashBookElement.category)
+                    att.setValue(data.note, forKey: EntityKeys.MyCashBookElement.note)
+                    att.setValue(data.payment, forKey: EntityKeys.MyCashBookElement.payment)
+                }
+            } else {
+                print("이미 존재하는 항목입니다.")
+            }
+        } catch {
+            print("Fetch 오류: \(error.localizedDescription)")
         }
+        
+        
     }
     
     /// MyCashBookEntity의 전체/특정 데이터를 가져오는 함수
@@ -74,5 +91,32 @@ extension MyCashBookEntity: CoreDataManagable {
         }
     }
     
+    
+    /// MyCashBookEntity의 전체/특정 데이터를 업데이트하는 함수
+    /// - Parameters:
+    ///   - data: 업데이트할 데이터
+    ///   - entityID: 업데이트할 Entity의 ID
+    ///   - context: CoreData 인스턴스
+    static func update(data: MockMyCashBookModel, entityID: UUID, context: NSManagedObjectContext) {
+        let fetchRequest: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", entityID as CVarArg)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            
+            if let entityToUpdate = results.first {
+                context.perform {
+                    entityToUpdate.setValue(data.amount, forKey: EntityKeys.MyCashBookElement.amount)
+                    entityToUpdate.setValue(data.category, forKey: EntityKeys.MyCashBookElement.category)
+                    entityToUpdate.setValue(data.note, forKey: EntityKeys.MyCashBookElement.note)
+                    entityToUpdate.setValue(data.payment, forKey: EntityKeys.MyCashBookElement.payment)
+                }
+            } else {
+                print("해당 UUID를 가진 엔티티를 찾을 수 없습니다.")
+            }
+        } catch {
+            print("업데이트 중 오류 발생: \(error.localizedDescription)")
+        }
+    }
     
 }

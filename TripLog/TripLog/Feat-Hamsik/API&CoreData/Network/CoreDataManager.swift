@@ -15,13 +15,13 @@ class CoreDataManager {
     private let persistentContainer: NSPersistentContainer
     
     private init(container: NSPersistentContainer = NSPersistentContainer(name: AppInfo.appId)) {
-            self.persistentContainer = container
-            self.persistentContainer.loadPersistentStores { _, error in
-                if let error = error {
-                    fatalError("Unresolved error \(error)")
-                }
+        self.persistentContainer = container
+        self.persistentContainer.loadPersistentStores { _, error in
+            if let error = error {
+                fatalError("Unresolved error \(error)")
             }
         }
+    }
     
     private var context: NSManagedObjectContext {
         return persistentContainer.viewContext
@@ -50,6 +50,15 @@ class CoreDataManager {
     }
     
     
+    /// CoreData에 저장된 Entity를 수정(업데이트)하는 함수
+    /// - Parameters:
+    ///   - type: 업데이트할 Entity의 Type
+    ///   - entityID: 업데이트할 Entity의 ID
+    ///   - data: 업데이트할 Entity의 Data
+    func update <T: CoreDataManagable>(type: T.Type, entityID: UUID, data: T.Model) {
+        T.update(data: data, entityID: entityID, context: context)
+    }
+    
     /// 특정 단일 Entity를 삭제하는 함수
     /// - Parameter object: 삭제할 하나의 Entity
     ///
@@ -66,10 +75,10 @@ class CoreDataManager {
             debugPrint("⚠️ 삭제하려는 엔티티 '\(entityName.rawValue)'가 존재하지 않습니다.")
             return
         }
-
+        
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName.rawValue)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-
+        
         do {
             try context.execute(deleteRequest)
             saveContext()
@@ -78,7 +87,7 @@ class CoreDataManager {
             debugPrint("❌ \(entityName) 삭제 실패: \(error)")
         }
     }
-
+    
     
     /// CoreData에 저장완료하는 코드를 간소화하기 위해 만든 함수
     private func saveContext() {

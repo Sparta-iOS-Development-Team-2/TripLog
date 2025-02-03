@@ -18,6 +18,11 @@ extension CurrencyEntity: CoreDataManagable {
     /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
     static func save(_ data: CurrencyRate, context: NSManagedObjectContext) { }
     
+    /// (사용X)
+    ///
+    /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
+    static func update(data: CurrencyRate, entityID: UUID, context: NSManagedObjectContext) { }
+    
     /// 새로운 환율정보를 생성하는 함수
     /// - Parameters:
     ///   - date: 생성할 환율날짜
