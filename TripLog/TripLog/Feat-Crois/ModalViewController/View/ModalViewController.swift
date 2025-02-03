@@ -74,6 +74,7 @@ private extension ModalViewController {
         self.modalPresentationStyle = .formSheet
         self.sheetPresentationController?.preferredCornerRadius = 12
         self.sheetPresentationController?.detents = [.custom(resolver: { _ in 464 })]
+        self.sheetPresentationController?.prefersGrabberVisible = true
     }
     
     /// 뷰 모델 바인딩 메소드

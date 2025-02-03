@@ -135,7 +135,7 @@ private extension ModalView {
     
     func setupLayout() {
         titleLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(16)
+            $0.top.equalToSuperview().offset(24)
             $0.horizontalEdges.equalToSuperview().inset(24)
         }
         
