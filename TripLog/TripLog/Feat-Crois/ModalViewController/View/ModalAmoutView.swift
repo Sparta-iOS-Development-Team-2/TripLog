@@ -74,7 +74,7 @@ final class ModalAmoutView: UIView {
     /// - Parameters:
     ///   - amout: 금액(빈 값일 수도 있음)
     ///   - currency: 통화
-    func configureAmoutView(amout: Int?, currency: Currency) {
+    func configureAmoutView(amout: Double?, currency: Currency) {
         self.textField.text = "\(amout ?? 0)"
         self.currencyButton.setTitle(currency.rawValue, for: .normal)
     }
