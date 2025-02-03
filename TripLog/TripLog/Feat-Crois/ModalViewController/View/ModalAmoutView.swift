@@ -79,6 +79,15 @@ final class ModalAmoutView: UIView {
         self.currencyButton.setTitle(currency.rawValue, for: .normal)
     }
     
+    func amountExtraction() -> Double {
+        guard
+            let text = textField.text,
+            let amount = Double(text)
+        else { return 0 }
+        
+        return amount
+    }
+    
 }
 
 // MARK: - UI Setting Method
