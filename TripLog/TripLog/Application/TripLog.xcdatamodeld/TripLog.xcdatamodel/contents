@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24C101" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="CurrencyEntity" representedClassName=".CurrencyEntity" syncable="YES">
+    <entity name="CashBookEntity" representedClassName="CashBookEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="budget" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="departure" optional="YES" attributeType="String"/>
+        <attribute name="homecoming" optional="YES" attributeType="String"/>
+        <attribute name="note" optional="YES" attributeType="String"/>
+        <attribute name="tripName" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="CurrencyEntity" representedClassName=".CurrencyEntity" syncable="YES" codeGenerationType="class">
         <attribute name="baseRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="currencyCode" optional="YES" attributeType="String"/>
         <attribute name="currencyName" optional="YES" attributeType="String"/>
+        <attribute name="rateDate" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="MyCashBookEntity" representedClassName="MyCashBookEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="note" optional="YES" attributeType="String"/>
+        <attribute name="payment" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
     </entity>
 </model>
