@@ -31,7 +31,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.adjustsFontSizeToFitWidth = true
     }
     
-    private let bugetLabel = UILabel().then {
+    private let budgetLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
         $0.textColor = .Dark.base
         $0.numberOfLines = 1
@@ -80,7 +80,7 @@ private extension ListCollectionViewCell {
         
         [
             noteLabel,
-            bugetLabel,
+            budgetLabel,
             periodLabel
         ].forEach { verticalStackView.addArrangedSubview($0) }
         
@@ -108,7 +108,7 @@ private extension ListCollectionViewCell {
             $0.height.equalTo(20)
         }
         
-        bugetLabel.snp.makeConstraints {
+        budgetLabel.snp.makeConstraints {
             $0.height.equalTo(20)
         }
         
@@ -123,10 +123,10 @@ private extension ListCollectionViewCell {
 extension ListCollectionViewCell {
     
     /// 데이터에 저장된 값으로 UI update
-    func configureCell(data: ListCellData) {
+    func configureCell(data: MockCashBookModel) {
         tripNameLabel.text = data.tripName
         noteLabel.text = data.note
-        bugetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.buget)))"
+        budgetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.budget)))"
         periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
     }
     

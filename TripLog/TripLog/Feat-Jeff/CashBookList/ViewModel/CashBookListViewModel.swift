@@ -13,33 +13,43 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
     
     private var dummyData =
     SectionOfListCellData(
-        identity: UUID(),
+        id: UUID(),
         items: [
-            ListCellData(tripName: "여름방학 여행 2025",
-                         note: "일본, 미국, 하와이, 스위스, 체코",
-                         buget: 26000000,
-                         departure: "2025.05.12",
-                         homecoming: "2025.06.13"),
-            ListCellData(tripName: "가을방학 여행 2025",
-                         note: "🇨🇮 🇩🇪 🇹🇷",
-                         buget: 3400000,
-                         departure: "2025.10.12",
-                         homecoming: "2025.10.23"),
-            ListCellData(tripName: "겨울방학 여행 2025",
-                         note: "대만, 일본, 발리",
-                         buget: 5600000,
-                         departure: "2025.12.12",
-                         homecoming: "2025.12.21"),
-            ListCellData(tripName: "아시아 출장 2026",
-                         note: "대만, 일본",
-                         buget: 1000000,
-                         departure: "2026.02.11",
-                         homecoming: "2026.02.21"),
-            ListCellData(tripName: "미국 출장 2026",
-                         note: "미국",
-                         buget: 3600000,
-                         departure: "2026.04.13",
-                         homecoming: "2025.04.30")
+            MockCashBookModel(identity: UUID(),
+                              id: UUID(),
+                              tripName: "여름방학 여행 2025",
+                              note: "일본, 미국, 하와이, 스위스, 체코",
+                              budget: 26000000,
+                              departure: "2025.05.12",
+                              homecoming: "2025.06.13"),
+            MockCashBookModel(identity: UUID(),
+                              id: UUID(),
+                              tripName: "가을방학 여행 2025",
+                              note: "🇨🇮 🇩🇪 🇹🇷",
+                              budget: 3400000,
+                              departure: "2025.10.12",
+                              homecoming: "2025.10.23"),
+            MockCashBookModel(identity: UUID(),
+                              id: UUID(),
+                              tripName: "겨울방학 여행 2025",
+                              note: "대만, 일본, 발리",
+                              budget: 5600000,
+                              departure: "2025.12.12",
+                              homecoming: "2025.12.21"),
+            MockCashBookModel(identity: UUID(),
+                              id: UUID(),
+                              tripName: "아시아 출장 2026",
+                              note: "대만, 일본",
+                              budget: 1000000,
+                              departure: "2026.02.11",
+                              homecoming: "2026.02.21"),
+            MockCashBookModel(identity: UUID(),
+                              id: UUID(),
+                              tripName: "미국 출장 2026",
+                              note: "미국",
+                              budget: 3600000,
+                              departure: "2026.04.13",
+                              homecoming: "2025.04.30")
         ]
     )
     
@@ -92,12 +102,14 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
         
         let sectionData = [
             SectionOfListCellData(
-                identity: UUID(),
+                id: UUID(), // 섹션 구분
                 items: fetchedData.map { entity in
-                    return ListCellData(
+                    return MockCashBookModel(
+                        identity: UUID(),
+                        id: entity.id ?? UUID(),
                         tripName: entity.tripName ?? "",
                         note: entity.note ?? "",
-                        buget: entity.budget,
+                        budget: entity.budget,
                         departure: entity.departure ?? "",
                         homecoming: entity.homecoming ?? ""
                     )
@@ -123,14 +135,16 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
         guard existingData.isEmpty else { return }
         
         for item in dummyData.items {
-            let dummykData = MockCashBookModel(
-                budget: item.buget,
-                departure: item.departure,
-                homecoming: item.homecoming,
+            let dummyData = MockCashBookModel(
+                identity: UUID(),
+                id: item.id,
+                tripName: item.tripName,
                 note: item.note,
-                tripName: item.tripName
+                budget:  item.budget,
+                departure: item.departure,
+                homecoming: item.homecoming
             )
-            CashBookEntity.save(dummykData, context: context)
+            CashBookEntity.save(dummyData, context: context)
         }
     }
     
@@ -168,11 +182,6 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
     
     func deleteCashBook(with id: UUID) {
         
-    }
-    
-    /// 엔티티 전체 삭제?
-    func deleteCashBookList() {
-        CoreDataManager.shared.removeEntity(entityName: .CashBookEntity)
     }
     
 }
