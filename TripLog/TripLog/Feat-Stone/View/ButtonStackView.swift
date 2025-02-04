@@ -57,7 +57,7 @@ class CustomButtonStackView: UIStackView {
 
     private func configureButton(_ button: UIButton, title: String) {
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: .medium)
+        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: .bold)
         button.applyTextFieldStroke()
     }
     
@@ -69,9 +69,16 @@ class CustomButtonStackView: UIStackView {
 
     // ✅ 버튼 스타일 업데이트
     private func updateButtonStyles() {
+        let todayFontWeight: UIFont.Weight = isTodaySelected ? .bold : .medium
+        let calendarFontWeight: UIFont.Weight = isTodaySelected ? .medium : .bold
+
         todayExpenseButton.setTitleColor(isTodaySelected ? UIColor.Personal.normal : UIColor.CustomColors.Text.textSecondary, for: .normal)
         calendarButton.setTitleColor(isTodaySelected ? UIColor.CustomColors.Text.textSecondary : UIColor.Personal.normal, for: .normal)
+
+        todayExpenseButton.titleLabel?.font = UIFont.SCDream(size: .display, weight: todayFontWeight)
+        calendarButton.titleLabel?.font = UIFont.SCDream(size: .display, weight: calendarFontWeight)
     }
+
 
     // ✅ 오늘 지출 버튼 클릭
     @objc private func todayButtonTapped() {
