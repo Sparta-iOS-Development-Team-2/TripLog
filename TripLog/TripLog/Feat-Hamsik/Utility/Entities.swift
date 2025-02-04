@@ -21,19 +21,21 @@ struct CurrencyElement {
 }
 
 struct MyCashBookElement {
+    let amount = "amount"
+    let category = "category"
+    let cashBookID = "cashBookID"
+    let country = "country"
+    let expenseDate = "expenseDate"
     let id = "id"
     let note = "note"
-    let category = "category"
-    let amount = "amount"
     let payment = "payment"
 }
 
 struct CashBookElement {
-    let id = "id"
     let budget = "budget"
     let departure = "departure"
     let homecoming = "homecoming"
+    let id = "id"
     let note = "note"
     let tripName = "tripName"
-
 }
