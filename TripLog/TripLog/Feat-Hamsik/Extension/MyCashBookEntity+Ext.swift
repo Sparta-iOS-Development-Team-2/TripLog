@@ -7,16 +7,9 @@
 
 import Foundation
 import CoreData
-import Differentiator
 
 // TODO: 임시데이터(삭제예정)
-struct MockMyCashBookModel: Hashable, IdentifiableType {
-    
-    typealias Identity = UUID
-    var identity: UUID {
-        self.id
-    }
-    
+struct MockMyCashBookModel {    
     var id = UUID()
     let note: String
     let category: String
