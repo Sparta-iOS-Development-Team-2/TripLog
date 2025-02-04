@@ -12,26 +12,28 @@ enum EntityKeys {
     enum Name: String {
         case CurrencyEntity, CashBookEntity, MyCashBookEntity
     }
-    
-    enum CurrencyElement {
-        static let rateDate = "rateDate"
-        static let baseRate = "baseRate"
-        static let currencyCode = "currencyCode"
-        static let currencyName = "currencyName"
-    }
-    
-    enum CashBookElement {
-        static let budget = "budget"
-        static let departure = "departure"
-        static let homecoming = "homecoming"
-        static let note = "note"
-        static let tripName = "tripName"
-    }
-    
-    enum MyCashBookElement {
-        static let note = "note"
-        static let category = "category"
-        static let amount = "amount"
-        static let payment = "payment"
-    }
+}
+struct CurrencyElement {
+    let rateDate = "rateDate"
+    let baseRate = "baseRate"
+    let currencyCode = "currencyCode"
+    let currencyName = "currencyName"
+}
+
+struct MyCashBookElement {
+    let id = "id"
+    let note = "note"
+    let category = "category"
+    let amount = "amount"
+    let payment = "payment"
+}
+
+struct CashBookElement {
+    let id = "id"
+    let budget = "budget"
+    let departure = "departure"
+    let homecoming = "homecoming"
+    let note = "note"
+    let tripName = "tripName"
+
 }
