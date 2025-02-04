@@ -208,12 +208,17 @@ private extension CashBookListViewController {
                 return UISwipeActionsConfiguration(actions: [deletAction])
             }
             
-            
             // 셀 수정 기능
             configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
                 let editAction = UIContextualAction(style: .normal, title: "수정") { _, _, completion in
                     
-                    completion(true) // 추후 기능 구현
+                    guard let data = try? self.dataSource.model(at: indexPath) as? MockCashBookModel else {
+                        completion(false)
+                        return
+                    }
+                    
+                    ModalViewManager.showModal(on: self, state: .editCashBook(data: data))
+                    completion(true)
                 }
                 return UISwipeActionsConfiguration(actions: [editAction])
             }
