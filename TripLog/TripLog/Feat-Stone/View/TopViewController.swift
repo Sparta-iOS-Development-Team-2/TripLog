@@ -17,6 +17,9 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
         $0.rowHeight = 192
+        $0.estimatedRowHeight = 0
+        $0.isScrollEnabled = false
+        $0.alwaysBounceVertical = false
     }
 
     private let data = TestDummyData.sampleData() // Model에서 가져옴
