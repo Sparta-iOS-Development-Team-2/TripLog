@@ -59,8 +59,8 @@ final class CustomProgressView: UIView {
         }, completion: { _ in
             // ✅ Gradient 애니메이션 다시 적용
             self.progress.applyGradientAnimation(colors: [
-                UIColor.Personal.normal,
-                UIColor(red: 98/256, green: 208/256, blue: 1.0, alpha: 1.0)
+                UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0),
+                UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0)
             ])
         })
     }
