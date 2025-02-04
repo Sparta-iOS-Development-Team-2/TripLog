@@ -201,7 +201,17 @@ private extension CashBookListViewController {
                 let item = section.items[indexPath.row]
                 
                 // 삭제 기능
-                let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
+                let deletAction = UIContextualAction(style: .destructive, title: "삭제") {[weak self] _, _, completion in
+                    guard let self = self else { return }
+                    
+                    // alert으로 삭제 여부 확인
+                    let alert = AlertManager.init(title: "경고",
+                                                  message: "해당 가계부를 삭제하시겠습니까?",
+                                                  cancelTitle: "취소",
+                                                  destructiveTitle: "삭제") {
+                        CoreDataManager.shared.delete(type: CashBookEntity.self, entityID: item.identity)
+                    }
+                    alert.showAlert(on: self, .alert)
                     CoreDataManager.shared.delete(type: CashBookEntity.self, entityID: item.identity)
                     completion(true)
                 }
