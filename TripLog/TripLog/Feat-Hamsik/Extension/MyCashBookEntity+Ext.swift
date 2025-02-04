@@ -7,9 +7,16 @@
 
 import Foundation
 import CoreData
+import Differentiator
 
 // TODO: 임시데이터(삭제예정)
-struct MockMyCashBookModel {
+struct MockMyCashBookModel: Hashable, IdentifiableType {
+    
+    typealias Identity = UUID
+    var identity: UUID {
+        self.id
+    }
+    
     var id = UUID()
     let note: String
     let category: String
@@ -30,36 +37,24 @@ extension MyCashBookEntity: CoreDataManagable {
     ///   - context: CoreData 인스턴스
     static func save(_ data: Model, context: NSManagedObjectContext) {
         let entityName = EntityKeys.Name.MyCashBookEntity.rawValue
+        let element = MyCashBookElement()
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         
-        let fetchRequest: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", data.id as CVarArg)
-        
-        do {
-            let existingItems = try context.fetch(fetchRequest)
-            if existingItems.isEmpty {
-                // 중복된 항목이 없으면 저장
-                context.perform {
-                    let att = NSManagedObject(entity: entity, insertInto: context)
-                    att.setValue(data.amount, forKey: EntityKeys.MyCashBookElement.amount)
-                    att.setValue(data.category, forKey: EntityKeys.MyCashBookElement.category)
-                    att.setValue(data.note, forKey: EntityKeys.MyCashBookElement.note)
-                    att.setValue(data.payment, forKey: EntityKeys.MyCashBookElement.payment)
-                }
-                do {
-                    try context.save()
-                    print("저장 성공: \(data.note)")
-                } catch {
-                    print("데이터 저장 실패: \(error)")
-                }
-                
-            } else {
-                print("이미 존재하는 항목입니다.")
+        // 비동기 저장
+        context.performAndWait {
+            let att = NSManagedObject(entity: entity, insertInto: context)
+            att.setValue(data.id, forKey: element.id)
+            att.setValue(data.amount, forKey: element.amount)
+            att.setValue(data.category, forKey: element.category)
+            att.setValue(data.note, forKey: element.note)
+            att.setValue(data.payment, forKey: element.payment)
+            do {
+                try context.save()
+                print("저장 성공: \(data.note)")
+            } catch {
+                print("데이터 저장 실패: \(error)")
             }
-        } catch {
-            print("Fetch 오류: \(error.localizedDescription)")
         }
-        
         
     }
     
@@ -71,6 +66,7 @@ extension MyCashBookEntity: CoreDataManagable {
     /// - Returns: 검색 결과
     static func fetch(context: NSManagedObjectContext, predicate: String? = nil) -> [Entity] {
         let request: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
+        let element = MyCashBookElement()
         
         guard let predicate = predicate else {
             // 검색 조건이 없을 때 동작
@@ -85,11 +81,11 @@ extension MyCashBookEntity: CoreDataManagable {
         }
         
         // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "note == $@", predicate)
+        request.predicate = NSPredicate(format: "\(element.note) == %@", predicate)
         do {
             let result = try context.fetch(request)
             for item in result {
-                print("검색 결과: \n이름: \(item.value(forKey: "note") ?? "")")
+                print("검색 결과: \n이름: \(item.value(forKey: element.note) ?? "")")
             }
             return result
         } catch {
@@ -106,17 +102,19 @@ extension MyCashBookEntity: CoreDataManagable {
     ///   - context: CoreData 인스턴스
     static func update(data: MockMyCashBookModel, entityID: UUID, context: NSManagedObjectContext) {
         let fetchRequest: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", entityID as CVarArg)
+        let element = MyCashBookElement()
+        fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)
         
         do {
             let results = try context.fetch(fetchRequest)
             
             if let entityToUpdate = results.first {
-                context.perform {
-                    entityToUpdate.setValue(data.amount, forKey: EntityKeys.MyCashBookElement.amount)
-                    entityToUpdate.setValue(data.category, forKey: EntityKeys.MyCashBookElement.category)
-                    entityToUpdate.setValue(data.note, forKey: EntityKeys.MyCashBookElement.note)
-                    entityToUpdate.setValue(data.payment, forKey: EntityKeys.MyCashBookElement.payment)
+                // 비동기 저장
+                context.performAndWait {
+                    entityToUpdate.setValue(data.amount, forKey: element.amount)
+                    entityToUpdate.setValue(data.category, forKey: element.category)
+                    entityToUpdate.setValue(data.note, forKey: element.note)
+                    entityToUpdate.setValue(data.payment, forKey: element.payment)
                 }
                 do {
                     try context.save()
@@ -134,20 +132,16 @@ extension MyCashBookEntity: CoreDataManagable {
     }
     
     static func delete(entityID: UUID, context: NSManagedObjectContext) {
-        let persistantContainer = CoreDataManager.shared.persistentContainer
         let entityName = EntityKeys.Name.MyCashBookEntity.rawValue
-        // Core Data 모델에서 해당 entity가 존재하는지 확인
-        guard persistantContainer.managedObjectModel.entities.contains(where: { $0.value(forKey: "id") as! UUID == entityID }) else {
-            debugPrint("삭제하려는 엔티티 '\(entityID)'가 존재하지 않습니다.")
-            return
-        }
+        let element = MyCashBookElement()
+        
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
-        fetchRequest.predicate = NSPredicate(format: "id == %@", entityID as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         
         do {
             try context.execute(deleteRequest)
-            try context.save()
+            context.refreshAllObjects()
             debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 완료")
         } catch {
             debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 실패: \(error)")
