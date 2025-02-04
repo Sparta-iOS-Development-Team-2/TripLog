@@ -78,7 +78,6 @@ final class ModalView: UIView {
             self.secondSection = ModalTextField(title: "여행 국가", subTitle: nil, placeholder: "예: 일본", keyboardType: .default)
             self.thirdSection = ModalTextField(title: "예산 설정", subTitle: "원(한화)", placeholder: "0", keyboardType: .numberPad)
             self.forthSection = ModalDateView()
-            self.buttons = ModalButtons(buttonTitle: "생성")
             
         case .createNewConsumption, .editConsumption:
             self.titleLabel.text = state.modalTitle
@@ -86,9 +85,15 @@ final class ModalView: UIView {
             self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
             self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비", keyboardType: .default)
             self.forthSection = ModalAmountView()
-            self.buttons = ModalButtons(buttonTitle: "생성")
         }
-    
+        
+        switch state {
+        case .createNewCashBook, .createNewConsumption:
+            self.buttons = ModalButtons(buttonTitle: "생성")
+        case .editCashBook, .editConsumption:
+            self.buttons = ModalButtons(buttonTitle: "수정")
+        }
+        
         super.init(frame: .zero)
         setupUI()
     }
