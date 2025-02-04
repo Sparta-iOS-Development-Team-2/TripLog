@@ -168,7 +168,7 @@ private extension CashBookListViewController {
         listCollectionView.rx.modelSelected(MockCashBookModel.self)
             .subscribe(onNext: { selectedItem in
                 print("\(selectedItem)")
-                //self.navigationController?.pushViewController(TopViewController(), animated: true)
+                self.navigationController?.pushViewController(TopViewController(), animated: true)
             })
             .disposed(by: disposeBag)
     }
@@ -181,6 +181,7 @@ private extension CashBookListViewController {
             // 셀 뒤의 스크롤뷰 색상 변경
             configuration.backgroundColor = UIColor.CustomColors.Background.background
             
+            // 셀 삭제 기능
             configuration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath in
                 guard let self = self else {
                     return UISwipeActionsConfiguration(actions: [])
@@ -190,38 +191,30 @@ private extension CashBookListViewController {
                 guard indexPath.section < sections.count else {
                     return nil
                 }
-                
                 let section = sections[indexPath.section]
                 guard indexPath.row < section.items.count else {
                     return nil
                 }
-                
-                let item = section.items[indexPath.row]
-                
-                let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
+                let item = section.items[indexPath.row]       
+
+//                // indexPath를 기반으로 CoreData에서 item 가져오기
+//                let sections = try? self.dataSource.model(at: indexPath) as? SectionOfListCellData
+//                print("🔍 model(at:) 호출 - indexPath: \(indexPath), 결과: \(String(describing: sections))")
+//                
+//                guard let section = sections else {
+//                    print("❌ model(at:)에서 섹션을 찾을 수 없음")
+//                    return nil
+//                }
+//                let item = section.items[indexPath.row]
+//                print("✅ model(at:)에서 가져온 아이템: \(item)")
+
+                let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
                     CoreDataManager.shared.delete(type: CashBookEntity.self, entityID: item.identity)
-                    completion(true)
+                    completion(true) // 추후 기능 구현
                 }
-                
-                return UISwipeActionsConfiguration(actions: [deleteAction])
+                return UISwipeActionsConfiguration(actions: [deletAction])
             }
-            //            // 셀 삭제 기능
-            //            configuration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath in
-            //                guard let self = self else {
-            //                    return UISwipeActionsConfiguration(actions: [])
-            //                }
-            //
-            //                // indexPath를 기반으로 CoreData에서 item 가져오기
-            //                let sections = try? self.dataSource.model(at: indexPath) as? SectionOfListCellData
-            //                guard let section = sections else { return nil }
-            //                let item = section.items[indexPath.row]
-            //
-            //                let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
-            //                    CoreDataManager.shared.delete(type: CashBookEntity.self, entityID: item.identity)
-            //                    completion(true) // 추후 기능 구현
-            //                }
-            //                return UISwipeActionsConfiguration(actions: [deletAction])
-            //            }
+
             
             // 셀 수정 기능
             configuration.leadingSwipeActionsConfigurationProvider = { indexPath in

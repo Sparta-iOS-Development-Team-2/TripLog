@@ -15,36 +15,31 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
     SectionOfListCellData(
         id: UUID(),
         items: [
-            MockCashBookModel(identity: UUID(),
-                              id: UUID(),
+            MockCashBookModel(id: UUID(),
                               tripName: "여름방학 여행 2025",
                               note: "일본, 미국, 하와이, 스위스, 체코",
                               budget: 26000000,
                               departure: "2025.05.12",
                               homecoming: "2025.06.13"),
-            MockCashBookModel(identity: UUID(),
-                              id: UUID(),
+            MockCashBookModel(id: UUID(),
                               tripName: "가을방학 여행 2025",
                               note: "🇨🇮 🇩🇪 🇹🇷",
                               budget: 3400000,
                               departure: "2025.10.12",
                               homecoming: "2025.10.23"),
-            MockCashBookModel(identity: UUID(),
-                              id: UUID(),
+            MockCashBookModel(id: UUID(),
                               tripName: "겨울방학 여행 2025",
                               note: "대만, 일본, 발리",
                               budget: 5600000,
                               departure: "2025.12.12",
                               homecoming: "2025.12.21"),
-            MockCashBookModel(identity: UUID(),
-                              id: UUID(),
+            MockCashBookModel(id: UUID(),
                               tripName: "아시아 출장 2026",
                               note: "대만, 일본",
                               budget: 1000000,
                               departure: "2026.02.11",
                               homecoming: "2026.02.21"),
-            MockCashBookModel(identity: UUID(),
-                              id: UUID(),
+            MockCashBookModel(id: UUID(),
                               tripName: "미국 출장 2026",
                               note: "미국",
                               budget: 3600000,
@@ -60,7 +55,6 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
     
     struct Output {
         let showAddListModal: PublishRelay<Void>
-        //let updatedData: Observable<[CashBookEntity.Entity]>
         let updatedData: Observable<[SectionOfListCellData]>
         let addCellViewHidden: Driver<Double>
     }
@@ -105,11 +99,10 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
                 id: UUID(), // 섹션 구분
                 items: fetchedData.map { entity in
                     return MockCashBookModel(
-                        identity: UUID(),
                         id: entity.id ?? UUID(),
                         tripName: entity.tripName ?? "",
                         note: entity.note ?? "",
-                        budget: entity.budget,
+                        budget: Int(entity.budget),
                         departure: entity.departure ?? "",
                         homecoming: entity.homecoming ?? ""
                     )
@@ -136,7 +129,6 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
         
         for item in dummyData.items {
             let dummyData = MockCashBookModel(
-                identity: UUID(),
                 id: item.id,
                 tripName: item.tripName,
                 note: item.note,
@@ -178,10 +170,6 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
             updatedData: updatedData,
             addCellViewHidden: addCellViewHidden
         )
-    }
-    
-    func deleteCashBook(with id: UUID) {
-        
     }
     
 }
