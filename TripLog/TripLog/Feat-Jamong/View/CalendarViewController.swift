@@ -6,10 +6,11 @@
 //
 
 import UIKit
+import FSCalendar
 import RxSwift
+import RxCocoa
 import Then
 import SnapKit
-import FSCalendar
 
 /// 캘린더 화면을 관리하는 뷰컨트롤러
 /// - 캘린더와 지출 목록을 스크롤 뷰로 표시
@@ -56,6 +57,8 @@ final class CalendarViewController: UIViewController {
         $0.applyViewStyle()
         $0.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10)
     }
+    
+    private let calendarViewModel = CalendarViewModel()
     
     // MARK: - Properties
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
@@ -174,7 +177,7 @@ final class CalendarViewController: UIViewController {
     // MARK: - Calendar Setup
     /// 캘린더 초기 설정
     private func setupCalendar() {
-        customHeaderView.updateTitle(date: calendarView.calendar.currentPage)
+        customHeaderView.viewModel = calendarViewModel
     }
     
     /// 지정된 날짜로 캘린더 페이지 변경
@@ -194,21 +197,35 @@ final class CalendarViewController: UIViewController {
             dateComponents.day = day
             if let date = calendar.date(from: dateComponents) {
                 if Bool.random() {
-                    fakeTripExpenses[date] = Double.random(in: 1000...100000)
+                    fakeTripExpenses[date] = Double.random(in: 10000...1000000)
                 }
             }
         }
     }
+    
+    // CalendarViewModel 바인딩
+    private func setupBindings() {
+        let calendar = calendarView.calendar
+
+        // 캘린더의 현재 페이지 변경 이벤트를 ViewModel로 전달
+        calendarViewModel.currentPageRelay
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] date in
+                self?.calendarView.calendar.setCurrentPage(date, animated: true)
+            })
+            .disposed(by: disposeBag)
+
+        // ViewModel에서 변경된 페이지를 감지하고 UI 업데이트
+        calendarView.rx.methodInvoked(#selector(FSCalendarDelegate.calendarCurrentPageDidChange(_:)))
+            .compactMap { [weak self] _ in self?.calendarView.calendar.currentPage }
+            .bind(to: calendarViewModel.currentPageRelay)
+            .disposed(by: disposeBag)
+    }
+    
 }
 
 // MARK: - FSCalendarDelegate, FSCalendarDataSource
 extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
-    /// 캘린더의 현재 페이지가 변경되었을 때 호출
-    /// - Parameter calendar: 변경된 캘린더 객체
-    func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
-        customHeaderView.updateTitle(date: calendar.currentPage)
-    }
-    
     /// 각 날짜에 대한 캘린더 셀을 생성하고 구성한다.
     /// - Parameters:
     ///   - calendar: 현재 FSCalendar 인스턴스
@@ -260,7 +277,6 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     
     private func configureUnselectedCell(_ cell: CalendarCustomCell, for date: Date) {
         let isToday = Calendar.current.isDateInToday(date)
-        
         cell.titleLabel.textColor = isToday ? .systemBlue : UIColor.CustomColors.Text.textPrimary
         cell.expenseLabel.textColor = .red
         cell.contentView.layer.cornerRadius = 0
