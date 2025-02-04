@@ -37,8 +37,7 @@ final class CalendarExpenseView: UIView {
         $0.textAlignment = .center
         $0.isHidden = true
     }
-    
-    
+
     // MARK: - Properties
     /// 현재 표시중인 지출 항목 배열
     private var expenses: [ExpenseItem] = []
@@ -56,8 +55,6 @@ final class CalendarExpenseView: UIView {
     // MARK: - Setup
     /// UI 컴포넌트들의 초기 설정
     private func setupUI() {
-        backgroundColor = UIColor.CustomColors.Background.background
-        
         [headerView, tableView, emptyStateLabel].forEach { addSubview($0) }
         
         setupConstraints()

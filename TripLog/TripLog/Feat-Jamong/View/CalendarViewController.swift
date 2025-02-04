@@ -34,7 +34,6 @@ final class CalendarViewController: UIViewController {
     /// 캘린더와 헤더를 담는 컨테이너 뷰
     private lazy var calendarContainerView = UIView().then {
         $0.applyViewStyle()
-        $0.backgroundColor = .white
         $0.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10)
     }
     
@@ -54,7 +53,8 @@ final class CalendarViewController: UIViewController {
     
     /// 지출 목록을 표시하는 뷰
     private lazy var expenseListView = CalendarExpenseView().then {
-        $0.backgroundColor = UIColor.CustomColors.Background.background
+        $0.applyViewStyle()
+        $0.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10)
     }
     
     // MARK: - Properties
@@ -102,6 +102,7 @@ final class CalendarViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         calendarContainerView.layer.shadowPath = calendarContainerView.shadowPath()
+        expenseListView.layer.shadowPath = expenseListView.shadowPath()
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -109,6 +110,7 @@ final class CalendarViewController: UIViewController {
         calendarContainerView.applyViewStyle()
         calendarContainerView.backgroundColor = UIColor.CustomColors.Background.background
         expenseListView.applyViewStyle()
+        expenseListView.backgroundColor = UIColor.CustomColors.Background.background
     }
     
     // MARK: - Setup
@@ -122,7 +124,7 @@ final class CalendarViewController: UIViewController {
     
     /// 기본 뷰 설정
     private func configureBaseView() {
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor.CustomColors.Background.background
     }
     
     /// 스크롤 뷰 설정
