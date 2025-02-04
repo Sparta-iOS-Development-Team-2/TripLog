@@ -17,6 +17,7 @@ final class ModalViewController: UIViewController {
     // MARK: - Rx Properties
     
     private let disposeBag = DisposeBag()
+    fileprivate let activeButtonTapped = PublishRelay<Void>()
     
     // MARK: - Properties
     
@@ -24,7 +25,7 @@ final class ModalViewController: UIViewController {
     
     // MARK: - UI Components
     
-    fileprivate let modalView: ModalView
+    private let modalView: ModalView
     
     // MARK: - Initializer
     
@@ -73,6 +74,7 @@ private extension ModalViewController {
         self.modalPresentationStyle = .formSheet
         self.sheetPresentationController?.preferredCornerRadius = 12
         self.sheetPresentationController?.detents = [.custom(resolver: { _ in 464 })]
+        self.sheetPresentationController?.prefersGrabberVisible = true
     }
     
     /// 뷰 모델 바인딩 메소드
@@ -80,35 +82,77 @@ private extension ModalViewController {
         
         let input: ModalViewModel.Input = .init(
             cancelButtonTapped: self.modalView.rx.cancelButtonTapped,
-            activeButtonTapped: self.modalView.rx.activeButtonTapped,
+            cashBookActiveButtonTapped: self.modalView.rx.cashBookActiveButtonTapped,
+            consumptionActiveButtonTapped: self.modalView.rx.consumptionActiveButtonTapped,
             sectionIsBlank: self.modalView.rx.checkBlankOfSections
         )
         
         let output = viewModel.transform(input: input)
         
-        output.active
+        output.cashBookActive
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
-            .emit { owner, isBlank in
+            .emit { owner, data in
                 
-                guard !isBlank else {
+                guard !data.0 else {
                     guard let vc = AppHelpers.getTopViewController() else { return }
                     let alert = AlertManager(title: "알림", message: "모든 입력을 채워주세요!!", cancelTitle: "확인")
                     alert.showAlert(on: vc, .alert)
                     return
                 }
                 
+                let result = CashBookEntity.Model(tripName: data.1.tripName,
+                                                note: data.1.note,
+                                                budget: data.1.budget,
+                                                departure: data.1.departure,
+                                                homecoming: data.1.homecoming)
+                
                 switch owner.modalView.checkModalStatus() {
-                case .createNewCashBook: break
+                case .createNewCashBook:
                     // 가계부를 코어 데이터에 추가하는 로직
-                case .editCashBook: break
+                    CoreDataManager.shared.save(type: CashBookEntity.self, data: result)
+                    
+                case .editCashBook:
                     // 가계부를 코어 데이터에 업데이트 하는 로직
-                case .createNewbudget: break
-                    // 지출 내역을 코어 데이터에 추가하는 로직
-                case .editBudget: break
-                    // 지출 내역을 코어 데이터에 업데이트 하는 로직
+                    CoreDataManager.shared.update(type: CashBookEntity.self, entityID: owner.modalView.getDataId(), data: result)
+                    
+                default: break
                 }
                 
+                owner.activeButtonTapped.accept(())
+                owner.dismiss(animated: true)
+                
+            }.disposed(by: disposeBag)
+        
+        output.consumptionActive
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, data in
+                
+                guard !data.0 else {
+                    guard let vc = AppHelpers.getTopViewController() else { return }
+                    let alert = AlertManager(title: "알림", message: "모든 입력을 채워주세요!!", cancelTitle: "확인")
+                    alert.showAlert(on: vc, .alert)
+                    return
+                }
+                
+                let result = MyCashBookEntity.Model(note: data.1.note,
+                                                  category: data.1.category,
+                                                  amount: data.1.amount,
+                                                  payment: data.1.payment)
+                
+                switch owner.modalView.checkModalStatus() {
+                case .createNewConsumption:
+                    // 지출내역을 코어 데이터에 추가하는 로직
+                    CoreDataManager.shared.save(type: MyCashBookEntity.self, data: result)
+                case .editConsumption:
+                    // 지출내역을 코어 데이터에 업데이트 하는 로직
+                    CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: owner.modalView.getDataId(), data: result)
+                    
+                default: break
+                }
+                
+                owner.activeButtonTapped.accept(())
                 owner.dismiss(animated: true)
                 
             }.disposed(by: disposeBag)
@@ -128,6 +172,6 @@ private extension ModalViewController {
 extension Reactive where Base: ModalViewController {
     /// 모달뷰의 active 버튼의 tap 이벤트를 방출하는 옵저버블
     var completedLogic: PublishRelay<Void> {
-        return base.modalView.rx.activeButtonTapped
+        return base.activeButtonTapped
     }
 }
