@@ -21,7 +21,7 @@ final class AddCellView: UIView {
     
     let addButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.tintColor = UIColor.Light.r200 // 컬러 에셋에 값이 없음(938989 / ffffff)
+        $0.tintColor = UIColor.CustomColors.Border.plus
     }
     
     //MARK: - Initializer

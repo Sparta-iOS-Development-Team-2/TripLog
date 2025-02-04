@@ -5,57 +5,88 @@
 //  Created by jae hoon lee on 1/22/25.
 //
 import Foundation
+import CoreData
 import RxSwift
 import RxCocoa
 
-class CashBookListViewModel: ViewModelType {
-    // 임시 코어데이터 역할
-    private let itemsRelay = BehaviorRelay<[ListCellData]>(value: [])
-    
-    private(set) var items: [ListCellData] {
-        get { itemsRelay.value }
-        set { itemsRelay.accept(newValue) }
-    }
-    
-    private var currentIndex = 0
-    private var dummyData =
-    SectionOfListCellData(
-        identity: UUID(),
-        items: [
-            ListCellData(tripName: "여름방학 여행 2025",
-                         note: "일본, 미국, 하와이, 스위스, 체코",
-                         buget: 26000000,
-                         departure: "2025.05.12",
-                         homecoming: "2025.06.13"),
-            ListCellData(tripName: "가을방학 여행 2025",
-                         note: "🇨🇮 🇩🇪 🇹🇷",
-                         buget: 3400000,
-                         departure: "2025.10.12",
-                         homecoming: "2025.10.23"),
-            ListCellData(tripName: "겨울방학 여행 2025",
-                         note: "대만, 일본, 발리",
-                         buget: 5600000,
-                         departure: "2025.12.12",
-                         homecoming: "2025.12.21")
-        ]
-    )
+class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsControllerDelegate {
     
     struct Input {
         let callViewWillAppear: Observable<Void>
-        let testButtonTapped: PublishRelay<Void>
         let addButtonTapped: PublishRelay<Void>
     }
-
+    
     struct Output {
-        let updatedData: Driver<[SectionOfListCellData]>
         let showAddListModal: PublishRelay<Void>
-        let addCellViewHidden: Driver<CGFloat>
+        let updatedData: Observable<[SectionOfListCellData]>
+        let addCellViewHidden: Driver<Double>
     }
     
     let disposeBag = DisposeBag()
     let showAddListModal = PublishRelay<Void>()
-
-    init() {}
+    let updatedDataSubject = BehaviorSubject<[SectionOfListCellData]>(value: [])
+    
+    /// CoreData의 변화를 감지하기 위한 컨트롤러
+    /// (CoreData fetch 요청의 결과를 관리하거나 사용자에게 데이터를 보여주기 위해 사용)
+    /// 타입은 제네릭으로 선언, 정렬이 필수적으로 필요
+    private lazy var fetchedResultsController: NSFetchedResultsController<CashBookEntity> = {
+        let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "departure", ascending: true)]
+        
+        let controller = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: CoreDataManager.shared.persistentContainer.viewContext,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        
+        // CoreData 변경 감지
+        controller.delegate = self
+        return controller
+    }()
+    
+    override init() {
+        super.init()
+        
+        try? fetchedResultsController.performFetch()
+        updateData()
+    }
+    
+    private func updateData() {
+        
+        let fetchedData = fetchedResultsController.fetchedObjects ?? []
+        
+        // 패치 결과로 업데이트
+        let sectionData = [
+            SectionOfListCellData(
+                id: UUID(), // 섹션 구분
+                items: fetchedData.map { entity in
+                    return MockCashBookModel(
+                        id: entity.id ?? UUID(),
+                        tripName: entity.tripName ?? "",
+                        note: entity.note ?? "",
+                        budget: Int(entity.budget),
+                        departure: entity.departure ?? "",
+                        homecoming: entity.homecoming ?? ""
+                    )
+                }
+            )
+        ]
+        
+        // RxDataSource 업데이트
+        updatedDataSubject.onNext(sectionData)
+    }
+    
+    ///  CoreData 변경 감지 후 Rx 스트림 업데이트
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        do {
+            // 최신 데이터 반영
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("패치 실패: \(error)")
+        }
+        updateData()
+    }
     
     /// Input
     /// - callViewWillAppear : ViewWillAppear 호출 시 이벤트
@@ -67,26 +98,14 @@ class CashBookListViewModel: ViewModelType {
     /// - showAddListModal : 모달 불러오기 메서드 호출
     /// - addCellViewHidden : 일정 추가하기 뷰의 alpha값 방출로 뷰 동작제어
     func transform(input: Input) -> Output {
-        let updatedData = itemsRelay
-            .map { items in
-                return [SectionOfListCellData(identity: UUID(), items: items)]
-            }.asDriver(onErrorJustReturn: [])
         
-        let addCellViewHidden = itemsRelay
-            .map { items -> CGFloat in
-                return items.isEmpty ? 1.0 : 0.0
-            }.asDriver(onErrorJustReturn: 0.0)
-            
-        input.testButtonTapped
-            .asSignal(onErrorSignalWith: .empty())
-            .emit(onNext: { [weak self] in
-                guard let self = self else { return }
-                
-                guard self.currentIndex < self.dummyData.items.count else { return }
-                let newItem = self.dummyData.items[self.currentIndex]
-                self.addItem(newItem)
-                self.currentIndex += 1
-            }).disposed(by: disposeBag)
+        let updatedData = updatedDataSubject
+            .asObservable()
+        
+        let addCellViewHidden = updatedData
+            .debug()
+            .map { $0.isEmpty ? 1.0 : 0.0 }
+            .asDriver(onErrorJustReturn: 0.0)
         
         input.addButtonTapped
             .asSignal(onErrorSignalWith: .empty())
@@ -96,23 +115,11 @@ class CashBookListViewModel: ViewModelType {
             }).disposed(by: disposeBag)
         
         return Output(
-            updatedData: updatedData,
             showAddListModal: showAddListModal,
+            updatedData: updatedData,
             addCellViewHidden: addCellViewHidden
         )
     }
     
-    /// 임시 데이터 추가(itemsRelay)
-    private func addItem(_ item: ListCellData) {
-        items.append(item)
-        print("\(item)")
-    }
-    
-    /// 임시 데이터 삭제(itemsRelay) - 해당 UUID
-    func deleteItem(with id: UUID) {
-        if let index = items.firstIndex(where: { $0.identity == id }) {
-            items.remove(at: index)
-        }
-    }
-    
 }
+
