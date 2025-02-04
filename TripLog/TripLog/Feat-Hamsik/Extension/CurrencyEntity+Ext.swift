@@ -48,7 +48,7 @@ extension CurrencyEntity: CoreDataManagable {
             return result
         } catch {
             print("데이터 읽기 실패: \(error)")
-            self.getDataFromFirestore(date: predicate, context: context)
+
             return []
         }
     }
@@ -68,7 +68,6 @@ extension CurrencyEntity: CoreDataManagable {
     ///   - date: 조회할 환율날짜
     ///   - context: CoreData 인스턴스
     static func getDataFromFirestore(date: String, context: NSManagedObjectContext) {
-        let dataType = APIInfo.exchangeRate
         
         FireStoreManager.shared.getStoreCurrencyRate(date: date) { result in
             saveToCoreData(result, date: date, context: context)

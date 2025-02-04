@@ -60,6 +60,8 @@ class FireStoreManager {
     func fetchCurrencyFromFirestore() async -> [CurrencyRate] {
         Task {
             let data = try await db.collection("Currency").getDocuments()
+
+            return data
         }
         return []
     }
