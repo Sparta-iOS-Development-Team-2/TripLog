@@ -12,7 +12,7 @@ import RxSwift
 import RxCocoa
 
 /// 모달뷰에서 금액을 입력하는 공용 컴포넌츠
-final class ModalAmoutView: UIView {
+final class ModalAmountView: UIView {
     
     // MARK: - UI Components
     
@@ -74,16 +74,27 @@ final class ModalAmoutView: UIView {
     /// - Parameters:
     ///   - amout: 금액(빈 값일 수도 있음)
     ///   - currency: 통화
-    func configureAmoutView(amout: Int?, currency: Currency) {
+    func configureAmoutView(amout: Double?, currency: Currency) {
         self.textField.text = "\(amout ?? 0)"
         self.currencyButton.setTitle(currency.rawValue, for: .normal)
+    }
+    
+    /// 금액뷰의 데이터를 추출하는 메소드
+    /// - Returns: 금액
+    func amountExtraction() -> Double {
+        guard
+            let text = textField.text,
+            let amount = Double(text)
+        else { return 0 }
+        
+        return amount
     }
     
 }
 
 // MARK: - UI Setting Method
 
-private extension ModalAmoutView {
+private extension ModalAmountView {
     
     func setupUI() {
         configureSelf()
@@ -139,8 +150,9 @@ private extension ModalAmoutView {
     
 }
 
-extension Reactive where Base: ModalAmoutView {
-    var isBlank: Observable<Bool> {
+extension Reactive where Base: ModalAmountView {
+    /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
+    var amountViewIsBlank: Observable<Bool> {
         return base.textField.rx.text.orEmpty
             .map { $0.isEmpty }
             .distinctUntilChanged()

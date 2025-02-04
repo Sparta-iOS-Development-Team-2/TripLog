@@ -48,6 +48,7 @@ extension CurrencyEntity: CoreDataManagable {
             return result
         } catch {
             print("데이터 읽기 실패: \(error)")
+
             return []
         }
     }
@@ -100,5 +101,6 @@ extension CurrencyEntity: CoreDataManagable {
             }
         }
     }
-    
+
+
 }

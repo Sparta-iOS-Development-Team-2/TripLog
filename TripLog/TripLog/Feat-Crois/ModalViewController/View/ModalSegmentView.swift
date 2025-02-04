@@ -44,6 +44,16 @@ final class ModalSegmentView: UIView {
         self.segmentView.selectedSegmentIndex = isCardPayment ? 1 : 0
     }
     
+    /// SegmentView의 데이터를 추출하는 메소드
+    /// - Returns: 결제 방식이 카드인지(Bool)
+    func paymentExtraction() -> Bool {
+        if segmentView.selectedSegmentIndex == 0 {
+            return false
+        } else {
+            return true
+        }
+    }
+    
 }
 
 // MARK: - UI Setting Method

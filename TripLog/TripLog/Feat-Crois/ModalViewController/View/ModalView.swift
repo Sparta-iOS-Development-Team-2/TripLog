@@ -13,11 +13,14 @@ import RxCocoa
 
 /// 모달 뷰 컨트롤러의 뷰로 쓰일 모달 뷰
 final class ModalView: UIView {
+    typealias ModalCashBookData = (tripName: String, note: String, budget: Int,departure: String, homecoming: String)
+    typealias ModalConsumptionData = (payment: Bool, note: String, category: String, amount: Double)
     
     // MARK: - Rx Properties
     
     fileprivate let cancelButtonTapped = PublishRelay<Void>()
-    fileprivate let activeButtonTapped = PublishRelay<Void>()
+    fileprivate let cashBookActiveButtonTapped = PublishRelay<ModalCashBookData>()
+    fileprivate let consumptionActiveButtonTapped = PublishRelay<ModalConsumptionData>()
     
     private let firstTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
     private let secondTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
@@ -58,6 +61,7 @@ final class ModalView: UIView {
     // MARK: - Properties
     
     private var state: ModalViewState
+    private var id: UUID?
     
     // MARK: - Initializer
     
@@ -76,12 +80,12 @@ final class ModalView: UIView {
             self.forthSection = ModalDateView()
             self.buttons = ModalButtons(buttonTitle: "생성")
             
-        case .createNewbudget, .editBudget:
+        case .createNewConsumption, .editConsumption:
             self.titleLabel.text = state.modalTitle
             self.firstSection = ModalSegmentView()
             self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
             self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비", keyboardType: .default)
-            self.forthSection = ModalAmoutView()
+            self.forthSection = ModalAmountView()
             self.buttons = ModalButtons(buttonTitle: "생성")
         }
     
@@ -103,6 +107,13 @@ final class ModalView: UIView {
     /// - Returns: 모달뷰의 현재 state
     func checkModalStatus() -> ModalViewState {
         return self.state
+    }
+    
+    /// 모달뷰의 ID를 추출하는 메소드
+    /// - Returns: 모달뷰의 ID
+    func getDataId() -> UUID {
+        guard let id else { return UUID() }
+        return id
     }
     
 }
@@ -131,7 +142,7 @@ private extension ModalView {
     
     func setupLayout() {
         titleLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(16)
+            $0.top.equalToSuperview().offset(24)
             $0.horizontalEdges.equalToSuperview().inset(24)
         }
         
@@ -198,10 +209,12 @@ private extension ModalView {
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalDateView
             {
-                firstSection.configureTextField(text: data.cashBookName)
-                secondSection.configureTextField(text: data.country)
+                firstSection.configureTextField(text: data.tripName)
+                secondSection.configureTextField(text: data.note)
                 thirdSection.configureTextField(text: "\(data.budget)")
-                forthSection.configureDate(start: data.startDate, end: data.endDate)
+                forthSection.configureDate(start: data.departure, end: data.homecoming)
+                
+                id = data.id
                 
                 firstSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -220,11 +233,11 @@ private extension ModalView {
                     .disposed(by: disposeBag)
             }
             
-        case .createNewbudget:
+        case .createNewConsumption:
             if
                let secondSection = self.secondSection as? ModalTextField,
                let thirdSection = self.thirdSection as? ModalTextField,
-               let forthSection = self.forthSection as? ModalAmoutView
+               let forthSection = self.forthSection as? ModalAmountView
             {
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -234,21 +247,23 @@ private extension ModalView {
                     .bind(to: secondTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                forthSection.rx.isBlank
+                forthSection.rx.amountViewIsBlank
                     .bind(to: thirdTextFieldIsBlank)
                     .disposed(by: disposeBag)
             }
             
-        case .editBudget(data: let data):
+        case .editConsumption(data: let data):
             if let firstSection = self.firstSection as? ModalSegmentView,
                let secondSection = self.secondSection as? ModalTextField,
                let thirdSection = self.thirdSection as? ModalTextField,
-               let forthSection = self.forthSection as? ModalAmoutView
+               let forthSection = self.forthSection as? ModalAmountView
             {
-                firstSection.configureSegment(to: data.isCardPayment)
-                secondSection.configureTextField(text: data.expenseDetails)
+                firstSection.configureSegment(to: data.payment)
+                secondSection.configureTextField(text: data.note)
                 thirdSection.configureTextField(text: data.category)
-                forthSection.configureAmoutView(amout: data.amount, currency: data.carrency)
+                forthSection.configureAmoutView(amout: data.amount, currency: Currency.KRW)
+                
+                id = data.id
                 
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -258,18 +273,91 @@ private extension ModalView {
                     .bind(to: secondTextFieldIsBlank)
                     .disposed(by: disposeBag)
                 
-                forthSection.rx.isBlank
+                forthSection.rx.amountViewIsBlank
                     .bind(to: thirdTextFieldIsBlank)
                     .disposed(by: disposeBag)
             }
         }
     }
+    
+    /// 모달뷰의 가계부 데이터를 추출하는 메소드
+    /// - Returns: 모달뷰 가계부 데이터
+    func cashBookDataExtraction() -> ModalCashBookData? {
+        switch state {
+        case .createNewCashBook, .editCashBook:
+            guard
+                let first = firstSection as? ModalTextField,
+                let second = secondSection as? ModalTextField,
+                let third = thirdSection as? ModalTextField,
+                let forth = forthSection as? ModalDateView
+            else { return nil }
+            
+            let dateData = forth.datePickerExtraction()
+            
+            let cashBookData = (first.textFieldExtraction(),
+                                second.textFieldExtraction(),
+                                Int(third.textFieldExtraction()) ?? 0,
+                                dateData.start,
+                                dateData.end)
+            
+            return cashBookData
+            
+        default:
+            return nil
+        }
+    }
+    
+    /// 모달뷰의 지출 내역 데이터를 추출하는 메소드
+    /// - Returns: 모달뷰의 지출 내역 데이터
+    func consumptionDataExtraction() -> ModalConsumptionData? {
+        switch state {
+        case .createNewConsumption, .editConsumption:
+            guard
+                let first = firstSection as? ModalSegmentView,
+                let second = secondSection as? ModalTextField,
+                let third = thirdSection as? ModalTextField,
+                let forth = forthSection as? ModalAmountView
+            else { return nil }
+            
+            let consumptionData = (first.paymentExtraction(),
+                                   second.textFieldExtraction(),
+                                   third.textFieldExtraction(),
+                                   forth.amountExtraction())
+            
+            return consumptionData
+            
+        default:
+            return nil
+        }
+    }
 
     /// 모달뷰의 버튼을 바인딩 하는 메소드
     func bindButtons() {
-        buttons.rx.activeButtondTapped
-            .bind(to: activeButtonTapped)
-            .disposed(by: disposeBag)
+        switch state {
+        case .createNewCashBook, .editCashBook:
+            buttons.rx.activeButtondTapped
+                .map { [weak self] _ -> ModalView.ModalCashBookData in
+                    guard let data = self?.cashBookDataExtraction() else {
+                        return ("","",0,"","")
+                    }
+                    
+                    return data
+                }
+                .bind(to: cashBookActiveButtonTapped)
+                .disposed(by: disposeBag)
+            
+        case .createNewConsumption, .editConsumption:
+            buttons.rx.activeButtondTapped
+                .map { [weak self] _ -> ModalView.ModalConsumptionData in
+                    guard let data = self?.consumptionDataExtraction() else {
+                        return (false, "", "", 0)
+                    }
+                    
+                    return data
+                }
+                .bind(to: consumptionActiveButtonTapped)
+                .disposed(by: disposeBag)
+        }
         
         buttons.rx.cancelButtondTapped
             .bind(to: cancelButtonTapped)
@@ -282,8 +370,13 @@ private extension ModalView {
 
 extension Reactive where Base: ModalView {
     /// active 버튼의 tap 이벤트를 방출하는 옵저버블
-    var activeButtonTapped: PublishRelay<Void> {
-        return base.activeButtonTapped
+    var cashBookActiveButtonTapped: PublishRelay<ModalView.ModalCashBookData> {
+        return base.cashBookActiveButtonTapped
+    }
+    
+    /// active 버튼의 tap 이벤트를 방출하는 옵저버블
+    var consumptionActiveButtonTapped: PublishRelay<ModalView.ModalConsumptionData> {
+        return base.consumptionActiveButtonTapped
     }
     
     /// cancel 버튼의 tap 이벤트를 방출하는 옵저버블

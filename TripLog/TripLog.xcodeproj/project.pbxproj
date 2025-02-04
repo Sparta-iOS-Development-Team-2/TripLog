@@ -331,8 +331,6 @@
 /* Begin XCBuildConfiguration section */
 		AAC9B08A2D3A7073006892A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
-			baseConfigurationReferenceRelativePath = "Application/Hamsik/API&CoreData/Secrets.xcconfig";
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -364,8 +362,6 @@
 		};
 		AAC9B08B2D3A7073006892A7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
-			baseConfigurationReferenceRelativePath = "Application/Hamsik/API&CoreData/Secrets.xcconfig";
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -516,8 +512,6 @@
 		};
 		AAC9B08F2D3A7073006892A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
-			baseConfigurationReferenceRelativePath = "Application/Hamsik/API&CoreData/Secrets.xcconfig";
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -540,8 +534,6 @@
 		};
 		AAC9B0902D3A7073006892A7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
-			baseConfigurationReferenceRelativePath = "Application/Hamsik/API&CoreData/Secrets.xcconfig";
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
