@@ -78,7 +78,7 @@ extension CurrencyEntity: CoreDataManagable {
         ///   - date: 요청한 환율정보의 날짜
         ///   - context: CoreData 인스턴스
         func saveToCoreData(_ currencyRates: CurrencyRate, date: String, context: NSManagedObjectContext) {
-            let keys = EntityKeys.CurrencyElement.self
+            let element = CurrencyElement()
             print("dataCount: \(currencyRates.count)")
             guard let entity = NSEntityDescription.entity(
                 forEntityName: EntityKeys.Name.CurrencyEntity.rawValue, in: context
@@ -86,10 +86,10 @@ extension CurrencyEntity: CoreDataManagable {
             context.perform {
                 for item in currencyRates {
                     let entity = NSManagedObject(entity: entity, insertInto: context)
-                    entity.setValue(date, forKey: keys.rateDate)
-                    entity.setValue(item.curUnit, forKey: keys.currencyCode)
-                    entity.setValue(item.curNm, forKey: keys.currencyName)
-                    entity.setValue(Double(item.dealBasR?.replacingOccurrences(of: ",", with: "") ?? "1") ?? 1.0, forKey: keys.baseRate)
+                    entity.setValue(date, forKey: element.rateDate)
+                    entity.setValue(item.curUnit, forKey: element.currencyCode)
+                    entity.setValue(item.curNm, forKey: element.currencyName)
+                    entity.setValue(Double(item.dealBasR?.replacingOccurrences(of: ",", with: "") ?? "1") ?? 1.0, forKey: element.baseRate)
                 }
                 do {
                     try context.save()
