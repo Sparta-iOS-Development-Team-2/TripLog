@@ -188,7 +188,7 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
             amount: expense.amount,
             exchangeRate: expense.exchangeRate
         )
-        cell.selectionStyle = .none
+        cell.selectionStyle = .none // 선택 효과 제거
         return cell
     }
 
@@ -196,12 +196,62 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
         return 108
     }
 
+    /// ✅ 커스텀 삭제 버튼을 포함한 스와이프 액션 추가
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        // 1️⃣ 삭제 버튼을 감싸는 UIView 생성
+        let customDeleteView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 60))
+        customDeleteView.backgroundColor = .red
+        customDeleteView.layer.cornerRadius = 12
+        customDeleteView.clipsToBounds = true
+
+        // 2️⃣ 삭제 버튼 추가
+        let deleteButton = UIButton(type: .system).then {
+            $0.setImage(UIImage(systemName: "trash.fill"), for: .normal)
+            $0.tintColor = .white
+            $0.addTarget(self, action: #selector(deleteExpense(_:)), for: .touchUpInside)
+        }
+
+        customDeleteView.addSubview(deleteButton)
+        deleteButton.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(32)
+        }
+
+        // 3️⃣ UIView를 이미지로 변환
+        let deleteImage = UIGraphicsImageRenderer(size: customDeleteView.frame.size).image { _ in
+            customDeleteView.drawHierarchy(in: customDeleteView.bounds, afterScreenUpdates: true)
+        }
+
+        // 4️⃣ UIContextualAction 생성 (이미지 적용)
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
+            guard let self = self else { return }
+            
+            // ✅ 데이터 삭제
+            self.expenses.remove(at: indexPath.section)
+            tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
+            
+            // ✅ 총 금액 업데이트
+            self.updateTotalAmount()
+            
+            // ✅ 빈 상태 업데이트
+            self.updateEmptyState()
+
+            completionHandler(true) // 완료 핸들러 호출
+        }
+        
+        deleteAction.image = deleteImage
+        deleteAction.backgroundColor = .clear // 배경을 투명하게 설정
+
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+
+    /// ✅ 삭제 버튼 액션 (뷰에서 호출되도록 구현)
     @objc private func deleteExpense(_ sender: UIButton) {
         if let cell = sender.superview?.superview as? ExpenseCell,
            let indexPath = tableView.indexPath(for: cell) {
             expenses.remove(at: indexPath.section)
             tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
-            updateTotalAmount()
+            updateTotalAmount()  // ✅ 삭제 후 총 금액 업데이트
             updateEmptyState()
         }
     }
