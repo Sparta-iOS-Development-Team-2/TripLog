@@ -52,5 +52,7 @@ class TitleDateView: UIView {
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
+        
+        applyBackgroundColor()
     }
 }

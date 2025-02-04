@@ -1,5 +1,5 @@
 //
-//  ButtonStackView.swift
+//  CustomButtonStackView.swift
 //  TripLog
 //
 //  Created by 김석준 on 1/22/25.
@@ -11,6 +11,13 @@ class CustomButtonStackView: UIStackView {
 
     private let todayExpenseButton = UIButton(type: .system)
     private let calendarButton = UIButton(type: .system)
+    
+    // 선택된 상태 추적
+    private var isTodaySelected: Bool = true {
+        didSet {
+            updateButtonStyles()
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -27,31 +34,70 @@ class CustomButtonStackView: UIStackView {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
-        self.todayExpenseButton.applyTextFieldStroke()
-        self.calendarButton.applyTextFieldStroke()
+        todayExpenseButton.applyTextFieldStroke()
+        calendarButton.applyTextFieldStroke()
     }
 
     private func setupButtons() {
-        // 버튼 공통 설정
-        configureButton(todayExpenseButton, title: "오늘 지출", titleColor: UIColor.Personal.normal, weight: .bold)
-        configureButton(calendarButton, title: "캘린더", titleColor: UIColor.CustomColors.Text.textSecondary, weight: .medium)
+        configureButton(todayExpenseButton, title: "오늘 지출")
+        configureButton(calendarButton, title: "캘린더")
 
         // 스택 뷰에 버튼 추가
         addArrangedSubview(todayExpenseButton)
         addArrangedSubview(calendarButton)
+        applyBackgroundColor()
+        
+        // 초기 스타일 설정
+        updateButtonStyles()
+
+        // 버튼 액션 추가
+        todayExpenseButton.addTarget(self, action: #selector(todayButtonTapped), for: .touchUpInside)
+        calendarButton.addTarget(self, action: #selector(calendarButtonTapped), for: .touchUpInside)
     }
 
-    private func configureButton(_ button: UIButton, title: String, titleColor: UIColor?, weight: UIFont.Weight) {
+    private func configureButton(_ button: UIButton, title: String) {
         button.setTitle(title, for: .normal)
-        button.setTitleColor(titleColor, for: .normal)
-        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: weight)
+        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: .bold)
         button.applyTextFieldStroke()
     }
-
+    
     private func setupLayout() {
-        // 스택 뷰 레이아웃 설정
         axis = .horizontal
         spacing = -0.5
         distribution = .fillEqually
+    }
+
+    // ✅ 버튼 스타일 업데이트
+    private func updateButtonStyles() {
+        let todayFontWeight: UIFont.Weight = isTodaySelected ? .bold : .medium
+        let calendarFontWeight: UIFont.Weight = isTodaySelected ? .medium : .bold
+
+        todayExpenseButton.setTitleColor(isTodaySelected ? UIColor.Personal.normal : UIColor.CustomColors.Text.textSecondary, for: .normal)
+        calendarButton.setTitleColor(isTodaySelected ? UIColor.CustomColors.Text.textSecondary : UIColor.Personal.normal, for: .normal)
+
+        todayExpenseButton.titleLabel?.font = UIFont.SCDream(size: .display, weight: todayFontWeight)
+        calendarButton.titleLabel?.font = UIFont.SCDream(size: .display, weight: calendarFontWeight)
+    }
+
+
+    // ✅ 오늘 지출 버튼 클릭
+    @objc private func todayButtonTapped() {
+        isTodaySelected = true
+        todayButtonAction?()
+    }
+
+    // ✅ 캘린더 버튼 클릭
+    @objc private func calendarButtonTapped() {
+        isTodaySelected = false
+        calendarButtonAction?()
+    }
+    
+    // ✅ 버튼 액션 설정 메서드 추가
+    private var todayButtonAction: (() -> Void)?
+    private var calendarButtonAction: (() -> Void)?
+
+    func setButtonActions(todayAction: @escaping () -> Void, calendarAction: @escaping () -> Void) {
+        self.todayButtonAction = todayAction
+        self.calendarButtonAction = calendarAction
     }
 }

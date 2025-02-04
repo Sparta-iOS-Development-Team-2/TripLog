@@ -11,7 +11,7 @@ import Then
 class TopProgressView: UIView {
 
     private let progressBar = CustomProgressView()
-    
+
     private let expenseLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .caption, weight: .medium)
         $0.textColor = UIColor(named: "textPrimary")
@@ -35,7 +35,7 @@ class TopProgressView: UIView {
         super.init(coder: coder)
         setupLayout()
     }
-    
+
     func configure(expense: String, budget: String) {
         let budgetAmount = Int(budget.replacingOccurrences(of: ",", with: "")) ?? 0
         let expenseAmount = Int(expense.replacingOccurrences(of: ",", with: "")) ?? 0
