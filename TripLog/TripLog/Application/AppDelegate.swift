@@ -11,9 +11,10 @@ import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        FirebaseApp.configure()
         let container = persistentContainer
         // 코어데이터와 동일한 NSPersistentContainer 사용을 위함
         CoreDataManager.shared = CoreDataManager(container: container)
