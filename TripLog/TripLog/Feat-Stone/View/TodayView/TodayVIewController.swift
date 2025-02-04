@@ -74,7 +74,7 @@ class TodayViewController: UIViewController {
     }
 
     @objc private func presentExpenseAddModal() {
-        ModalViewManager.showModal(on: self, state: .createNewbudget)
+        ModalViewManager.showModal(on: self, state: .createNewConsumption)
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
 
@@ -199,7 +199,7 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
     /// ✅ 커스텀 삭제 버튼을 포함한 스와이프 액션 추가
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         // 1️⃣ 삭제 버튼을 감싸는 UIView 생성
-        let customDeleteView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 60))
+        let customDeleteView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 120))
         customDeleteView.backgroundColor = .red
         customDeleteView.layer.cornerRadius = 12
         customDeleteView.clipsToBounds = true
@@ -240,7 +240,7 @@ extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
         }
         
         deleteAction.image = deleteImage
-        deleteAction.backgroundColor = .clear // 배경을 투명하게 설정
+        deleteAction.backgroundColor = UIColor.CustomColors.Background.background
 
         return UISwipeActionsConfiguration(actions: [deleteAction])
     }

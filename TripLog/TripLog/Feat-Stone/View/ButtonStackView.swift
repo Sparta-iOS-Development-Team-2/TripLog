@@ -57,7 +57,7 @@ class CustomButtonStackView: UIStackView {
 
     private func configureButton(_ button: UIButton, title: String) {
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: .bold)
+        button.titleLabel?.font = UIFont.SCDream(size: .display, weight: .medium)
         button.applyTextFieldStroke()
     }
     

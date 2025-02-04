@@ -6,7 +6,6 @@ class CustomTableViewCell: UITableViewCell {
     private let titleDateView = TitleDateView()
     private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
-//    private let todayViewController = TodayViewController()
 
     private let todayViewController = TodayViewController()
     private let calendarViewController = CalendarViewController()
@@ -70,27 +69,22 @@ class CustomTableViewCell: UITableViewCell {
             $0.edges.equalToSuperview()
         }
 
-        // 버튼 액션 추가
+        // 버튼 액션 설정
         buttonStackView.setButtonActions(
             todayAction: { [weak self] in
-                self?.switchToTodayView()
+                self?.switchCurrentView()
             },
             calendarAction: { [weak self] in
-                self?.switchToCalendarView()
+                self?.switchCurrentView()
             }
         )
     }
 
-    // `TodayViewController`로 전환
-    private func switchToTodayView() {
-        todayViewController.view.isHidden = false
-        calendarViewController.view.isHidden = true
-    }
-
-    // `CalendarViewController`로 전환
-    private func switchToCalendarView() {
-        todayViewController.view.isHidden = true
-        calendarViewController.view.isHidden = false
+    
+    // 현재 활성화된 뷰를 전환
+    private func switchCurrentView() {
+        todayViewController.view.isHidden.toggle()
+        calendarViewController.view.isHidden.toggle()
     }
 
     override func layoutSubviews() {
