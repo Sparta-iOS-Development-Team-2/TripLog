@@ -13,7 +13,7 @@ struct MockCashBookModel {
     var id = UUID()
     let tripName: String
     let note: String
-    let budget: Double
+    let budget: Int
     let departure: String
     let homecoming: String
 }

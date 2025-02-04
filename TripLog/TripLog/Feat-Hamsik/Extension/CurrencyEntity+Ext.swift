@@ -48,7 +48,7 @@ extension CurrencyEntity: CoreDataManagable {
             return result
         } catch {
             print("데이터 읽기 실패: \(error)")
-            self.getCurrencyRate(date: predicate, context: context)
+
             return []
         }
     }
@@ -65,22 +65,12 @@ extension CurrencyEntity: CoreDataManagable {
     
     /// 새로운 환율정보를 생성하는 함수
     /// - Parameters:
-    ///   - date: 생성할 환율날짜
+    ///   - date: 조회할 환율날짜
     ///   - context: CoreData 인스턴스
-    static func getCurrencyRate(date: String, context: NSManagedObjectContext) {
-        let dataType = APIInfo.exchangeRate
+    static func getDataFromFirestore(date: String, context: NSManagedObjectContext) {
         
-        APIManager.shared.fetchCurrencyRatesWithAlamofire(dataType: dataType, date: date) { result in
-            switch result {
-            case .success(let currencyRates):
-                // API 상태 코드 출력 (1:성공, 2:DATA코드 오류, 3:인증코드 오류, 4: 일일제한횟수 마감
-                print("resultCode: \(String(describing: currencyRates[0].result))")
-                print("resultCount: \(currencyRates.count)")
-                // CoreData에 환율정보 저장
-                saveToCoreData(currencyRates, date: date, context: context)
-            case .failure(let error):
-                print("API Error: \(error.localizedDescription)")
-            }
+        FireStoreManager.shared.getStoreCurrencyRate(date: date) { result in
+            saveToCoreData(result, date: date, context: context)
         }
         
         /// 환율정보를 코어데이터에 저장하는 함수
@@ -106,10 +96,11 @@ extension CurrencyEntity: CoreDataManagable {
                     try context.save()
                     print("환율 저장 완료")
                 } catch {
-                    print("🚫환율 저장 실패: \(error)")
+                    print("환율 저장 실패: \(error)")
                 }
             }
         }
     }
-    
+
+
 }

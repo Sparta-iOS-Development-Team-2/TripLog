@@ -79,6 +79,8 @@ final class ModalDatePicker: UIView {
         }
     }
     
+    /// DatePicker를 설정하는 메소드
+    /// - Parameter date: DatePicker에 설정할 Date
     func configureDatePicker(date: Date) {
         datePicker.rx.date.onNext(date)
         updateTextField(date: date)
