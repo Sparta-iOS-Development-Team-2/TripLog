@@ -134,21 +134,16 @@ extension CashBookEntity: CoreDataManagable {
     }
     
     static func delete(entityID: UUID, context: NSManagedObjectContext) {
-        let persistantContainer = CoreDataManager.shared.persistentContainer
         let entityName = EntityKeys.Name.CashBookEntity.rawValue
         let element = CashBookElement()
-        // Core Data 모델에서 해당 entity가 존재하는지 확인
-        guard persistantContainer.managedObjectModel.entities.contains(where: { $0.value(forKey: element.id) as! UUID == entityID }) else {
-            debugPrint("삭제하려는 엔티티 '\(entityID)'가 존재하지 않습니다.")
-            return
-        }
+        
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
         fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         
         do {
             try context.execute(deleteRequest)
-            try context.save()
+            context.refreshAllObjects()
             debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 완료")
         } catch {
             debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 실패: \(error)")
