@@ -11,43 +11,6 @@ import RxCocoa
 
 class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsControllerDelegate {
     
-    private var dummyData =
-    SectionOfListCellData(
-        id: UUID(),
-        items: [
-            MockCashBookModel(id: UUID(),
-                              tripName: "여름방학 여행 2025",
-                              note: "일본, 미국, 하와이, 스위스, 체코",
-                              budget: 26000000,
-                              departure: "2025.05.12",
-                              homecoming: "2025.06.13"),
-            MockCashBookModel(id: UUID(),
-                              tripName: "가을방학 여행 2025",
-                              note: "🇨🇮 🇩🇪 🇹🇷",
-                              budget: 3400000,
-                              departure: "2025.10.12",
-                              homecoming: "2025.10.23"),
-            MockCashBookModel(id: UUID(),
-                              tripName: "겨울방학 여행 2025",
-                              note: "대만, 일본, 발리",
-                              budget: 5600000,
-                              departure: "2025.12.12",
-                              homecoming: "2025.12.21"),
-            MockCashBookModel(id: UUID(),
-                              tripName: "아시아 출장 2026",
-                              note: "대만, 일본",
-                              budget: 1000000,
-                              departure: "2026.02.11",
-                              homecoming: "2026.02.21"),
-            MockCashBookModel(id: UUID(),
-                              tripName: "미국 출장 2026",
-                              note: "미국",
-                              budget: 3600000,
-                              departure: "2026.04.13",
-                              homecoming: "2025.04.30")
-        ]
-    )
-    
     struct Input {
         let callViewWillAppear: Observable<Void>
         let addButtonTapped: PublishRelay<Void>
@@ -84,16 +47,16 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
     
     override init() {
         super.init()
-        insertDummyData()
         
         try? fetchedResultsController.performFetch()
         updateData()
     }
     
-    func updateData() {
+    private func updateData() {
         
         let fetchedData = fetchedResultsController.fetchedObjects ?? []
         
+        // 패치 결과로 업데이트
         let sectionData = [
             SectionOfListCellData(
                 id: UUID(), // 섹션 구분
@@ -116,28 +79,13 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
     
     ///  CoreData 변경 감지 후 Rx 스트림 업데이트
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        updateData()
-    }
-    
-    
-    // 더미데이터 코어데이터에 저장(임시)
-    func insertDummyData() {
-        let context = CoreDataManager.shared.persistentContainer.viewContext
-        let existingData = CashBookEntity.fetch(context: context)
-        
-        guard existingData.isEmpty else { return }
-        
-        for item in dummyData.items {
-            let dummyData = MockCashBookModel(
-                id: item.id,
-                tripName: item.tripName,
-                note: item.note,
-                budget:  item.budget,
-                departure: item.departure,
-                homecoming: item.homecoming
-            )
-            CashBookEntity.save(dummyData, context: context)
+        do {
+            // 최신 데이터 반영
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("패치 실패: \(error)")
         }
+        updateData()
     }
     
     /// Input
@@ -151,10 +99,11 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
     /// - addCellViewHidden : 일정 추가하기 뷰의 alpha값 방출로 뷰 동작제어
     func transform(input: Input) -> Output {
         
-        // 코어데이터에 있는 임시 데이터를 불러옴
-        let updatedData = updatedDataSubject.asObservable()
+        let updatedData = updatedDataSubject
+            .asObservable()
         
         let addCellViewHidden = updatedData
+            .debug()
             .map { $0.isEmpty ? 1.0 : 0.0 }
             .asDriver(onErrorJustReturn: 0.0)
         

@@ -70,8 +70,6 @@ final class CashBookListViewController: UIViewController {
         setupUI()
         setupConstraints()
         bind()
-        
-        print(CoreDataManager.shared.fetch(type: CashBookEntity.self))
     }
     
     // 추후 구현 예정
@@ -187,38 +185,34 @@ private extension CashBookListViewController {
                     return UISwipeActionsConfiguration(actions: [])
                 }
                 
+                // dataSource에 접근(섹션목록)
                 let sections = dataSource.sectionModels
                 guard indexPath.section < sections.count else {
                     return nil
                 }
+                
+                // dataSource의 선택된 section에 접근(셀)
                 let section = sections[indexPath.section]
                 guard indexPath.row < section.items.count else {
                     return nil
                 }
-                let item = section.items[indexPath.row]       
-
-//                // indexPath를 기반으로 CoreData에서 item 가져오기
-//                let sections = try? self.dataSource.model(at: indexPath) as? SectionOfListCellData
-//                print("🔍 model(at:) 호출 - indexPath: \(indexPath), 결과: \(String(describing: sections))")
-//                
-//                guard let section = sections else {
-//                    print("❌ model(at:)에서 섹션을 찾을 수 없음")
-//                    return nil
-//                }
-//                let item = section.items[indexPath.row]
-//                print("✅ model(at:)에서 가져온 아이템: \(item)")
-
+                
+                // dataSource의 선택된 cell에 접근
+                let item = section.items[indexPath.row]
+                
+                // 삭제 기능
                 let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
                     CoreDataManager.shared.delete(type: CashBookEntity.self, entityID: item.identity)
-                    completion(true) // 추후 기능 구현
+                    completion(true)
                 }
                 return UISwipeActionsConfiguration(actions: [deletAction])
             }
-
+            
             
             // 셀 수정 기능
             configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
                 let editAction = UIContextualAction(style: .normal, title: "수정") { _, _, completion in
+                    
                     completion(true) // 추후 기능 구현
                 }
                 return UISwipeActionsConfiguration(actions: [editAction])
