@@ -52,14 +52,14 @@ class MainViewController: UIViewController {
 private extension MainViewController {
     
     func setupUI() {
-        configureSelf()
-        setupLayout()
-        playLottie()
-        
         // TabBarController 삽입
         addChild(mainVC)
         view.addSubview(mainVC.view)
         mainVC.didMove(toParent: self)
+        
+        configureSelf()
+        setupLayout()
+        playLottie()
     }
     
     func configureSelf() {
