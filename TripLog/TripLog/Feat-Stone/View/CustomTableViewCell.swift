@@ -1,5 +1,6 @@
 import UIKit
 import SnapKit
+import CoreData
 
 class CustomTableViewCell: UITableViewCell {
 
@@ -7,22 +8,44 @@ class CustomTableViewCell: UITableViewCell {
     private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
 
-    private let todayViewController = TodayViewController()
+    private var todayViewController: TodayViewController? // ✅ TodayViewController를 저장할 변수
     private let calendarViewController = CalendarViewController()
 
     private let containerView = UIView() // ✅ TodayViewController와 CalendarViewController를 담을 컨테이너 뷰
 
-    func configure(subtitle: String, date: String, expense: String, budget: String) {
+    // ✅ CoreData 컨텍스트를 받도록 수정
+    func configure(subtitle: String, date: String, expense: String, budget: String, context: NSManagedObjectContext) {
         titleDateView.configure(subtitle: subtitle, date: date)
-        progressView.configure(expense: expense, budget: budget)
 
         setupLayout()
         applyBackgroundColor()
-        
+
+        // ✅ TodayViewController를 초기화하면서 CoreData 컨텍스트 전달
+        todayViewController = TodayViewController(context: context)
+        guard let todayVC = todayViewController else { return }
+
+        // ✅ 초기 총 금액을 가져와 ProgressView 업데이트
+        let initialExpense = todayVC.viewModel.totalAmount.value
+        progressView.configure(expense: initialExpense, budget: budget)
+
         // ✅ TodayViewController에서 지출이 변경될 때 progressView 업데이트
-        todayViewController.onExpenseUpdated = { [weak self] updatedExpense in
-            self?.progressView.configure(expense: updatedExpense, budget: budget)
+        todayVC.onExpenseUpdated = { [weak self] updatedExpense in
+            DispatchQueue.main.async {
+                self?.progressView.configure(expense: updatedExpense, budget: budget)
+            }
         }
+
+        // ✅ TodayViewController의 뷰를 containerView에 추가
+        containerView.addSubview(todayVC.view)
+        todayVC.view.snp.makeConstraints { $0.edges.equalToSuperview() }
+
+        // ✅ CalendarViewController의 뷰도 containerView에 추가
+        containerView.addSubview(calendarViewController.view)
+        calendarViewController.view.snp.makeConstraints { $0.edges.equalToSuperview() }
+
+        // 기본적으로 `TodayViewController`를 보이게 하고 `CalendarViewController`는 숨김
+        todayVC.view.isHidden = false
+        calendarViewController.view.isHidden = true
     }
 
     private func setupLayout() {
@@ -30,14 +53,6 @@ class CustomTableViewCell: UITableViewCell {
         [titleDateView, progressView, buttonStackView, containerView].forEach {
             contentView.addSubview($0)
         }
-
-        // `TodayViewController`와 `CalendarViewController`의 `view`를 `containerView`에 추가
-        containerView.addSubview(todayViewController.view)
-        containerView.addSubview(calendarViewController.view)
-
-        // 기본적으로 `TodayViewController`를 보이게 하고 `CalendarViewController`는 숨김
-        todayViewController.view.isHidden = false
-        calendarViewController.view.isHidden = true
 
         titleDateView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(4)
@@ -61,14 +76,6 @@ class CustomTableViewCell: UITableViewCell {
             $0.height.equalTo(UIScreen.main.bounds.height * 0.6).priority(.required) // 화면의 60% 차지
         }
 
-        todayViewController.view.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-
-        calendarViewController.view.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-
         // 버튼 액션 설정
         buttonStackView.setButtonActions(
             todayAction: { [weak self] in
@@ -80,10 +87,9 @@ class CustomTableViewCell: UITableViewCell {
         )
     }
 
-    
     // 현재 활성화된 뷰를 전환
     private func switchCurrentView() {
-        todayViewController.view.isHidden.toggle()
+        todayViewController?.view.isHidden.toggle()
         calendarViewController.view.isHidden.toggle()
     }
 

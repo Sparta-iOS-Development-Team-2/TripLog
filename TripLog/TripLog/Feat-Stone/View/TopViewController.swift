@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import Then
+import CoreData
 
 class TopViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -23,6 +24,17 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     }
 
     private let data = TestDummyData.sampleData() // Model에서 가져옴
+    private let context: NSManagedObjectContext // ✅ CoreData 컨텍스트 추가
+
+    // ✅ `init(context:)` 추가하여 CoreData 컨텍스트를 전달받도록 변경
+    init(context: NSManagedObjectContext) {
+        self.context = context
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -68,11 +80,13 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
         let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as! CustomTableViewCell
         let trip = data[indexPath.row]
 
+        // ✅ `context`를 함께 전달하여 오류 해결
         cell.configure(
             subtitle: trip.subtitle,
             date: trip.date,
             expense: trip.expense,
-            budget: trip.budget
+            budget: trip.budget,
+            context: context
         )
 
         return cell
@@ -92,6 +106,7 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 
 @available(iOS 17.0, *)
 #Preview("TopViewController") {
-    UINavigationController(rootViewController: TopViewController())
+    // ✅ CoreData 컨텍스트를 Preview에 전달
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    return UINavigationController(rootViewController: TopViewController(context: context))
 }
-

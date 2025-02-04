@@ -3,15 +3,16 @@ import SnapKit
 import Then
 import RxSwift
 import RxCocoa
+import CoreData
 
 class TodayViewController: UIViewController {
     
     var onExpenseUpdated: ((String) -> Void)?
     
-    private var expenses: [TestTodayExpense] = TestTodayExpense.sampleData()
-    
+    let viewModel: TodayViewModel  // ✅ ViewModel을 올바르게 선언
     private let disposeBag = DisposeBag()
-    
+    private let topStackView = UIStackView()
+
     private let headerTitleLabel = UILabel().then {
         $0.text = "지출 내역"
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
@@ -38,10 +39,10 @@ class TodayViewController: UIViewController {
         $0.register(ExpenseCell.self, forCellReuseIdentifier: ExpenseCell.identifier)
         $0.separatorStyle = .none
         $0.applyBackgroundColor()
-        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0) // ✅ 하단 패딩 추가
+        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
+        $0.showsVerticalScrollIndicator = false
     }
-    
-    // ✅ floatingButton을 UITableView 위에 오버레이
+
     private let floatingButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         $0.tintColor = UIColor.Personal.normal
@@ -52,9 +53,17 @@ class TodayViewController: UIViewController {
         $0.layer.shadowOffset = CGSize(width: 0, height: 2)
         $0.layer.shadowRadius = 4
     }
-    
-    private let topStackView = UIStackView()
-    
+
+    // ✅ CoreData 컨텍스트를 전달받아 ViewModel을 초기화
+    init(context: NSManagedObjectContext) {
+        self.viewModel = TodayViewModel(context: context)
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -62,15 +71,83 @@ class TodayViewController: UIViewController {
         
         setupViews()
         setupConstraints()
-        setupFloatingButton() // ✅ Floating Button 추가
+        setupFloatingButton()
         
-        tableView.dataSource = self
-        tableView.delegate = self
+        bindViewModel()  // ✅ ViewModel 바인딩
+    }
+
+    private func bindViewModel() {
+        // ✅ 테이블 뷰 바인딩 (CoreData에서 불러온 데이터 표시)
+        viewModel.expenses
+            .bind(to: tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
+                let originalAmount = Int(expense.amount) // ✅ Double → Int 변환
+                let convertedAmount = Int(expense.amount * 1.4) // ✅ Double → Int 변환
+
+                let exchangeRateString = "\(NumberFormatter.formattedString(from: convertedAmount)) 원" // ✅ 천 단위 변환 적용
+
+                cell.configure(
+                    date: "오늘",
+                    title: expense.note,
+                    category: expense.category,
+                    amount: "$ \(NumberFormatter.formattedString(from: originalAmount))", // ✅ 천 단위 적용
+                    exchangeRate: exchangeRateString
+                )
+            }
+            .disposed(by: disposeBag)
+
         
-        floatingButton.addTarget(self, action: #selector(presentExpenseAddModal), for: .touchUpInside)
+        // ✅ 모달에서 데이터가 추가되면 테이블을 자동으로 리로드
+        viewModel.expenses
+            .subscribe(onNext: { [weak self] _ in
+                self?.tableView.reloadData()
+            })
+            .disposed(by: disposeBag)
+
+        // ✅ 총 금액 바인딩 (모든 exchangeRate 값의 합산)
+        viewModel.expenses
+            .map { expenses in
+                let totalExchangeRate = expenses
+                    .map { Int($0.amount * 1.4) } // ✅ 모든 amount * 1.4 변환 후 합산
+                    .reduce(0, +)
+                return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원" // ✅ 천 단위 변환 적용
+            }
+            .do(onNext: { [weak self] totalAmount in
+                self?.onExpenseUpdated?(totalAmount) // ✅ TopProgressView 업데이트
+            })
+            .bind(to: totalAmountLabel.rx.text)
+            .disposed(by: disposeBag)
+
+
+        // ✅ 삭제 이벤트 바인딩
+        tableView.rx.itemDeleted
+            .subscribe(onNext: { [weak self] indexPath in
+                self?.viewModel.deleteExpense(at: indexPath.section)
+            })
+            .disposed(by: disposeBag)
+
+        // ✅ ViewModel에서 모달 트리거 감지
+        viewModel.showAddExpenseModal
+            .subscribe(onNext: { [weak self] in
+                self?.presentExpenseAddModal()
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    // ✅ Floating Button을 ViewModel을 통해 동작하도록 수정
+    private func setupFloatingButton() {
+        view.addSubview(floatingButton)
+
+        floatingButton.snp.makeConstraints {
+            $0.width.height.equalTo(64)
+            $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+        }
         
-        updateTotalAmount()
-        updateEmptyState()
+        floatingButton.addTarget(self, action: #selector(floatingButtonTapped), for: .touchUpInside)
+    }
+
+    @objc private func floatingButtonTapped() {
+        viewModel.triggerAddExpenseModal() // ✅ ViewModel에서 모달을 띄우도록 변경
     }
 
     @objc private func presentExpenseAddModal() {
@@ -78,23 +155,12 @@ class TodayViewController: UIViewController {
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
 
-                let newExpense = TestTodayExpense(
-                    date: "2024.01.16",
-                    title: "새 지출",
-                    category: "기타",
-                    amount: "10,000",
-                    exchangeRate: "140,444 원"
-                )
-
-                self.expenses.append(newExpense)
-                self.tableView.reloadData()
-                self.updateTotalAmount()
-
-                print("✅ 새로운 지출 내역 추가: \(newExpense)")
+                // ✅ 새로운 데이터를 불러와 테이블 뷰를 갱신
+                self.viewModel.fetchExpenses()
             })
             .disposed(by: disposeBag)
     }
-    
+
     private func setupViews() {
         let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel, helpButton]).then {
             $0.axis = .horizontal
@@ -120,7 +186,7 @@ class TodayViewController: UIViewController {
         view.addSubview(topStackView)
         view.addSubview(tableView)
     }
-    
+
     private func setupConstraints() {
         topStackView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
@@ -132,133 +198,21 @@ class TodayViewController: UIViewController {
             $0.leading.trailing.bottom.equalToSuperview()
         }
     }
-    
-    /// ✅ floatingButton을 UITableView 위에 추가
-    private func setupFloatingButton() {
-        view.addSubview(floatingButton)
+}
 
-        floatingButton.snp.makeConstraints {
-            $0.width.height.equalTo(64)
-            $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
-        }
-    }
-
-    /// ✅ **총 금액 업데이트 메서드**
-    private func updateTotalAmount() {
-        let totalAmount = expenses
-            .compactMap { Int($0.exchangeRate.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) }
-            .reduce(0, +)
-
-        totalAmountLabel.text = "\(totalAmount) 원"
-        onExpenseUpdated?("\(totalAmount)")
-    }
-
-    private func updateEmptyState() {
-        if expenses.isEmpty {
-            let emptyLabel = UILabel().then {
-                $0.text = "지출 내역이 없습니다."
-                $0.textColor = UIColor(named: "textPlaceholder")
-                $0.textAlignment = .center
-                $0.font = UIFont.systemFont(ofSize: 16)
-            }
-            tableView.backgroundView = emptyLabel
-        } else {
-            tableView.backgroundView = nil
-        }
+/// 1,000 천 단위 표기
+extension NumberFormatter {
+    static func formattedString(from number: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal // 🔹 천 단위 구분 적용
+        return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
 }
 
-extension TodayViewController: UITableViewDataSource, UITableViewDelegate {
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return expenses.count
-    }
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: ExpenseCell.identifier, for: indexPath) as! ExpenseCell
-        let expense = expenses[indexPath.section]
-        cell.configure(
-            date: expense.date,
-            title: expense.title,
-            category: expense.category,
-            amount: expense.amount,
-            exchangeRate: expense.exchangeRate
-        )
-        cell.selectionStyle = .none // 선택 효과 제거
-        return cell
-    }
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 108
-    }
-
-    /// ✅ 커스텀 삭제 버튼을 포함한 스와이프 액션 추가
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        // 1️⃣ 삭제 버튼을 감싸는 UIView 생성
-        let customDeleteView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 120))
-        customDeleteView.backgroundColor = .red
-        customDeleteView.layer.cornerRadius = 12
-        customDeleteView.clipsToBounds = true
-
-        // 2️⃣ 삭제 버튼 추가
-        let deleteButton = UIButton(type: .system).then {
-            $0.setImage(UIImage(systemName: "trash.fill"), for: .normal)
-            $0.tintColor = .white
-            $0.addTarget(self, action: #selector(deleteExpense(_:)), for: .touchUpInside)
-        }
-
-        customDeleteView.addSubview(deleteButton)
-        deleteButton.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.width.height.equalTo(32)
-        }
-
-        // 3️⃣ UIView를 이미지로 변환
-        let deleteImage = UIGraphicsImageRenderer(size: customDeleteView.frame.size).image { _ in
-            customDeleteView.drawHierarchy(in: customDeleteView.bounds, afterScreenUpdates: true)
-        }
-
-        // 4️⃣ UIContextualAction 생성 (이미지 적용)
-        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
-            guard let self = self else { return }
-            
-            // ✅ 데이터 삭제
-            self.expenses.remove(at: indexPath.section)
-            tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
-            
-            // ✅ 총 금액 업데이트
-            self.updateTotalAmount()
-            
-            // ✅ 빈 상태 업데이트
-            self.updateEmptyState()
-
-            completionHandler(true) // 완료 핸들러 호출
-        }
-        
-        deleteAction.image = deleteImage
-        deleteAction.backgroundColor = UIColor.CustomColors.Background.background
-
-        return UISwipeActionsConfiguration(actions: [deleteAction])
-    }
-
-    /// ✅ 삭제 버튼 액션 (뷰에서 호출되도록 구현)
-    @objc private func deleteExpense(_ sender: UIButton) {
-        if let cell = sender.superview?.superview as? ExpenseCell,
-           let indexPath = tableView.indexPath(for: cell) {
-            expenses.remove(at: indexPath.section)
-            tableView.deleteSections(IndexSet(integer: indexPath.section), with: .automatic)
-            updateTotalAmount()  // ✅ 삭제 후 총 금액 업데이트
-            updateEmptyState()
-        }
-    }
-}
 
 @available(iOS 17.0, *)
 #Preview("TodayViewController") {
-    let viewController = TodayViewController()
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let viewController = TodayViewController(context: context)
     return UINavigationController(rootViewController: viewController)
 }

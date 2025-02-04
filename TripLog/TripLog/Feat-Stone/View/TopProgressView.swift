@@ -37,17 +37,25 @@ class TopProgressView: UIView {
     }
 
     func configure(expense: String, budget: String) {
-        let budgetAmount = Int(budget.replacingOccurrences(of: ",", with: "")) ?? 0
-        let expenseAmount = Int(expense.replacingOccurrences(of: ",", with: "")) ?? 0
-        let balance = NumberFormatter.wonFormat(Int(budgetAmount - expenseAmount))
+        // ✅ 숫자로 변환 (천 단위 콤마 제거)
+        let budgetAmount = Int(budget.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0
+        let expenseAmount = Int(expense.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0
+            
+        // ✅ 잔액 계산
+        let balance = budgetAmount - expenseAmount
+        let formattedBalance = NumberFormatter.wonFormat(balance) // "1,000원" 형식으로 변환
 
+        // ✅ UI 업데이트
+        expenseLabel.text = "지출: \(NumberFormatter.wonFormat(expenseAmount))"
+        budgetLabel.text = "예산: \(NumberFormatter.wonFormat(budgetAmount))원"
+        balanceLabel.text = "잔액: \(formattedBalance)"
+
+        // ✅ 잔액이 0보다 작으면 빨간색으로 표시 (예산 초과)
+        balanceLabel.textColor = (balance < 0) ? .red : UIColor.Personal.normal
+
+        // ✅ 프로그레스 바 업데이트
         let progressValue = (budgetAmount > 0) ? Float(expenseAmount) / Float(budgetAmount) : 0.0
         progressBar.updateProgress(CGFloat(progressValue))
-
-        expenseLabel.text = "지출: \(expense)원"
-        budgetLabel.text = "예산: \(budget)원"
-        balanceLabel.text = "잔액: \(balance)"
-        balanceLabel.textColor = UIColor.Personal.normal
     }
 
     private func setupLayout() {
