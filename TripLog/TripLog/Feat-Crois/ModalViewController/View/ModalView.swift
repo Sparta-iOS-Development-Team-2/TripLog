@@ -85,7 +85,7 @@ final class ModalView: UIView {
             self.firstSection = ModalSegmentView()
             self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
             self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비", keyboardType: .default)
-            self.forthSection = ModalAmoutView()
+            self.forthSection = ModalAmountView()
             self.buttons = ModalButtons(buttonTitle: "생성")
         }
     
@@ -237,7 +237,7 @@ private extension ModalView {
             if
                let secondSection = self.secondSection as? ModalTextField,
                let thirdSection = self.thirdSection as? ModalTextField,
-               let forthSection = self.forthSection as? ModalAmoutView
+               let forthSection = self.forthSection as? ModalAmountView
             {
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -256,7 +256,7 @@ private extension ModalView {
             if let firstSection = self.firstSection as? ModalSegmentView,
                let secondSection = self.secondSection as? ModalTextField,
                let thirdSection = self.thirdSection as? ModalTextField,
-               let forthSection = self.forthSection as? ModalAmoutView
+               let forthSection = self.forthSection as? ModalAmountView
             {
                 firstSection.configureSegment(to: data.payment)
                 secondSection.configureTextField(text: data.note)
@@ -316,7 +316,7 @@ private extension ModalView {
                 let first = firstSection as? ModalSegmentView,
                 let second = secondSection as? ModalTextField,
                 let third = thirdSection as? ModalTextField,
-                let forth = forthSection as? ModalAmoutView
+                let forth = forthSection as? ModalAmountView
             else { return nil }
             
             let consumptionData = (first.paymentExtraction(),

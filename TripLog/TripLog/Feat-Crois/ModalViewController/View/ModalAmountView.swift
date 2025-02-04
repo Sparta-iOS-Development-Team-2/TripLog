@@ -12,7 +12,7 @@ import RxSwift
 import RxCocoa
 
 /// 모달뷰에서 금액을 입력하는 공용 컴포넌츠
-final class ModalAmoutView: UIView {
+final class ModalAmountView: UIView {
     
     // MARK: - UI Components
     
@@ -94,7 +94,7 @@ final class ModalAmoutView: UIView {
 
 // MARK: - UI Setting Method
 
-private extension ModalAmoutView {
+private extension ModalAmountView {
     
     func setupUI() {
         configureSelf()
@@ -150,7 +150,7 @@ private extension ModalAmoutView {
     
 }
 
-extension Reactive where Base: ModalAmoutView {
+extension Reactive where Base: ModalAmountView {
     /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
     var amountViewIsBlank: Observable<Bool> {
         return base.textField.rx.text.orEmpty
