@@ -28,7 +28,7 @@ class CalendarCustomCell: FSCalendarCell {
         $0.textAlignment = .center
         $0.textColor = .red
         $0.adjustsFontSizeToFitWidth = true
-        $0.minimumScaleFactor = 0.5
+        $0.minimumScaleFactor = 0.75
         $0.numberOfLines = 1
     }
     

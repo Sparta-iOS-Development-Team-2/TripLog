@@ -116,7 +116,7 @@ final class CalendarExpenseCell: UITableViewCell {
             foreignAmountLabel.text = nil
         }
         
-        categoryLabel.text = "\(item.category)/\(item.paymentMethod)"
+        categoryLabel.text = "\(item.category) / \(item.paymentMethod)"
         wonAmountLabel.text = "\(Int(item.wonAmount).formatted())원"
     }
     

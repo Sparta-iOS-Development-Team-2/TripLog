@@ -38,12 +38,18 @@ class CalendarCustomHeaderView: UIView {
     }
     
     // MARK: - Properties
+    var viewModel: CalendarViewModel? {
+        didSet {
+            bindViewModel()
+        }
+    }
+    
     /// 연결된 FSCalendar 인스턴스
     /// - weak 참조를 통해 순환 참조 방지
     weak var calendar: FSCalendar?
     
     /// RxSwift 리소스 정리를 위한 DisposeBag
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
     
     // MARK: - Initialization
     override init(frame: CGRect) {
@@ -56,18 +62,11 @@ class CalendarCustomHeaderView: UIView {
     }
     
     // MARK: - UI Setup
-    /// UI 컴포넌트들의 초기 설정을 담당하는 메서드
+    /// UI 컴포넌트들의 제약조건을 설정하는 메서드
     private func setupUI() {
         // 서브뷰 추가
         [previousButton, titleLabel, nextButton].forEach { addSubview($0) }
         
-        setupConstraints()
-        setupBindings()
-    }
-    
-    // MARK: - Constraints Setup
-    /// UI 컴포넌트들의 제약조건을 설정하는 메서드
-    private func setupConstraints() {
         // 뷰 자체 높이 설정
         snp.makeConstraints {
             $0.height.equalTo(80)
@@ -91,36 +90,28 @@ class CalendarCustomHeaderView: UIView {
         }
     }
     
-    /// 현재 표시된 달의 제목을 업데이트하는 메서드
-    /// - Parameter date: 표시할 날짜
-    /// - "yyyy년 M월" 형식으로 타이틀 업데이트
-    func updateTitle(date: Date) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 M월"
-        titleLabel.text = formatter.string(from: date)
-    }
-    
-    /// 버튼 이벤트 바인딩을 설정하는 메서드
-    /// - RxSwift를 사용하여 버튼 탭 이벤트 처리
-    /// - 이전/다음 달로 페이지 전환 및 타이틀 업데이트
-    private func setupBindings() {
-        previousButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                guard let self = self,
-                      let currentPage = self.calendar?.currentPage else { return }
-                let previousMonth = Calendar.current.date(byAdding: .month, value: -1, to: currentPage) ?? currentPage
-                self.calendar?.setCurrentPage(previousMonth, animated: true)
-                self.updateTitle(date: previousMonth)
-            })
-            .disposed(by: disposeBag)
+    // MARK: - UI Setup
+    private func bindViewModel() {
+        guard let viewModel = viewModel else { return }
         
-        nextButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                guard let self = self,
-                      let currentPage = self.calendar?.currentPage else { return }
-                let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: currentPage) ?? currentPage
-                self.calendar?.setCurrentPage(nextMonth, animated: true)
-                self.updateTitle(date: nextMonth)
+        let input = CalendarViewModel.Input(
+            selectedDate: viewModel.currentPageRelay.asObservable(),
+            previousButtonTapped: previousButton.rx.tap.asObservable(),
+            nextButtonTapped: nextButton.rx.tap.asObservable()
+        )
+        
+        let output = viewModel.transform(input: input)
+
+        output.title
+            .drive(titleLabel.rx.text)
+            .disposed(by: disposeBag)
+
+        output.updatedDate
+            .drive(onNext: { [weak self] date in
+                guard let self = self else { return }
+                self.viewModel?.currentPageRelay.accept(date)
+                self.calendar?.setCurrentPage(date, animated: true)
+                self.calendar?.reloadData()
             })
             .disposed(by: disposeBag)
     }

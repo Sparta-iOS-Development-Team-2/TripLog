@@ -48,7 +48,6 @@ final class CalendarView: UIView {
     
     // MARK: - UI Setup
     private func setupUI() {
-        backgroundColor = .white
         addSubview(calendar)
         
         calendar.snp.makeConstraints {
