@@ -26,7 +26,7 @@ final class ModalAmountView: UIView {
     }
     
     private let currencyButton = UIButton().then {
-        $0.setTitle("원(한화)", for: .normal)
+        $0.setTitle("KRW(원)", for: .normal)
         $0.setTitleColor(UIColor.Personal.normal, for: .normal)
         $0.titleLabel?.font = UIFont.SCDream(size: .headline, weight: .medium)
         $0.setImage(UIImage(systemName: "chevron.up.chevron.down"), for: .normal)
@@ -92,6 +92,8 @@ final class ModalAmountView: UIView {
         return amount
     }
     
+    /// 모달뷰의 금액뷰에서 통화 정보를 추출하는 메소드
+    /// - Returns: 통화 정보
     func currencyExtraction() -> String {
         guard let currency = currencyButton.titleLabel?.text else { return "" }
         return String(currency.prefix(3))

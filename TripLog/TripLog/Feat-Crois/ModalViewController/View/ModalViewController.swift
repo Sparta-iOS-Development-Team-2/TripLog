@@ -107,7 +107,7 @@ private extension ModalViewController {
                                                         departure: data.1.departure,
                                                         homecoming: data.1.homecoming)
                 
-                switch owner.modalView.checkModalStatus() {
+                switch data.1.state {
                 case .createNewCashBook:
                     // 가계부를 코어 데이터에 추가하는 로직
                     CoreDataManager.shared.save(type: CashBookEntity.self, data: cashBookData)
@@ -143,8 +143,8 @@ private extension ModalViewController {
                                                              expenseDate: data.1.expenseDate,
                                                              note: data.1.note,
                                                              payment: data.1.payment)
-                
-                switch owner.modalView.checkModalStatus() {
+                                
+                switch data.1.state {
                 case .createNewConsumption:
                     // 지출내역을 코어 데이터에 추가하는 로직
                     CoreDataManager.shared.save(type: MyCashBookEntity.self, data: consumptionData)

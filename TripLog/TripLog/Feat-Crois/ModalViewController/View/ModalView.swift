@@ -13,8 +13,8 @@ import RxCocoa
 
 /// 모달 뷰 컨트롤러의 뷰로 쓰일 모달 뷰
 final class ModalView: UIView {
-    typealias ModalCashBookData = (id: UUID, tripName: String, note: String, budget: Int,departure: String, homecoming: String)
-    typealias ModalConsumptionData = (id: UUID, cashBookID: UUID, expenseDate: Date, payment: Bool, note: String, category: String, amount: Double, country: String)
+    typealias ModalCashBookData = (id: UUID, tripName: String, note: String, budget: Int,departure: String, homecoming: String, state: ModalViewState)
+    typealias ModalConsumptionData = (id: UUID, cashBookID: UUID, expenseDate: Date, payment: Bool, note: String, category: String, amount: Double, country: String, state: ModalViewState)
     
     // MARK: - Rx Properties
     
@@ -108,12 +108,6 @@ final class ModalView: UIView {
         super.layoutSubviews()
         
         self.layer.shadowPath = self.shadowPath()
-    }
-    
-    /// 모달뷰의 현재 상태를 반환하는 메소드
-    /// - Returns: 모달뷰의 현재 state
-    func checkModalStatus() -> ModalViewState {
-        return self.state
     }
 
 }
@@ -325,7 +319,8 @@ private extension ModalView {
                                 second.textFieldExtraction(),
                                 Int(third.textFieldExtraction()) ?? 0,
                                 dateData.start,
-                                dateData.end)
+                                dateData.end,
+                                state)
             
             return cashBookData
             
@@ -353,7 +348,8 @@ private extension ModalView {
                                    second.textFieldExtraction(),
                                    third.textFieldExtraction(),
                                    forth.amountExtraction(),
-                                   forth.currencyExtraction())
+                                   forth.currencyExtraction(),
+                                   state)
         
             return consumptionData
             
@@ -369,7 +365,7 @@ private extension ModalView {
             buttons.rx.activeButtondTapped
                 .map { [weak self] _ -> ModalView.ModalCashBookData in
                     guard let data = self?.cashBookDataExtraction() else {
-                        return (UUID(), "", "", 0, "", "")
+                        return (UUID(), "", "", 0, "", "", ModalViewState.createNewCashBook)
                     }
                     
                     return data
@@ -381,7 +377,7 @@ private extension ModalView {
             buttons.rx.activeButtondTapped
                 .map { [weak self] _ -> ModalView.ModalConsumptionData in
                     guard let data = self?.consumptionDataExtraction() else {
-                        return (UUID(), UUID(), Date(), false, "", "", 0, "")
+                        return (UUID(), UUID(), Date(), false, "", "", 0, "", ModalViewState.createNewCashBook)
                     }
                     
                     return data
