@@ -74,13 +74,8 @@ final class TabBarView: UIView {
     
     let tabBarAddButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.tintColor = UIColor.CustomColors.Background.background
-        $0.layer.cornerRadius = (64 - 10) / 2  // ((버튼 뷰 크기 - 버튼 패딩) / 2)
-    }
-    
-    private let tabBarAddButtonView = UIView().then {
-        $0.backgroundColor = UIColor.CustomColors.Background.background
-        $0.layer.cornerRadius = 32 // (버튼 뷰 크기 / 2)
+        $0.tintColor = UIColor.CustomColors.Border.plus
+        $0.backgroundColor = UIColor.CustomColors.Accent.blue
     }
     
     //MARK: - Initializer
@@ -97,6 +92,14 @@ final class TabBarView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+    
+            tabBarAddButton.applyTabBarButtonStyle()
+            
+        }
+    }
 }
 
 //MARK: - Private Method
@@ -106,14 +109,10 @@ private extension TabBarView {
     func setupUI() {
         
         // 탭바 추가 버튼 스타일 적용
-        tabBarAddButton.applyTabBarButton()
-        
-        // 탭바 그림자 적용
-        tabBarAddButtonView.applyViewShadow()
-        
+        tabBarAddButton.applyTabBarButtonStyle()
+                
         cashBookTabView.addSubview(cashBookVerticalStackView)
         settingTabView.addSubview(settingVerticalStackView)
-        tabBarAddButtonView.addSubview(tabBarAddButton)
         
         [
             cashBookImageView,
@@ -127,7 +126,7 @@ private extension TabBarView {
         
         [
             cashBookTabView,
-            tabBarAddButtonView,
+            tabBarAddButton,
             settingTabView
         ].forEach { addSubview($0) }
     }
@@ -146,14 +145,10 @@ private extension TabBarView {
             $0.width.equalTo(50)
         }
         
-        tabBarAddButtonView.snp.makeConstraints {
+        tabBarAddButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.width.height.equalTo(64)
             $0.top.equalToSuperview().offset(-24)
-        }
-        
-        tabBarAddButton.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(5)
         }
         
         settingTabView.snp.makeConstraints {

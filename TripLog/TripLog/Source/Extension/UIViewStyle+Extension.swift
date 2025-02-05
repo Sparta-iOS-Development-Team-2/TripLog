@@ -147,7 +147,7 @@ extension UIView {
     /// Floating Button Stroke
     func applyFloatingButtonStroke() {
         layer.borderWidth = 5
-        layer.borderColor = darkModeCheck(UIColor.CustomColors.Border.darkBackground.cgColor, UIColor.white.cgColor)
+        layer.borderColor = darkModeCheck(UIColor.CustomColors.Background.background.cgColor, UIColor.CustomColors.Background.background.cgColor)
     }
     
     /// View Stroke
@@ -221,9 +221,9 @@ extension UIView {
     }
     
     /// Center button(tabbar)
-    func applyTabBarButton() {
-        applyCornerRadius(((64 - 10) / 2))
-        applyButtonStroke()
-        backgroundColor = UIColor.CustomColors.Accent.blue
+    func applyTabBarButtonStyle() {
+        applyCornerRadius(32)
+        applyViewShadow()
+        applyFloatingButtonStroke()
     }
 }

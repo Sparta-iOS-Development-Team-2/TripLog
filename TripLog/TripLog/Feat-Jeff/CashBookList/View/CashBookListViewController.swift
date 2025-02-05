@@ -115,7 +115,7 @@ private extension CashBookListViewController {
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeArea.snp.top).offset(12)
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(24)
+            $0.height.equalTo(26)
         }
         
         addCellView.snp.makeConstraints {
@@ -174,7 +174,7 @@ private extension CashBookListViewController {
         // 선택된 셀 동작처리(추후 구현)
         listCollectionView.rx.modelSelected(MockCashBookModel.self)
             .subscribe(onNext: { selectedItem in
-                print("\(selectedItem)")
+                print("노트 : \(selectedItem.note), 예산 : \(selectedItem.budget) ")
                 self.navigationController?.pushViewController(TopViewController(), animated: true)
             })
             .disposed(by: disposeBag)
