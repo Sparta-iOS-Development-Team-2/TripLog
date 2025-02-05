@@ -9,7 +9,7 @@ class TodayViewController: UIViewController {
     
     var onExpenseUpdated: ((String) -> Void)?
     
-    let viewModel: TodayViewModel  // ✅ ViewModel을 올바르게 선언
+    let viewModel: TodayViewModel  // ViewModel을 올바르게 선언
     private let disposeBag = DisposeBag()
     private let topStackView = UIStackView()
 
@@ -54,7 +54,7 @@ class TodayViewController: UIViewController {
         $0.layer.shadowRadius = 4
     }
 
-    // ✅ CoreData 컨텍스트를 전달받아 ViewModel을 초기화
+    // CoreData 컨텍스트를 전달받아 ViewModel을 초기화
     init(context: NSManagedObjectContext) {
         self.viewModel = TodayViewModel(context: context)
         super.init(nibName: nil, bundle: nil)
@@ -73,72 +73,72 @@ class TodayViewController: UIViewController {
         setupConstraints()
         setupFloatingButton()
         
-        bindViewModel()  // ✅ ViewModel 바인딩
+        bindViewModel()  // ViewModel 바인딩
     }
 
     private func bindViewModel() {
-        // ✅ 테이블 뷰 바인딩 (CoreData에서 불러온 데이터 표시)
+        // 테이블 뷰 바인딩 (CoreData에서 불러온 데이터 표시)
         viewModel.expenses
             .bind(to: tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
-                let originalAmount = Int(expense.amount) // ✅ Double → Int 변환
-                let convertedAmount = Int(expense.amount * 1.4) // ✅ Double → Int 변환
+                let originalAmount = Int(expense.amount) // Double → Int 변환
+                let convertedAmount = Int(expense.amount * 1.4) // Double → Int 변환
 
-                let exchangeRateString = "\(NumberFormatter.formattedString(from: convertedAmount)) 원" // ✅ 천 단위 변환 적용
+                let exchangeRateString = "\(NumberFormatter.formattedString(from: convertedAmount)) 원" // 천 단위 변환 적용
 
                 cell.configure(
                     date: "오늘",
                     title: expense.note,
                     category: expense.category,
-                    amount: "$ \(NumberFormatter.formattedString(from: originalAmount))", // ✅ 천 단위 적용
+                    amount: "$ \(NumberFormatter.formattedString(from: originalAmount))", // 천 단위 적용
                     exchangeRate: exchangeRateString
                 )
             }
             .disposed(by: disposeBag)
 
         
-        // ✅ 모달에서 데이터가 추가되면 테이블을 자동으로 리로드
+        // 모달에서 데이터가 추가되면 테이블을 자동으로 리로드
         viewModel.expenses
             .subscribe(onNext: { [weak self] _ in
                 self?.tableView.reloadData()
             })
             .disposed(by: disposeBag)
 
-        // ✅ 총 금액 바인딩 (모든 exchangeRate 값의 합산)
+        // 총 금액 바인딩 (모든 exchangeRate 값의 합산)
         viewModel.expenses
             .map { expenses in
                 let totalExchangeRate = expenses
-                    .map { Int($0.amount * 1.4) } // ✅ 모든 amount * 1.4 변환 후 합산
+                    .map { Int($0.amount * 1.4) } // 모든 amount * 1.4 변환 후 합산
                     .reduce(0, +)
-                return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원" // ✅ 천 단위 변환 적용
+                return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원" // 천 단위 변환 적용
             }
             .do(onNext: { [weak self] totalAmount in
-                self?.onExpenseUpdated?(totalAmount) // ✅ TopProgressView 업데이트
+                self?.onExpenseUpdated?(totalAmount) // TopProgressView 업데이트
             })
             .bind(to: totalAmountLabel.rx.text)
             .disposed(by: disposeBag)
 
 
-        // ✅ 삭제 이벤트 바인딩
+        // 삭제 이벤트 바인딩
         tableView.rx.itemDeleted
             .subscribe(onNext: { [weak self] indexPath in
                 self?.viewModel.deleteExpense(at: indexPath.section)
             })
             .disposed(by: disposeBag)
 
-        // ✅ ViewModel에서 모달 트리거 감지
+        // ViewModel에서 모달 트리거 감지
         viewModel.showAddExpenseModal
             .subscribe(onNext: { [weak self] in
                 self?.presentExpenseAddModal()
             })
             .disposed(by: disposeBag)
-        // ✅ 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기
+        // 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기
         tableView.rx.modelSelected(MockMyCashBookModel.self)
             .subscribe(onNext: { [weak self] selectedExpense in
                 guard let self = self else { return }
                 
                 ModalViewManager.showModal(on: self, state: .editConsumption(data: selectedExpense))
                     .subscribe(onNext: {
-                        // ✅ 모달이 닫히면 데이터 다시 로드
+                        // 모달이 닫히면 데이터 다시 로드
                         self.viewModel.fetchExpenses()
                     })
                     .disposed(by: self.disposeBag)
@@ -146,7 +146,7 @@ class TodayViewController: UIViewController {
             .disposed(by: disposeBag)
     }
     
-    // ✅ Floating Button을 ViewModel을 통해 동작하도록 수정
+    // Floating Button을 ViewModel을 통해 동작하도록 수정
     private func setupFloatingButton() {
         view.addSubview(floatingButton)
 
@@ -160,7 +160,7 @@ class TodayViewController: UIViewController {
     }
 
     @objc private func floatingButtonTapped() {
-        viewModel.triggerAddExpenseModal() // ✅ ViewModel에서 모달을 띄우도록 변경
+        viewModel.triggerAddExpenseModal() // ViewModel에서 모달을 띄우도록 변경
     }
 
     @objc private func presentExpenseAddModal() {
@@ -168,7 +168,7 @@ class TodayViewController: UIViewController {
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
 
-                // ✅ 새로운 데이터를 불러와 테이블 뷰를 갱신
+                // 새로운 데이터를 불러와 테이블 뷰를 갱신
                 self.viewModel.fetchExpenses()
             })
             .disposed(by: disposeBag)

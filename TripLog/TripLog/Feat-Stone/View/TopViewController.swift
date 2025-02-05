@@ -23,12 +23,21 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
         $0.alwaysBounceVertical = false
     }
 
-    private let data = TestDummyData.sampleData() // Model에서 가져옴
-    private let context: NSManagedObjectContext // ✅ CoreData 컨텍스트 추가
+    private let context: NSManagedObjectContext // CoreData 컨텍스트
 
-    // ✅ `init(context:)` 추가하여 CoreData 컨텍스트를 전달받도록 변경
-    init(context: NSManagedObjectContext) {
+    // 추가된 프로퍼티
+    private let tripName: String
+    private let note: String
+    private let budget: Double
+    private let period: String
+
+    // `init`을 수정하여 데이터 전달받도록 변경
+    init(context: NSManagedObjectContext, tripName: String, note: String, budget: Double, period: String) {
         self.context = context
+        self.tripName = tripName
+        self.note = note
+        self.budget = budget
+        self.period = period
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -42,15 +51,12 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 
         navigationController?.navigationBar.isHidden = false
 
-        // 네비게이션 타이틀 폰트 크기 설정
+        // 네비게이션 타이틀을 tripName으로 설정
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.SCDream(size: .title, weight: .bold)
         ]
+        self.navigationItem.title = tripName
 
-        if let firstTrip = data.first {
-            self.navigationItem.title = firstTrip.title
-        }
-        
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = UIScreen.main.bounds.height * 0.5
 
@@ -73,19 +79,18 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     // MARK: - UITableViewDataSource
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return data.count
+        return 1 // 단일 데이터 표시
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as! CustomTableViewCell
-        let trip = data[indexPath.row]
 
-        // ✅ `context`를 함께 전달하여 오류 해결
+        // `configure`에 전달할 데이터 적용
         cell.configure(
-            subtitle: trip.subtitle,
-            date: trip.date,
-            expense: trip.expense,
-            budget: trip.budget,
+            subtitle: note,
+            date: period,
+            expense: "", // 필요하면 추가
+            budget: "\(budget) 원",
             context: context
         )
 
@@ -96,17 +101,20 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-
-        let selectedTrip = data[indexPath.row]
-        self.navigationItem.title = selectedTrip.title
-
-        print("Cell tapped: \(indexPath.row), Title: \(selectedTrip.title)")
+        print("Selected trip: \(tripName)")
     }
 }
 
 @available(iOS 17.0, *)
 #Preview("TopViewController") {
-    // ✅ CoreData 컨텍스트를 Preview에 전달
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    return UINavigationController(rootViewController: TopViewController(context: context))
+    return UINavigationController(
+        rootViewController: TopViewController(
+            context: context,
+            tripName: "제주도 여행",
+            note: "제주에서 3박 4일 일정",
+            budget: 500000,
+            period: "2025-01-20 ~ 2025-01-24"
+        )
+    )
 }

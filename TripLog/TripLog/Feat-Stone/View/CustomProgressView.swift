@@ -41,23 +41,23 @@ final class CustomProgressView: UIView {
         }
     }
 
-    /// ✅ **프로그레스 바의 상태를 업데이트**
+    /// **프로그레스 바의 상태를 업데이트**
     /// - Parameter value: 프로그레스 바의 진행도 (%)
     func updateProgress(_ value: CGFloat) {
         let progressValue = min(max(value, 0), 1) // 값이 0~1 사이를 벗어나지 않도록 제한
         let newWidth = (self.bounds.width - 34) * progressValue
         
-        // ✅ Progress Label 업데이트
+        // Progress Label 업데이트
         progressLabel.text = "\(Int(progressValue * 100))%"
 
-        // ✅ Auto Layout을 이용한 애니메이션 적용
+        // Auto Layout을 이용한 애니메이션 적용
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear, animations: {
             self.progress.snp.updateConstraints {
                 $0.width.equalTo(newWidth)
             }
             self.layoutIfNeeded()
         }, completion: { _ in
-            // ✅ Gradient 애니메이션 다시 적용
+            // Gradient 애니메이션 다시 적용
             self.progress.applyGradientAnimation(colors: [
                 UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0),
                 UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0)

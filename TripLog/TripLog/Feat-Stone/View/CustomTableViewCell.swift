@@ -8,38 +8,38 @@ class CustomTableViewCell: UITableViewCell {
     private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
 
-    private var todayViewController: TodayViewController? // ✅ TodayViewController를 저장할 변수
+    private var todayViewController: TodayViewController? // TodayViewController를 저장할 변수
     private let calendarViewController = CalendarViewController()
 
-    private let containerView = UIView() // ✅ TodayViewController와 CalendarViewController를 담을 컨테이너 뷰
+    private let containerView = UIView() // TodayViewController와 CalendarViewController를 담을 컨테이너 뷰
 
-    // ✅ CoreData 컨텍스트를 받도록 수정
+    // CoreData 컨텍스트를 받도록 수정
     func configure(subtitle: String, date: String, expense: String, budget: String, context: NSManagedObjectContext) {
         titleDateView.configure(subtitle: subtitle, date: date)
 
         setupLayout()
         applyBackgroundColor()
 
-        // ✅ TodayViewController를 초기화하면서 CoreData 컨텍스트 전달
+        // TodayViewController를 초기화하면서 CoreData 컨텍스트 전달
         todayViewController = TodayViewController(context: context)
         guard let todayVC = todayViewController else { return }
 
-        // ✅ 초기 총 금액을 가져와 ProgressView 업데이트
+        // 초기 총 금액을 가져와 ProgressView 업데이트
         let initialExpense = todayVC.viewModel.totalAmount.value
         progressView.configure(expense: initialExpense, budget: budget)
 
-        // ✅ TodayViewController에서 지출이 변경될 때 progressView 업데이트
+        // TodayViewController에서 지출이 변경될 때 progressView 업데이트
         todayVC.onExpenseUpdated = { [weak self] updatedExpense in
             DispatchQueue.main.async {
                 self?.progressView.configure(expense: updatedExpense, budget: budget)
             }
         }
 
-        // ✅ TodayViewController의 뷰를 containerView에 추가
+        // TodayViewController의 뷰를 containerView에 추가
         containerView.addSubview(todayVC.view)
         todayVC.view.snp.makeConstraints { $0.edges.equalToSuperview() }
 
-        // ✅ CalendarViewController의 뷰도 containerView에 추가
+        // CalendarViewController의 뷰도 containerView에 추가
         containerView.addSubview(calendarViewController.view)
         calendarViewController.view.snp.makeConstraints { $0.edges.equalToSuperview() }
 
