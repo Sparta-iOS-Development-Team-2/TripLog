@@ -30,6 +30,16 @@ final class CustomTabBarController: UIViewController {
         bind()
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            
+            customTabBar.applyTabBarStyle()
+            
+        }
+    }
+    
+    
 }
 
 //MARK: - Private Method
@@ -75,7 +85,7 @@ private extension CustomTabBarController {
         
         customTabBar.snp.makeConstraints {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(-10)
             $0.height.equalTo(60)
         }
     }

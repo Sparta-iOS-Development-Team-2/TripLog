@@ -78,6 +78,15 @@ final class CashBookListViewController: UIViewController {
         viewWillAppearSubject.onNext(())
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+    
+            addCellView.applyBoxStyle()
+            
+        }
+    }
+    
 }
 
 //MARK: - Private Method
@@ -212,7 +221,6 @@ private extension CashBookListViewController {
                         CoreDataManager.shared.delete(type: CashBookEntity.self, entityID: item.identity)
                     }
                     alert.showAlert(on: self, .alert)
-                    CoreDataManager.shared.delete(type: CashBookEntity.self, entityID: item.identity)
                     completion(true)
                 }
                 return UISwipeActionsConfiguration(actions: [deletAction])

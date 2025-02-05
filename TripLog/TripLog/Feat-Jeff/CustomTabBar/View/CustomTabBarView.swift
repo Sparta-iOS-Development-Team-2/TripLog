@@ -205,14 +205,18 @@ extension TabBarView {
         switch state {
         case .cashBookList:
             cashBookImageView.tintColor = UIColor.CustomColors.Accent.blue
+            cashBookImageView.image = UIImage(systemName: "book.fill")
             cashBookLabel.textColor = UIColor.CustomColors.Accent.blue
             settingImageView.tintColor = UIColor.CustomColors.Text.textSecondary
+            settingImageView.image = UIImage(systemName: "gearshape")
             settingLabel.textColor = UIColor.CustomColors.Text.textSecondary
             
         case .setting:
             settingImageView.tintColor = UIColor.CustomColors.Accent.blue
+            settingImageView.image = UIImage(systemName: "gearshape.fill")
             settingLabel.textColor = UIColor.CustomColors.Accent.blue
             cashBookImageView.tintColor = UIColor.CustomColors.Text.textSecondary
+            cashBookImageView.image = UIImage(systemName: "book")
             cashBookLabel.textColor = UIColor.CustomColors.Text.textSecondary
         }
     }

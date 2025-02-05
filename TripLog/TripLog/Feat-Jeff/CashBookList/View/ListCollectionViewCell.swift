@@ -66,6 +66,15 @@ final class ListCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+    
+            contentView.applyBoxStyle()
+            
+        }
+    }
+    
 }
 
 //MARK: - Private Method
