@@ -44,12 +44,15 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: true) // 항상 내비게이션 바 보이기
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.applyBackgroundColor()
-
-        navigationController?.navigationBar.isHidden = false
 
         // 네비게이션 타이틀을 tripName으로 설정
         navigationController?.navigationBar.titleTextAttributes = [
@@ -100,7 +103,7 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     // MARK: - UITableViewDelegate
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
+        tableView.deselectRow(at: indexPath, animated: false)
         print("Selected trip: \(tripName)")
     }
 }

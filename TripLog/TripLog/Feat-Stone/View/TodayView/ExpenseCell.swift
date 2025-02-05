@@ -85,7 +85,7 @@ class ExpenseCell: UITableViewCell {
 
         dateLabel.snp.makeConstraints {
             $0.leading.equalToSuperview().offset(16)
-            $0.top.equalToSuperview().offset(8)
+            $0.top.equalToSuperview().offset(16)
         }
 
         firstRowStackView.snp.makeConstraints {
