@@ -24,13 +24,16 @@ final class TabBarView: UIView {
      
     private var cashBookTabButton: UIButton = {
         var config = UIButton.Configuration.plain()
+        // 배경색과 텍스트색 설정
         config.baseBackgroundColor = .clear
         config.baseForegroundColor = UIColor.CustomColors.Accent.blue
         
+        // 텍스트와 폰트 설정
         var title = AttributedString.init("가계부")
         title.font =  UIFont.SCDream(size: .body, weight: .bold)
         config.attributedTitle = title
         
+        // 이미지와 위치 설정
         config.image = UIImage(systemName: "book")
         config.imagePadding = 5
         config.imagePlacement = .top
@@ -42,13 +45,16 @@ final class TabBarView: UIView {
     
     private var settingTabButton: UIButton = {
         var config = UIButton.Configuration.plain()
+        // 배경색과 텍스트색 설정
         config.baseBackgroundColor = .clear
         config.baseForegroundColor = UIColor.CustomColors.Accent.blue
         
+        // 텍스트와 폰트 설정
         var title = AttributedString.init("설정")
         title.font =  UIFont.SCDream(size: .body, weight: .bold)
         config.attributedTitle = title
         
+        // 이미지와 위치 설정
         config.image = UIImage(systemName: "gearshape")
         config.imagePadding = 5
         config.imagePlacement = .top
