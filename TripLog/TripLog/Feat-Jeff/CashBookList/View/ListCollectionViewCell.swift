@@ -12,7 +12,7 @@ final class ListCollectionViewCell: UICollectionViewCell {
     static let id = "ListCollectionViewCell"
     
     private let tripNameLabel = UILabel().then {
-        $0.font = UIFont.SCDream(size: .headline, weight: .medium)
+        $0.font = UIFont.SCDream(size: .headline, weight: .bold)
         $0.textColor = .Dark.base
         $0.numberOfLines = 1
         $0.textAlignment = .left
@@ -108,7 +108,7 @@ private extension ListCollectionViewCell {
         }
         
         verticalStackView.snp.makeConstraints {
-            $0.top.equalTo(tripNameLabel.snp.bottom).offset(16)
+            $0.top.equalTo(tripNameLabel.snp.bottom).offset(8)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.bottom.equalToSuperview().offset(-20)
         }
@@ -136,7 +136,7 @@ extension ListCollectionViewCell {
         tripNameLabel.text = data.tripName
         noteLabel.text = data.note
         budgetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.budget)))"
-        periodLabel.text = "🗓️ \(data.departure) - \(data.homecoming)"
+        periodLabel.text = "🗓️ \(Formatter.dateFormat(data.departure)) - \(Formatter.dateFormat(data.homecoming))"
     }
     
 }
