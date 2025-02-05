@@ -13,8 +13,8 @@ import RxCocoa
 
 /// 모달 뷰 컨트롤러의 뷰로 쓰일 모달 뷰
 final class ModalView: UIView {
-    typealias ModalCashBookData = (tripName: String, note: String, budget: Int,departure: String, homecoming: String)
-    typealias ModalConsumptionData = (payment: Bool, note: String, category: String, amount: Double)
+    typealias ModalCashBookData = (id: UUID, tripName: String, note: String, budget: Int,departure: String, homecoming: String)
+    typealias ModalConsumptionData = (id: UUID, cashBookID: UUID, expenseDate: Date, payment: Bool, note: String, category: String, amount: Double, country: String)
     
     // MARK: - Rx Properties
     
@@ -61,7 +61,9 @@ final class ModalView: UIView {
     // MARK: - Properties
     
     private var state: ModalViewState
-    private var id: UUID?
+    private var cashBookID: UUID?
+    private var consumptionID: UUID?
+    private var expenseDate: Date?
     
     // MARK: - Initializer
     
@@ -113,14 +115,7 @@ final class ModalView: UIView {
     func checkModalStatus() -> ModalViewState {
         return self.state
     }
-    
-    /// 모달뷰의 ID를 추출하는 메소드
-    /// - Returns: 모달뷰의 ID
-    func getDataId() -> UUID {
-        guard let id else { return UUID() }
-        return id
-    }
-    
+
 }
 
 // MARK: - UI Setting Method
@@ -182,6 +177,27 @@ private extension ModalView {
         }
     }
     
+    /// 모달뷰의 CashBookID를 추출하는 메소드
+    /// - Returns: 모달뷰의 CashBookID
+    func getCashBookID() -> UUID {
+        guard let cashBookID else { return UUID() }
+        return cashBookID
+    }
+    
+    /// 모달뷰의 ConsumptionID를 추출하는 메소드
+    /// - Returns: 모달뷰의 ConsumptionID
+    func getConsumptionID() -> UUID {
+        guard let consumptionID else { return UUID() }
+        return  consumptionID
+    }
+    
+    /// 모달뷰의 지출 내역 일자를 반환하는 메소드
+    /// - Returns: 지출 내역 작성 일자
+    func getExpenseDate() -> Date {
+        guard let expenseDate else { return Date() }
+        return expenseDate
+    }
+    
     /// 모달뷰를 세팅하는 메소드
     func setupModal() {
         switch self.state {
@@ -219,7 +235,7 @@ private extension ModalView {
                 thirdSection.configureTextField(text: "\(data.budget)")
                 forthSection.configureDate(start: data.departure, end: data.homecoming)
                 
-                id = data.id
+                self.cashBookID = data.id
                 
                 firstSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -238,12 +254,15 @@ private extension ModalView {
                     .disposed(by: disposeBag)
             }
             
-        case .createNewConsumption:
+        case .createNewConsumption(cashBookID: let id, date: let date):
             if
                let secondSection = self.secondSection as? ModalTextField,
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalAmountView
             {
+                self.cashBookID = id
+                self.expenseDate = date
+                
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
                     .disposed(by: disposeBag)
@@ -266,9 +285,11 @@ private extension ModalView {
                 firstSection.configureSegment(to: data.payment)
                 secondSection.configureTextField(text: data.note)
                 thirdSection.configureTextField(text: data.category)
-                forthSection.configureAmoutView(amout: data.amount, currency: Currency.KRW)
+                forthSection.configureAmoutView(amout: data.amount, country: data.country)
                 
-                id = data.id
+                self.cashBookID = data.cashBookID
+                self.consumptionID = data.id
+                self.expenseDate = data.expenseDate
                 
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -299,7 +320,8 @@ private extension ModalView {
             
             let dateData = forth.datePickerExtraction()
             
-            let cashBookData = (first.textFieldExtraction(),
+            let cashBookData = (getCashBookID(),
+                                first.textFieldExtraction(),
                                 second.textFieldExtraction(),
                                 Int(third.textFieldExtraction()) ?? 0,
                                 dateData.start,
@@ -324,11 +346,15 @@ private extension ModalView {
                 let forth = forthSection as? ModalAmountView
             else { return nil }
             
-            let consumptionData = (first.paymentExtraction(),
+            let consumptionData = (getCashBookID(),
+                                   getConsumptionID(),
+                                   getExpenseDate(),
+                                   first.paymentExtraction(),
                                    second.textFieldExtraction(),
                                    third.textFieldExtraction(),
-                                   forth.amountExtraction())
-            
+                                   forth.amountExtraction(),
+                                   forth.currencyExtraction())
+        
             return consumptionData
             
         default:
@@ -343,7 +369,7 @@ private extension ModalView {
             buttons.rx.activeButtondTapped
                 .map { [weak self] _ -> ModalView.ModalCashBookData in
                     guard let data = self?.cashBookDataExtraction() else {
-                        return ("","",0,"","")
+                        return (UUID(), "", "", 0, "", "")
                     }
                     
                     return data
@@ -355,7 +381,7 @@ private extension ModalView {
             buttons.rx.activeButtondTapped
                 .map { [weak self] _ -> ModalView.ModalConsumptionData in
                     guard let data = self?.consumptionDataExtraction() else {
-                        return (false, "", "", 0)
+                        return (UUID(), UUID(), Date(), false, "", "", 0, "")
                     }
                     
                     return data
