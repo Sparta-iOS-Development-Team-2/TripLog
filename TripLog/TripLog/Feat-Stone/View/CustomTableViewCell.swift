@@ -28,14 +28,13 @@ class CustomTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // CoreData 컨텍스트를 받도록 수정 & 뷰 중복 추가 방지
-    func configure(subtitle: String, date: String, expense: String, budget: String, context: NSManagedObjectContext) {
+    func configure(subtitle: String, date: String, expense: String, budget: String, context: NSManagedObjectContext, cashBookID: UUID) {
         self.context = context // 컨텍스트 저장
         titleDateView.configure(subtitle: subtitle, date: date)
 
         // 기존 TodayViewController 제거 후 다시 추가 (재사용 방지)
         todayViewController?.view.removeFromSuperview()
-        todayViewController = TodayViewController(context: context)
+        todayViewController = TodayViewController(context: context, cashBookID: cashBookID) // ✅ `cashBookID` 추가
 
         guard let todayVC = todayViewController else { return }
 

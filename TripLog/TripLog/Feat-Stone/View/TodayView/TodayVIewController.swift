@@ -7,6 +7,9 @@ import CoreData
 
 class TodayViewController: UIViewController {
     
+    // 🔹 cashBookID를 저장하여 특정 가계부 데이터만 필터링
+    private let cashBookID: UUID
+    
     // 총 지출 금액이 업데이트될 때 호출되는 클로저 (상위 뷰에서 활용 가능)
     var onExpenseUpdated: ((String) -> Void)?
     
@@ -63,8 +66,9 @@ class TodayViewController: UIViewController {
         $0.applyFloatingButtonStyle()
     }
 
-    // CoreData 컨텍스트를 받아 ViewModel을 초기화
-    init(context: NSManagedObjectContext) {
+    // 🔹 init에서 cashBookID를 받아 저장
+    init(context: NSManagedObjectContext, cashBookID: UUID) {
+        self.cashBookID = cashBookID
         self.viewModel = TodayViewModel(context: context)
         super.init(nibName: nil, bundle: nil)
     }
@@ -84,13 +88,19 @@ class TodayViewController: UIViewController {
         setupFloatingButton()
         
         bindViewModel()
+        
+        // ✅ 특정 cashBookID를 가진 데이터만 가져오도록 수정
+        viewModel.fetchExpenses(for: cashBookID)
     }
 
     // ViewModel과 RxSwift를 사용하여 UI 데이터 바인딩
     private func bindViewModel() {
-        // 테이블 뷰의 데이터 바인딩 (CoreData에서 가져온 데이터 표시)
+        // 🔹 특정 cashBookID를 가진 지출 내역만 표시하도록 필터링
         viewModel.expenses
-            .bind(to: tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { index, expense, cell in
+            .map { expenses in
+                expenses.filter { $0.cashBookID == self.cashBookID }
+            }
+            .bind(to: tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
                 let originalAmount = Int(expense.amount)
                 let convertedAmount = Int(expense.amount * 1.4)
                 let exchangeRateString = "\(NumberFormatter.formattedString(from: convertedAmount)) 원"
@@ -113,17 +123,15 @@ class TodayViewController: UIViewController {
             })
             .disposed(by: disposeBag)
 
-        // 총 금액 바인딩 (모든 exchangeRate 값을 합산하여 표시)
+        // 🔹 특정 cashBookID를 가진 데이터만 합산하여 총 금액 표시
         viewModel.expenses
             .map { expenses in
                 let totalExchangeRate = expenses
+                    .filter { $0.cashBookID == self.cashBookID }
                     .map { Int($0.amount * 1.4) }
                     .reduce(0, +)
                 return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원"
             }
-            .do(onNext: { [weak self] totalAmount in
-                self?.onExpenseUpdated?(totalAmount)
-            })
             .bind(to: totalAmountLabel.rx.text)
             .disposed(by: disposeBag)
 
@@ -148,7 +156,7 @@ class TodayViewController: UIViewController {
                 
                 ModalViewManager.showModal(on: self, state: .editConsumption(data: selectedExpense))
                     .subscribe(onNext: {
-                        self.viewModel.fetchExpenses()
+                        self.viewModel.fetchExpenses(for: self.cashBookID) // ✅ self 추가
                     })
                     .disposed(by: self.disposeBag)
             })
@@ -175,14 +183,17 @@ class TodayViewController: UIViewController {
 
     // 지출 추가 모달 표시
     @objc private func presentExpenseAddModal() {
-        // TODO: 가계부ID를 받아오고 날짜를 지정하는 로직 추가 요청(석준)
-        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: UUID(), date: Date()))
+        // ✅ TopViewController에서 받은 cashBookID를 사용하도록 수정
+        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: self.cashBookID, date: Date()))
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
-                self.viewModel.fetchExpenses()
+                print("📌 사용된 cashBookID: \(self.cashBookID)") // ✅ 제대로 전달되는지 확인
+                print("📌 저장된 날짜: \(Date())")
+                self.viewModel.fetchExpenses(for: self.cashBookID)
             })
             .disposed(by: disposeBag)
     }
+
 
     // UI 요소 설정
     private func setupViews() {
@@ -293,6 +304,11 @@ extension TodayViewController: UITableViewDelegate {
 @available(iOS 17.0, *)
 #Preview("TodayViewController") {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    let viewController = TodayViewController(context: context)
+    
+    // 🔹 샘플 가계부 ID 생성 (테스트용)
+    let sampleCashBookID = UUID()
+
+    let viewController = TodayViewController(context: context, cashBookID: sampleCashBookID)
+
     return UINavigationController(rootViewController: viewController)
 }
