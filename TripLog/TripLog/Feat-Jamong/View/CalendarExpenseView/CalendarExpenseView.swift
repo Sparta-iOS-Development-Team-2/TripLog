@@ -35,12 +35,11 @@ final class CalendarExpenseView: UIView {
         $0.font = .SCDream(size: .body, weight: .medium)
         $0.textColor = UIColor.CustomColors.Text.textSecondary
         $0.textAlignment = .center
-        $0.isHidden = true
     }
 
     // MARK: - Properties
     /// 현재 표시중인 지출 항목 배열
-    private var expenses: [ExpenseItem] = []
+    private var expenses: [MockMyCashBookModel] = []
     
     // MARK: - Initialization
     override init(frame: CGRect) {
@@ -94,9 +93,9 @@ final class CalendarExpenseView: UIView {
     ///   - date: 선택된 날짜
     ///   - expenses: 해당 날짜의 지출 항목 배열
     ///   - balance: 현재 잔액
-    func configure(date: Date, expenses: [ExpenseItem], balance: Int) {
+    func configure(date: Date, expenses: [MockMyCashBookModel], balance: Int) {
         self.expenses = expenses
-        let totalExpense = Int(expenses.reduce(0) { $0 + $1.wonAmount })
+        let totalExpense = Int(expenses.reduce(0) { $0 + $1.amount })
         headerView.configure(date: date, expense: totalExpense, balance: balance)
         
         // 데이터 유무에 따라 빈 상태 표시

@@ -26,30 +26,16 @@ class CalendarCustomHeaderView: UIView {
     }
     
     /// 이전 달로 이동하는 버튼
-    private let previousButton = UIButton(type: .system).then {
+    fileprivate let previousButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "chevron.left"), for: .normal)
         $0.tintColor = UIColor.CustomColors.Text.textPrimary
     }
     
     /// 다음 달로 이동하는 버튼
-    private let nextButton = UIButton(type: .system).then {
+    fileprivate let nextButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "chevron.right"), for: .normal)
         $0.tintColor = UIColor.CustomColors.Text.textPrimary
     }
-    
-    // MARK: - Properties
-    var viewModel: CalendarViewModel? {
-        didSet {
-            bindViewModel()
-        }
-    }
-    
-    /// 연결된 FSCalendar 인스턴스
-    /// - weak 참조를 통해 순환 참조 방지
-    weak var calendar: FSCalendar?
-    
-    /// RxSwift 리소스 정리를 위한 DisposeBag
-    private var disposeBag = DisposeBag()
     
     // MARK: - Initialization
     override init(frame: CGRect) {
@@ -90,29 +76,20 @@ class CalendarCustomHeaderView: UIView {
         }
     }
     
-    // MARK: - UI Setup
-    private func bindViewModel() {
-        guard let viewModel = viewModel else { return }
-        
-        let input = CalendarViewModel.Input(
-            selectedDate: viewModel.currentPageRelay.asObservable(),
-            previousButtonTapped: previousButton.rx.tap.asObservable(),
-            nextButtonTapped: nextButton.rx.tap.asObservable()
-        )
-        
-        let output = viewModel.transform(input: input)
-
-        output.title
-            .drive(titleLabel.rx.text)
-            .disposed(by: disposeBag)
-
-        output.updatedDate
-            .drive(onNext: { [weak self] date in
-                guard let self = self else { return }
-                self.viewModel?.currentPageRelay.accept(date)
-                self.calendar?.setCurrentPage(date, animated: true)
-                self.calendar?.reloadData()
-            })
-            .disposed(by: disposeBag)
+    func updateTitle(date: Date) {
+        var formatter = DateFormatter()
+        formatter.dateFormat = "yyyy년 M월"
+        titleLabel.text = formatter.string(from: date)
     }
 }
+
+extension Reactive where Base: CalendarCustomHeaderView {
+    var previousButtonTapped : Observable<Void> {
+        base.previousButton.rx.tap.asObservable()
+    }
+    
+    var nextButtonTapped: Observable<Void> {
+        base.nextButton.rx.tap.asObservable()
+    }
+}
+

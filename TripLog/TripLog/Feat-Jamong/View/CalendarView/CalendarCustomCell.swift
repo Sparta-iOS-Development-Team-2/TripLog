@@ -24,7 +24,7 @@ class CalendarCustomCell: FSCalendarCell {
     
     /// 해당 일자 지출 금액 라벨
     public let expenseLabel = UILabel().then {
-        $0.font = .SCDream(size: .subcaption, weight: .medium)
+        $0.font = .SCDream(size: .caption, weight: .medium)
         $0.textAlignment = .center
         $0.textColor = .red
         $0.adjustsFontSizeToFitWidth = true

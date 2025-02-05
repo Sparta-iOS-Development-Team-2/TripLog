@@ -107,6 +107,10 @@ final class CalendarView: UIView {
         }
         calendar.reloadData()
     }
+    
+    func updatePageLoad(date: Date) {
+        calendar.setCurrentPage(date, animated: true)
+    }
 }
 
 // MARK: - Extension for Setup Methods
