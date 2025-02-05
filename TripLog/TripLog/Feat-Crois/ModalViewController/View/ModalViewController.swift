@@ -101,20 +101,20 @@ private extension ModalViewController {
                     return
                 }
                 
-                let result = CashBookEntity.Model(tripName: data.1.tripName,
-                                                note: data.1.note,
-                                                budget: data.1.budget,
-                                                departure: data.1.departure,
-                                                homecoming: data.1.homecoming)
+                let cashBookData = CashBookEntity.Model(tripName: data.1.tripName,
+                                                        note: data.1.note,
+                                                        budget: data.1.budget,
+                                                        departure: data.1.departure,
+                                                        homecoming: data.1.homecoming)
                 
-                switch owner.modalView.checkModalStatus() {
+                switch data.1.state {
                 case .createNewCashBook:
                     // 가계부를 코어 데이터에 추가하는 로직
-                    CoreDataManager.shared.save(type: CashBookEntity.self, data: result)
+                    CoreDataManager.shared.save(type: CashBookEntity.self, data: cashBookData)
                     
                 case .editCashBook:
                     // 가계부를 코어 데이터에 업데이트 하는 로직
-                    CoreDataManager.shared.update(type: CashBookEntity.self, entityID: owner.modalView.getDataId(), data: result)
+                    CoreDataManager.shared.update(type: CashBookEntity.self, entityID: data.1.id, data: cashBookData)
                     
                 default: break
                 }
@@ -135,16 +135,22 @@ private extension ModalViewController {
                     alert.showAlert(on: vc, .alert)
                     return
                 }
-                // TODO: 수정요청(상경)
-                let result = MyCashBookEntity.Model(amount: 0.0, cashBookID: UUID(), category: "category", country: "country", expenseDate: Date(), note: "note", payment: true)
                 
-                switch owner.modalView.checkModalStatus() {
+                let consumptionData = MyCashBookEntity.Model(amount: data.1.amount,
+                                                             cashBookID: data.1.cashBookID,
+                                                             category: data.1.category,
+                                                             country: data.1.country,
+                                                             expenseDate: data.1.expenseDate,
+                                                             note: data.1.note,
+                                                             payment: data.1.payment)
+                                
+                switch data.1.state {
                 case .createNewConsumption:
                     // 지출내역을 코어 데이터에 추가하는 로직
-                    CoreDataManager.shared.save(type: MyCashBookEntity.self, data: result)
+                    CoreDataManager.shared.save(type: MyCashBookEntity.self, data: consumptionData)
                 case .editConsumption:
                     // 지출내역을 코어 데이터에 업데이트 하는 로직
-                    CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: owner.modalView.getDataId(), data: result)
+                    CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: data.1.id, data: consumptionData)
                     
                 default: break
                 }
