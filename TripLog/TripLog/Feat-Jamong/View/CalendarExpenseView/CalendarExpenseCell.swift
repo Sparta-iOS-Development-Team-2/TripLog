@@ -96,28 +96,17 @@ final class CalendarExpenseCell: UITableViewCell {
     /// - Parameter item: 표시할 지출 항목 데이터
     /// - Note: 외화 금액은 통화 종류에 따라 다른 형식으로 표시
     ///   (JPY, CNY는 정수로, 다른 통화는 소수점 포함)
-    func configure(with item: ExpenseItem) {
-        titleLabel.text = item.title
+    func configure(with model: MockMyCashBookModel) {
+        titleLabel.text = model.note
         
-        if let foreignAmount = item.foreignAmount {
-            let numberFormatter = NumberFormatter()
-            numberFormatter.numberStyle = .decimal
-            
-            if let formattedAmount = numberFormatter.string(from: NSNumber(value: foreignAmount)) {
-                // JPY와 CNY는 소수점 없이 정수로 표시
-                if item.currencyType == .jpy || item.currencyType == .cny {
-                    let intAmount = Int(foreignAmount)
-                    foreignAmountLabel.text = "\(item.currencyType.symbol) \(intAmount)"
-                } else {
-                    foreignAmountLabel.text = "\(item.currencyType.symbol) \(formattedAmount)"
-                }
-            }
-        } else {
-            foreignAmountLabel.text = nil
-        }
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        // 변경 예정 model.country -> Symbol
+        foreignAmountLabel.text = "\(model.country) \(Int(model.amount).formatted())"
+        categoryLabel.text = "\(model.category)/\(model.payment ? "카드" : "현금")"
         
-        categoryLabel.text = "\(item.category) / \(item.paymentMethod)"
-        wonAmountLabel.text = "\(Int(item.wonAmount).formatted())원"
+        // 한화로 변경하는 로직이 필요함 한화 * 환율데이트 수정필요
+        wonAmountLabel.text = "\(Int(model.amount).formatted())원"
     }
     
     /// 셀이 재사용될 때 모든 상태를 초기화

@@ -47,10 +47,7 @@ final class CalendarViewController: UIViewController {
     }
     
     /// 캘린더 상단의 커스텀 헤더 뷰
-    private lazy var customHeaderView = CalendarCustomHeaderView(frame: .zero).then {
-        $0.calendar = calendarView.calendar
-        $0.backgroundColor = .clear
-    }
+    private lazy var customHeaderView = CalendarCustomHeaderView(frame: .zero)
     
     /// 지출 목록을 표시하는 뷰
     private lazy var expenseListView = CalendarExpenseView().then {
@@ -64,42 +61,15 @@ final class CalendarViewController: UIViewController {
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
     private var fakeTripExpenses: [Date: Double] = [:]
     private let disposeBag = DisposeBag()
+    private var currentPage = BehaviorRelay<Date>(value: Date())
     
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        setupCalendar()
-        generateFakeExpenseData()
-        // 오늘 날짜 선택
         calendarView.calendar.select(Date())
-        
-        // 테스트용 ExpenseListView
-        let testExpenses = [
-            ExpenseItem(
-                title: "스시 오마카세",
-                foreignAmount: 15000.0,
-                currencyType: .jpy,
-                category: "식비",
-                paymentMethod: "현금",
-                wonAmount: 140044.0
-            ),
-            ExpenseItem(
-                title: "라멘",
-                foreignAmount: 1200.0,
-                currencyType: .jpy,
-                category: "식비",
-                paymentMethod: "카드",
-                wonAmount: 11203.0
-            )
-        ]
-        
-        // ExpenseListView 설정
-        expenseListView.configure(
-            date: Date(),
-            expenses: testExpenses,
-            balance: 560176
-        )
+        setupBindings()
+        calendarViewModel.loadExpenseData()
     }
     
     override func viewDidLayoutSubviews() {
@@ -175,11 +145,6 @@ final class CalendarViewController: UIViewController {
     }
     
     // MARK: - Calendar Setup
-    /// 캘린더 초기 설정
-    private func setupCalendar() {
-        customHeaderView.viewModel = calendarViewModel
-    }
-    
     /// 지정된 날짜로 캘린더 페이지 변경
     /// - Parameter date: 이동할 날짜
     func changeMonth(to date: Date) {
@@ -205,27 +170,28 @@ final class CalendarViewController: UIViewController {
     
     // CalendarViewModel 바인딩
     private func setupBindings() {
-        let calendar = calendarView.calendar
-
-        // 캘린더의 현재 페이지 변경 이벤트를 ViewModel로 전달
-        calendarViewModel.currentPageRelay
-            .distinctUntilChanged()
-            .subscribe(onNext: { [weak self] date in
-                self?.calendarView.calendar.setCurrentPage(date, animated: true)
-            })
-            .disposed(by: disposeBag)
-
-        // ViewModel에서 변경된 페이지를 감지하고 UI 업데이트
-        calendarView.rx.methodInvoked(#selector(FSCalendarDelegate.calendarCurrentPageDidChange(_:)))
-            .compactMap { [weak self] _ in self?.calendarView.calendar.currentPage }
-            .bind(to: calendarViewModel.currentPageRelay)
+        let input: CalendarViewModel.Input = .init(
+            selectedDate: currentPage,
+            previousButtonTapped: customHeaderView.rx.previousButtonTapped,
+            nextButtonTapped: customHeaderView.rx.nextButtonTapped)
+        
+        let output = calendarViewModel.transform(input: input)
+        output.updatedDate
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { [weak self] date in
+                self?.customHeaderView.updateTitle(date: date)
+                self?.calendarView.updatePageLoad(date: date)
+            }
             .disposed(by: disposeBag)
     }
-    
 }
 
 // MARK: - FSCalendarDelegate, FSCalendarDataSource
 extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
+    func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
+        self.currentPage.accept(calendar.currentPage)
+    }
+    
     /// 각 날짜에 대한 캘린더 셀을 생성하고 구성한다.
     /// - Parameters:
     ///   - calendar: 현재 FSCalendar 인스턴스
@@ -250,8 +216,9 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     }
     
     private func configureCellExpense(_ cell: CalendarCustomCell, for date: Date) {
-        if let expense = fakeTripExpenses[date] {
-            cell.expenseLabel.text = (Int(expense).formatted())
+        let totalExpense = calendarViewModel.totalExpense(for: date)
+        if totalExpense > 0 {
+            cell.expenseLabel.text = "\(Int(totalExpense))"
             cell.expenseLabel.isHidden = false
         } else {
             cell.expenseLabel.text = nil
@@ -289,23 +256,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     ///   - date: 선택된 날짜
     ///   - monthPosition: 선택된 날짜의 월 내 위치
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-        logSelectedDate(date)
+        calendarViewModel.selectedDateExpenses.onNext(calendarViewModel.expensesForDate(date))
         calendar.reloadData()
-    }
-    
-    private func logSelectedDate(_ date: Date) {
-        let calendars = Calendar.current
-        
-        print("Date: \(date)")
-        print("Month: \(calendars.component(.month, from: date))")
-        print("Day: \(calendars.component(.day, from: date))")
-        
-        if let expense = fakeTripExpenses[date] {
-            print("지출: ₩\(Int(expense).formatted())")
-        } else {
-            print("데이터 없음")
-        }
-        
-        print("==================================")
     }
 }
