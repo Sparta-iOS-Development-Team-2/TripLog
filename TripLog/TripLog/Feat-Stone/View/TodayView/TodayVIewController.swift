@@ -131,6 +131,19 @@ class TodayViewController: UIViewController {
                 self?.presentExpenseAddModal()
             })
             .disposed(by: disposeBag)
+        // ✅ 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기
+        tableView.rx.modelSelected(MockMyCashBookModel.self)
+            .subscribe(onNext: { [weak self] selectedExpense in
+                guard let self = self else { return }
+                
+                ModalViewManager.showModal(on: self, state: .editConsumption(data: selectedExpense))
+                    .subscribe(onNext: {
+                        // ✅ 모달이 닫히면 데이터 다시 로드
+                        self.viewModel.fetchExpenses()
+                    })
+                    .disposed(by: self.disposeBag)
+            })
+            .disposed(by: disposeBag)
     }
     
     // ✅ Floating Button을 ViewModel을 통해 동작하도록 수정

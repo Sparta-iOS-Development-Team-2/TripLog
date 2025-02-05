@@ -19,19 +19,38 @@ class TodayViewModel {
 
     // ✅ CoreData에서 데이터 가져오기
     func fetchExpenses() {
-        let entities = MyCashBookEntity.fetch(context: context)
+        let entities = MyCashBookEntity.fetch(context: context, predicate: nil) // ✅ `predicate: nil` 추가
         let convertedData = entities.map { entity in
             MockMyCashBookModel(
+                amount: entity.amount,
+                cashBookID: entity.cashBookID ?? UUID(),
+                category: entity.category ?? "기타",
+                country: entity.country ?? "USD", // 기본값 설정
+                expenseDate: entity.expenseDate ?? Date(), // 기본값 설정
                 id: entity.id ?? UUID(),
                 note: entity.note ?? "지출",
-                category: entity.category ?? "기타",
-                amount: entity.amount,
                 payment: entity.payment
             )
         }
+        
+        // ✅ 데이터 콘솔에 출력
+        print("🔥 CoreData에 저장된 데이터 목록:")
+        for data in convertedData {
+            print("""
+            - ID: \(data.id)
+            - 금액: \(data.amount)
+            - 카테고리: \(data.category)
+            - 설명: \(data.note)
+            - 결제 방식: \(data.payment ? "카드" : "현금")
+            - 국가: \(data.country)
+            - 날짜: \(data.expenseDate)
+            """)
+        }
+        
         expenses.accept(convertedData)
         updateTotalAmount()
     }
+
 
     // ✅ CoreData에 지출 항목 추가
     func addExpense(data: MockMyCashBookModel) {
