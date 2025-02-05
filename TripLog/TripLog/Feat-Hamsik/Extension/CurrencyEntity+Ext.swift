@@ -23,10 +23,10 @@ extension CurrencyEntity: CoreDataManagable {
     ///   - context: CoreData 인스턴스
     ///   - predicate: 검색 값(미 입력 시 전체 환율 반환)
     /// - Returns: 검색결과(특정 검색 결과)
-    static func fetch(context: NSManagedObjectContext, predicate: String? = nil) -> [Entity] {
+    static func fetch(context: NSManagedObjectContext, predicate: Any? = nil) -> [Entity] {
         let request: NSFetchRequest<CurrencyEntity> = CurrencyEntity.fetchRequest()
         
-        guard let predicate = predicate else {
+        guard let predicate = predicate as? String else {
             // 검색 조건이 없을 때 동작
             do {
                 let result = try context.fetch(request)

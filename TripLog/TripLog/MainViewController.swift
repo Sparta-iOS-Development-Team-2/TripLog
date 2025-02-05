@@ -46,20 +46,25 @@ class MainViewController: UIViewController {
         setupUI()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.navigationBar.isHidden = true
+    }
 }
 
 // MARK: - UI Setting Method
 private extension MainViewController {
     
     func setupUI() {
-        configureSelf()
-        setupLayout()
-        playLottie()
-        
         // TabBarController 삽입
         addChild(mainVC)
         view.addSubview(mainVC.view)
         mainVC.didMove(toParent: self)
+        
+        configureSelf()
+        setupLayout()
+        playLottie()
     }
     
     func configureSelf() {

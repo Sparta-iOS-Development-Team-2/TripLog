@@ -41,7 +41,13 @@ final class ThemeManager {
     /// 현재 앱의 테마 상태를 확인하고 테마를 변경시키는 메소드
     /// - Parameter window: 테마를 변경할 window
     static func loadTheme(for window: UIWindow?) {
-        let isDarkMode = UserDefaults.standard.bool(forKey: "isDarkModeEnabled")
-        applyDarkMode(isDarkMode, for: window)
+        if UserDefaults.standard.object(forKey: "isDarkModeEnabled") == nil {
+            let isDarkMode = UITraitCollection.current.userInterfaceStyle == .dark
+            applyDarkMode(isDarkMode, for: window)
+        } else {
+            let isDarkMode = UserDefaults.standard.bool(forKey: "isDarkModeEnabled")
+            applyDarkMode(isDarkMode, for: window)
+        }
+        
     }
 }

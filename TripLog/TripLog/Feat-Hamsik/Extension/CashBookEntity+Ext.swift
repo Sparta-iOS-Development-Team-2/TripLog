@@ -30,12 +30,25 @@ extension CashBookEntity: CoreDataManagable {
     typealias Model = MockCashBookModel
     typealias Entity = CashBookEntity
     
+    
+    /// CashBookEntity를 저장/생성하는 함수
+    /// - Parameters:
+    ///   - data: 저장할 데이터
+    ///   - context: CoreData 인스턴스
     static func save(_ data: Model, context: NSManagedObjectContext) {
         let entityName = EntityKeys.Name.CashBookEntity.rawValue
         let element = CashBookElement()
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
         let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "\(element.tripName) == %@", data.tripName as CVarArg)
+        let properties: [String: Any] = [
+            element.id : data.id,
+            element.budget : data.budget,
+            element.departure : data.departure,
+            element.homecoming : data.homecoming,
+            element.note : data.note,
+            element.tripName : data.tripName
+        ]
         
         do {
             let existingItems = try context.fetch(fetchRequest)
@@ -44,12 +57,10 @@ extension CashBookEntity: CoreDataManagable {
                 // 비동기 저장
                 context.performAndWait {
                     let att = NSManagedObject(entity: entity, insertInto: context)
-                    att.setValue(data.id, forKey: element.id)
-                    att.setValue(data.budget, forKey: element.budget)
-                    att.setValue(data.departure, forKey: element.departure)
-                    att.setValue(data.homecoming, forKey: element.homecoming)
-                    att.setValue(data.note, forKey: element.note)
-                    att.setValue(data.tripName, forKey: element.tripName)
+                    properties.forEach { key, value in
+                        att.setValue(value, forKey: key)
+                    }
+                
                     do {
                         try context.save()
                         print("저장 성공: \(data.note)")
@@ -72,11 +83,11 @@ extension CashBookEntity: CoreDataManagable {
     ///   - context: CoreData 인스턴스
     ///   - predicate: 찾고자하는 가계부 이름(tripName)
     /// - Returns: 검색 결과
-    static func fetch(context: NSManagedObjectContext, predicate: String? = nil) -> [Entity] {
+    static func fetch(context: NSManagedObjectContext, predicate: Any? = nil) -> [Entity] {
         let request: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
         let element = CashBookElement()
         
-        guard let predicate = predicate else {
+        guard let predicate = predicate as? String else {
             // 검색 조건이 없을 때 동작
             do {
                 let result = try context.fetch(request)
@@ -111,6 +122,13 @@ extension CashBookEntity: CoreDataManagable {
         let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
         let element = CashBookElement()
         fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)
+        let properties: [String: Any] = [
+            element.budget : data.budget,
+            element.departure : data.departure,
+            element.homecoming : data.homecoming,
+            element.note : data.note,
+            element.tripName : data.tripName
+        ]
         
         do {
             let results = try context.fetch(fetchRequest)
@@ -118,12 +136,11 @@ extension CashBookEntity: CoreDataManagable {
             if let entityToUpdate = results.first {
                 // 비동기 저장
                 context.performAndWait {
-                    entityToUpdate.setValue(data.budget, forKey: element.budget)
-                    entityToUpdate.setValue(data.departure, forKey: element.departure)
-                    entityToUpdate.setValue(data.homecoming, forKey: element.homecoming)
-                    entityToUpdate.setValue(data.note, forKey: element.note)
-                    entityToUpdate.setValue(data.tripName, forKey: element.tripName)
+                    properties.forEach { key, value in
+                        entityToUpdate.setValue(value, forKey: key)
+                    }
                 }
+                
                 do {
                     try context.save()
                     print("업데이트 성공: \(data.note)")
@@ -139,6 +156,10 @@ extension CashBookEntity: CoreDataManagable {
         }
     }
     
+    /// CashBookEntity를 삭제하는 함수
+    /// - Parameters:
+    ///   - entityID: 삭제할 CashBookEntity ID
+    ///   - context: CoreData 인스턴스
     static func delete(entityID: UUID, context: NSManagedObjectContext) {
         let entityName = EntityKeys.Name.CashBookEntity.rawValue
         let element = CashBookElement()

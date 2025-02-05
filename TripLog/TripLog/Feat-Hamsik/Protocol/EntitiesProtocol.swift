@@ -17,7 +17,7 @@ protocol CoreDataManagable: NSManagedObject {
     // 엔티티별 저장 로직
     static func save(_ data: Model, context: NSManagedObjectContext)
     // 엔티티별 검색 로직
-    static func fetch(context: NSManagedObjectContext, predicate: String?) -> [Entity]
+    static func fetch(context: NSManagedObjectContext, predicate: Any?) -> [Entity]
     // 엔티티별 업데이트 로직
     static func update(data: Model, entityID: UUID, context: NSManagedObjectContext)
     // 엔티티별 삭제 로직

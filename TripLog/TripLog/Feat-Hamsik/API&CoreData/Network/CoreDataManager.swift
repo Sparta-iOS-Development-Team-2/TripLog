@@ -18,7 +18,7 @@ class CoreDataManager {
         self.persistentContainer = container
     }
     
-    private var context: NSManagedObjectContext {
+    var context: NSManagedObjectContext {
         return persistentContainer.viewContext
     }
     
@@ -38,7 +38,7 @@ class CoreDataManager {
     ///   - predicate: 검색할 특정 문자
     ///   (예: let predicate = NSPredicate(format: "tripName CONTAINS[cd] %@", "trip1"))
     /// - Returns: 검색결과
-    func fetch<T: CoreDataManagable>(type: T.Type, predicate: String? = nil) -> [T.Entity] {
+    func fetch<T: CoreDataManagable>(type: T.Type, predicate: Any? = nil) -> [T.Entity] {
         return type.fetch(context: context, predicate: predicate)
     }
     
