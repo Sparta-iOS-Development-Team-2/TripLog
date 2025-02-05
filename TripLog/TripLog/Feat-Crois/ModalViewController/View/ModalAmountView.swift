@@ -26,7 +26,7 @@ final class ModalAmountView: UIView {
     }
     
     private let currencyButton = UIButton().then {
-        $0.setTitle("원(한화)", for: .normal)
+        $0.setTitle("KRW(원)", for: .normal)
         $0.setTitleColor(UIColor.Personal.normal, for: .normal)
         $0.titleLabel?.font = UIFont.SCDream(size: .headline, weight: .medium)
         $0.setImage(UIImage(systemName: "chevron.up.chevron.down"), for: .normal)
@@ -74,9 +74,11 @@ final class ModalAmountView: UIView {
     /// - Parameters:
     ///   - amout: 금액(빈 값일 수도 있음)
     ///   - currency: 통화
-    func configureAmoutView(amout: Double?, currency: Currency) {
+    func configureAmoutView(amout: Double?, country: String) {
         self.textField.text = "\(amout ?? 0)"
-        self.currencyButton.setTitle(currency.rawValue, for: .normal)
+        
+        let currency = Currency.allCurrencies.filter { String($0.prefix(3)) == country }.first
+        self.currencyButton.setTitle(currency ?? "", for: .normal)
     }
     
     /// 금액뷰의 데이터를 추출하는 메소드
@@ -88,6 +90,13 @@ final class ModalAmountView: UIView {
         else { return 0 }
         
         return amount
+    }
+    
+    /// 모달뷰의 금액뷰에서 통화 정보를 추출하는 메소드
+    /// - Returns: 통화 정보
+    func currencyExtraction() -> String {
+        guard let currency = currencyButton.titleLabel?.text else { return "" }
+        return String(currency.prefix(3))
     }
     
 }
