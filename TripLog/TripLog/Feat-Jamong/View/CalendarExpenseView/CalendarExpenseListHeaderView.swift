@@ -1,0 +1,163 @@
+//
+//  CalendarExpenseListHeaderView.swift
+//  TripLog
+//
+//  Created by Jamong on 2/4/25.
+//
+
+import UIKit
+import RxSwift
+import RxCocoa
+import Then
+import SnapKit
+
+/// 지출 목록의 헤더를 표시하는 커스텀 뷰
+/// - 날짜, 총 지출액, 잔액 표시
+/// - 지출 추가 버튼 포함
+final class CalendarExpenseListHeaderView: UIView {
+    // MARK: - UI Components
+    /// 날짜와 추가 버튼을 담는 스택뷰
+    private let topStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.alignment = .center
+        $0.distribution = .equalSpacing
+        $0.spacing = 8
+    }
+    
+    /// 지출과 잔액 정보를 담는 스택뷰
+    private let bottomStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.alignment = .center
+        $0.distribution = .equalSpacing
+        $0.spacing = 8
+    }
+    
+    /// 지출 정보를 담는 스택뷰
+    private let expenseStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.alignment = .center
+        $0.spacing = 8
+    }
+    
+    /// 잔액 정보를 담는 스택뷰
+    private let balanceStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.alignment = .center
+        $0.spacing = 8
+    }
+    
+    /// 선택된 날짜를 표시하는 레이블
+    private let dateLabel = UILabel().then {
+        $0.font = .SCDream(size: .display, weight: .bold)
+        $0.textColor = UIColor.CustomColors.Text.textPrimary
+    }
+    
+    /// 지출 추가 버튼
+    private let addButton = UIButton(type: .system).then {
+        $0.applyButtonStyle()
+        $0.backgroundColor = UIColor.CustomColors.Accent.blue
+        
+        let imageConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        let plusImage = UIImage(systemName: "plus", withConfiguration: imageConfig)
+        $0.setImage(plusImage, for: .normal)
+        $0.tintColor = UIColor.CustomColors.Border.border
+        $0.setTitle("추가하기", for: .normal)
+        $0.setTitleColor(UIColor.CustomColors.Border.border, for: .normal)
+        $0.titleLabel?.font = .SCDream(size: .body, weight: .medium)
+        $0.titleLabel?.numberOfLines = 1
+        $0.titleLabel?.lineBreakMode = .byTruncatingTail
+        $0.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        $0.imageEdgeInsets = UIEdgeInsets(top: 0, left: -4, bottom: 0, right: 4)
+        $0.titleEdgeInsets = UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4)
+        $0.layer.cornerRadius = 8
+        $0.layer.masksToBounds = true
+    }
+    
+    private let expenseTitleLabel = UILabel().then {
+        $0.text = "지출"
+        $0.font = .SCDream(size: .body, weight: .medium)
+        $0.textColor = UIColor.CustomColors.Text.textPrimary
+    }
+    
+    private let expenseAmountLabel = UILabel().then {
+        $0.font = .SCDream(size: .body, weight: .medium)
+        $0.textColor = UIColor.CustomColors.Text.textPrimary
+    }
+    
+    private let balanceTitleLabel = UILabel().then {
+        $0.text = "잔액"
+        $0.font = .SCDream(size: .body, weight: .medium)
+        $0.textAlignment = .right
+        $0.textColor = UIColor.CustomColors.Accent.blue
+    }
+    
+    private let balanceAmountLabel = UILabel().then {
+        $0.font = .SCDream(size: .body, weight: .medium)
+        $0.textAlignment = .right
+        $0.textColor = UIColor.CustomColors.Accent.blue
+    }
+    
+    // MARK: - Initialization
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Setup
+    private func setupUI() {
+        backgroundColor = UIColor.CustomColors.Background.background
+        
+        setupStackViews()
+        setupConstraints()
+    }
+    
+    private func setupStackViews() {
+        // 스택뷰 구성
+        addSubview(topStackView)
+        addSubview(bottomStackView)
+        
+        // 상단 스택뷰 구성
+        topStackView.addArrangedSubview(dateLabel)
+        topStackView.addArrangedSubview(addButton)
+        
+        // 하단 스택뷰 구성
+        bottomStackView.addArrangedSubview(expenseStackView)
+        bottomStackView.addArrangedSubview(balanceStackView)
+        
+        // 지출 스택뷰 구성
+        expenseStackView.addArrangedSubview(expenseTitleLabel)
+        expenseStackView.addArrangedSubview(expenseAmountLabel)
+        
+        // 잔액 스택뷰 구성
+        balanceStackView.addArrangedSubview(balanceTitleLabel)
+        balanceStackView.addArrangedSubview(balanceAmountLabel)
+    }
+    
+    private func setupConstraints() {
+        topStackView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview().offset(24)
+            $0.trailing.equalToSuperview().offset(-24)
+        }
+        
+        bottomStackView.snp.makeConstraints {
+            $0.top.equalTo(topStackView.snp.bottom).offset(16)
+            $0.leading.equalToSuperview().offset(24)
+            $0.trailing.equalToSuperview().offset(-24)
+            $0.bottom.equalToSuperview().offset(-20)
+        }
+    }
+    
+    func configure(date: Date, expense: Int, balance: Int) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M월 d일 지출"
+        dateLabel.text = formatter.string(from: date)
+        
+        expenseAmountLabel.text = "\(expense)원"
+        balanceAmountLabel.text = "\(balance.formatted())원"
+    }
+}
