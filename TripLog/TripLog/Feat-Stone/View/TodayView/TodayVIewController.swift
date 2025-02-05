@@ -90,10 +90,9 @@ class TodayViewController: UIViewController {
     private func bindViewModel() {
         // 테이블 뷰의 데이터 바인딩 (CoreData에서 가져온 데이터 표시)
         viewModel.expenses
-            .bind(to: tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
+            .bind(to: tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { index, expense, cell in
                 let originalAmount = Int(expense.amount)
                 let convertedAmount = Int(expense.amount * 1.4)
-
                 let exchangeRateString = "\(NumberFormatter.formattedString(from: convertedAmount)) 원"
 
                 cell.configure(
@@ -105,6 +104,7 @@ class TodayViewController: UIViewController {
                 )
             }
             .disposed(by: disposeBag)
+
 
         // 데이터 변경 감지 후 테이블 뷰 리로드
         viewModel.expenses
@@ -233,6 +233,60 @@ extension NumberFormatter {
         formatter.numberStyle = .decimal
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
+}
+
+extension TodayViewController: UITableViewDelegate {
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.delegate = self
+    }
+
+    // 기본 삭제 기능 비활성화
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return false // 기본 삭제 버튼 비활성화
+    }
+
+    // 기본 삭제 기능을 완전히 비활성화
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        // 기본 삭제 기능 비활성화 (아무 동작도 하지 않음)
+    }
+
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        // 삭제 버튼 컨테이너 뷰 생성
+        let deleteView = UIView(frame: CGRect(x: 0, y: 0, width: 70, height: 40)).then {
+            $0.backgroundColor = .red
+            $0.layer.cornerRadius = 8
+        }
+
+        let deleteButton = UIButton(type: .system).then {
+            $0.setTitle("삭제", for: .normal)
+            $0.setTitleColor(.white, for: .normal)
+            $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
+        }
+
+        deleteView.addSubview(deleteButton)
+        deleteButton.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.width.equalTo(50) // 버튼의 좌우 크기 조절
+            make.height.equalTo(30) // 버튼의 높이 조절
+        }
+
+        let customDeleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] _, _, completionHandler in
+            guard let self = self else { return }
+            self.viewModel.deleteExpense(at: indexPath.row)
+            completionHandler(true)
+        }
+
+        // 기본 배경 제거 후, 커스텀 뷰 적용
+        customDeleteAction.backgroundColor = UIColor.CustomColors.Background.background
+       // customDeleteAction.image = deleteView.asImage() // UIView를 UIImage로 변환하여 버튼 크기 반영
+
+        let configuration = UISwipeActionsConfiguration(actions: [customDeleteAction])
+        configuration.performsFirstActionWithFullSwipe = false // 전체 스와이프 방지
+
+        return configuration
+    }
+
 }
 
 
