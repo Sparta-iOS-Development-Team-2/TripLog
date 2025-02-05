@@ -346,8 +346,8 @@ private extension ModalView {
                 let forth = forthSection as? ModalAmountView
             else { return nil }
             
-            let consumptionData = (getCashBookID(),
-                                   getConsumptionID(),
+            let consumptionData = (getConsumptionID(),
+                                   getCashBookID(),
                                    getExpenseDate(),
                                    first.paymentExtraction(),
                                    second.textFieldExtraction(),

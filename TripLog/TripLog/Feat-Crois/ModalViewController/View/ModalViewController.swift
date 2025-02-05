@@ -148,7 +148,6 @@ private extension ModalViewController {
                 case .createNewConsumption:
                     // 지출내역을 코어 데이터에 추가하는 로직
                     CoreDataManager.shared.save(type: MyCashBookEntity.self, data: consumptionData)
-                    print(data.1.cashBookID, data.1.expenseDate)
                 case .editConsumption:
                     // 지출내역을 코어 데이터에 업데이트 하는 로직
                     CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: data.1.id, data: consumptionData)
