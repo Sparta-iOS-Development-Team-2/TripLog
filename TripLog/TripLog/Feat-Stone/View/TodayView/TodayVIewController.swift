@@ -74,7 +74,8 @@ class TodayViewController: UIViewController {
     }
 
     @objc private func presentExpenseAddModal() {
-        ModalViewManager.showModal(on: self, state: .createNewConsumption)
+        // TODO: 가계부ID를 받아오고 날짜를 지정하는 로직 추가 요청(석준)
+        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: UUID(), date: Date()))
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
 
