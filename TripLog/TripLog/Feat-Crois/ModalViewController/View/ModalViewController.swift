@@ -135,11 +135,8 @@ private extension ModalViewController {
                     alert.showAlert(on: vc, .alert)
                     return
                 }
-                
-                let result = MyCashBookEntity.Model(note: data.1.note,
-                                                  category: data.1.category,
-                                                  amount: data.1.amount,
-                                                  payment: data.1.payment)
+                // TODO: 수정요청(상경)
+                let result = MyCashBookEntity.Model(amount: 0.0, cashBookID: UUID(), category: "category", country: "country", expenseDate: Date(), note: "note", payment: true)
                 
                 switch owner.modalView.checkModalStatus() {
                 case .createNewConsumption:
