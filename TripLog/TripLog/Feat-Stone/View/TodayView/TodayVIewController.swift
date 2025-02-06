@@ -3,212 +3,99 @@ import SnapKit
 import Then
 import RxSwift
 import RxCocoa
-import CoreData
 
 class TodayViewController: UIViewController {
     
-    // 🔹 cashBookID를 저장하여 특정 가계부 데이터만 필터링
-    private let cashBookID: UUID
-    
-    // 총 지출 금액이 업데이트될 때 호출되는 클로저 (상위 뷰에서 활용 가능)
-    var onExpenseUpdated: ((String) -> Void)?
-    
-    // ViewModel 인스턴스 (CoreData와 연동됨)
+    private let disposeBag = DisposeBag()
     let viewModel: TodayViewModel
-    private let disposeBag = DisposeBag() // RxSwift 메모리 관리용 DisposeBag
-    private let topStackView = UIStackView() // 상단 UI StackView
+    
+    // 🔹 상단 UI StackView
+    private let topStackView = UIStackView()
 
     // "지출 내역" 헤더 레이블
     private let headerTitleLabel = UILabel().then {
         $0.text = "지출 내역"
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
     }
-    
-    // 도움말 버튼 (현재 기능 없음, 확장 가능)
+        
+    // 도움말 버튼
     private let helpButton = UIButton(type: .system).then {
         $0.setTitle("?", for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
     }
-    
+        
     // "오늘 사용 금액" 라벨
     private let totalLabel = UILabel().then {
         $0.text = "오늘 사용 금액"
         $0.font = UIFont.SCDream(size: .body, weight: .medium)
         $0.textColor = UIColor(named: "textPrimary")
     }
-    
+        
     // 총 금액 표시 라벨
     private let totalAmountLabel = UILabel().then {
         $0.text = "0 원"
         $0.font = UIFont.SCDream(size: .body, weight: .bold)
         $0.textColor = UIColor.Personal.normal
     }
-    
+        
     // 지출 내역을 표시할 테이블 뷰
     private let tableView = UITableView().then {
         $0.register(ExpenseCell.self, forCellReuseIdentifier: ExpenseCell.identifier)
-        $0.separatorStyle = .none // 구분선 제거
+        $0.separatorStyle = .none
         $0.applyBackgroundColor()
         $0.showsVerticalScrollIndicator = false
         $0.rowHeight = 108
-        $0.clipsToBounds = true // 가로 스크롤 방지
-
-        // 가로 스크롤 문제 해결
+        $0.clipsToBounds = true
         $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
         $0.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     }
-
-    // 지출 추가 버튼 (Floating Button)
+    
     private let floatingButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         $0.tintColor = UIColor.Personal.normal
         $0.layer.cornerRadius = 32
         $0.applyFloatingButtonStyle()
     }
+    
+    private let cashBookID: UUID // ✅ 저장된 cashBookID
 
-    // 🔹 init에서 cashBookID를 받아 저장
-    init(context: NSManagedObjectContext, cashBookID: UUID) {
+    init(cashBookID: UUID) {
         self.cashBookID = cashBookID
-        self.viewModel = TodayViewModel(context: context)
+        self.viewModel = TodayViewModel()
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // 뷰가 로드될 때 실행
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.applyBackgroundColor()
-        
         setupViews()
         setupConstraints()
-        setupFloatingButton()
-        
         bindViewModel()
         
-        // ✅ 특정 cashBookID를 가진 데이터만 가져오도록 수정
-        viewModel.fetchExpenses(for: cashBookID)
-    }
-
-    // ViewModel과 RxSwift를 사용하여 UI 데이터 바인딩
-    private func bindViewModel() {
-        // 🔹 특정 cashBookID를 가진 지출 내역만 표시하도록 필터링
-        viewModel.expenses
-            .map { expenses in
-                expenses.filter { $0.cashBookID == self.cashBookID }
-            }
-            .bind(to: tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
-                let originalAmount = Int(expense.amount)
-                let convertedAmount = Int(expense.amount * 1.4)
-                let exchangeRateString = "\(NumberFormatter.formattedString(from: convertedAmount)) 원"
-
-                cell.configure(
-                    date: "오늘",
-                    title: expense.note,
-                    category: expense.category,
-                    amount: "$ \(NumberFormatter.formattedString(from: originalAmount))",
-                    exchangeRate: exchangeRateString
-                )
-            }
-            .disposed(by: disposeBag)
-
-
-        // 데이터 변경 감지 후 테이블 뷰 리로드
-        viewModel.expenses
-            .subscribe(onNext: { [weak self] _ in
-                self?.tableView.reloadData()
-            })
-            .disposed(by: disposeBag)
-
-        // 🔹 특정 cashBookID를 가진 데이터만 합산하여 총 금액 표시
-        viewModel.expenses
-            .map { expenses in
-                let totalExchangeRate = expenses
-                    .filter { $0.cashBookID == self.cashBookID }
-                    .map { Int($0.amount * 1.4) }
-                    .reduce(0, +)
-                return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원"
-            }
-            .bind(to: totalAmountLabel.rx.text)
-            .disposed(by: disposeBag)
-
-        // 항목 삭제 이벤트 처리
-        tableView.rx.itemDeleted
-            .subscribe(onNext: { [weak self] indexPath in
-                self?.viewModel.deleteExpense(at: indexPath.section)
-            })
-            .disposed(by: disposeBag)
-
-        // 모달 표시 트리거 감지 (새로운 지출 추가)
-        viewModel.showAddExpenseModal
-            .subscribe(onNext: { [weak self] in
-                self?.presentExpenseAddModal()
-            })
-            .disposed(by: disposeBag)
-
-        // 테이블 셀 선택 시 수정 모달 표시
-        tableView.rx.modelSelected(MockMyCashBookModel.self)
-            .subscribe(onNext: { [weak self] selectedExpense in
-                guard let self = self else { return }
-                
-                ModalViewManager.showModal(on: self, state: .editConsumption(data: selectedExpense))
-                    .subscribe(onNext: {
-                        self.viewModel.fetchExpenses(for: self.cashBookID) // ✅ self 추가
-                    })
-                    .disposed(by: self.disposeBag)
-            })
-            .disposed(by: disposeBag)
+        // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
+        viewModel.input.fetchTrigger.accept(cashBookID)
     }
     
-    // Floating Button 설정
-    private func setupFloatingButton() {
-        view.addSubview(floatingButton)
-
-        floatingButton.snp.makeConstraints {
-            $0.width.height.equalTo(64)
-            $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
-        }
-        
-        floatingButton.addTarget(self, action: #selector(floatingButtonTapped), for: .touchUpInside)
-    }
-
-    // Floating Button 클릭 시 동작
-    @objc private func floatingButtonTapped() {
-        viewModel.triggerAddExpenseModal()
-    }
-
-    // 지출 추가 모달 표시
-    @objc private func presentExpenseAddModal() {
-        // ✅ TopViewController에서 받은 cashBookID를 사용하도록 수정
-        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: self.cashBookID, date: Date()))
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                print("📌 사용된 cashBookID: \(self.cashBookID)") // ✅ 제대로 전달되는지 확인
-                print("📌 저장된 날짜: \(Date())")
-                self.viewModel.fetchExpenses(for: self.cashBookID)
-            })
-            .disposed(by: disposeBag)
-    }
-
-
-    // UI 요소 설정
+    // 🔹 UI 요소 추가
     private func setupViews() {
         let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel, helpButton]).then {
             $0.axis = .horizontal
             $0.spacing = 8
             $0.alignment = .center
         }
-        
+           
         let totalStackView = UIStackView(arrangedSubviews: [totalLabel, totalAmountLabel]).then {
             $0.axis = .vertical
             $0.alignment = .trailing
             $0.spacing = 4
         }
-        
+           
         topStackView.addArrangedSubview(headerStackView)
         topStackView.addArrangedSubview(totalStackView)
         topStackView.do {
@@ -217,23 +104,77 @@ class TodayViewController: UIViewController {
             $0.alignment = .center
             $0.distribution = .equalSpacing
         }
-        
+           
         view.addSubview(topStackView)
         view.addSubview(tableView)
+        view.addSubview(floatingButton) // ✅ 추가
     }
-
-    // UI 레이아웃 설정
+    
+    // 🔹 UI 레이아웃 설정
     private func setupConstraints() {
         topStackView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
             $0.leading.trailing.equalToSuperview().inset(16)
         }
-        
+            
         tableView.snp.makeConstraints {
             $0.top.equalTo(topStackView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
+        
+        floatingButton.snp.makeConstraints {
+            $0.width.height.equalTo(64)
+            $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+        }
+    }
+    
+    private func bindViewModel() {
+        // 🔹 테이블 뷰 바인딩
+        viewModel.output.expenses
+            .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
+                cell.configure(
+                    date: "오늘",
+                    title: expense.note,
+                    category: expense.category,
+                    amount: "$ \(NumberFormatter.formattedString(from: Int(expense.amount)))",
+                    exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4))) 원"
+                )
+            }
+            .disposed(by: disposeBag)
+        
+        // 🔹 **총 지출 금액을 `exchangeRate`의 합으로 반영**
+        viewModel.output.expenses
+            .map { expenses in
+                let totalExchangeRate = expenses
+                    .map { Int($0.amount * 1.4) } // ✅ exchangeRate 변환된 값 사용
+                    .reduce(0, +)
+                return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원"
+            }
+            .drive(totalAmountLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        // 🔹 모달 표시 바인딩 (RxSwift 적용)
+        floatingButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                self.presentExpenseAddModal()
+            })
+            .disposed(by: disposeBag)
+    }
+                           
+    @objc private func presentExpenseAddModal() {
+        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: self.cashBookID, date: Date()))
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                print("📌 사용된 cashBookID: \(self.cashBookID)")
+                print("📌 저장된 날짜: \(Date())")
+
+                // ✅ 모달 닫힌 후 데이터 새로고침
+                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+            })
+            .disposed(by: disposeBag)
     }
 }
 
@@ -284,9 +225,13 @@ extension TodayViewController: UITableViewDelegate {
 
         let customDeleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] _, _, completionHandler in
             guard let self = self else { return }
-            self.viewModel.deleteExpense(at: indexPath.row)
+            
+            // ✅ Rx 방식으로 삭제 요청을 전달
+            self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
+            
             completionHandler(true)
         }
+
 
         // 기본 배경 제거 후, 커스텀 뷰 적용
         customDeleteAction.backgroundColor = UIColor.CustomColors.Background.background
@@ -300,15 +245,11 @@ extension TodayViewController: UITableViewDelegate {
 
 }
 
-
 @available(iOS 17.0, *)
 #Preview("TodayViewController") {
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
-    // 🔹 샘플 가계부 ID 생성 (테스트용)
+    // ✅ `context` 제거 후 `cashBookID`만 전달하도록 수정
     let sampleCashBookID = UUID()
-
-    let viewController = TodayViewController(context: context, cashBookID: sampleCashBookID)
+    let viewController = TodayViewController(cashBookID: sampleCashBookID)
 
     return UINavigationController(rootViewController: viewController)
 }

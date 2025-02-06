@@ -1,28 +1,42 @@
 import UIKit
 import SnapKit
 import Then
-import CoreData
+import RxSwift
+import RxCocoa
+import RxDataSources
 
-class TopViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    
-    private let context: NSManagedObjectContext
-    private let cashBook: MockCashBookModel
+class TopViewController: UIViewController {
+
+    private let viewModel: TopViewModel
+    private let disposeBag = DisposeBag()
 
     private let tableView = UITableView().then {
         $0.separatorStyle = .none
-        $0.applyBackgroundColor()
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
-        $0.rowHeight = 192
-        $0.estimatedRowHeight = 0
         $0.isScrollEnabled = false
         $0.alwaysBounceVertical = false
+        $0.rowHeight = UITableView.automaticDimension
+        $0.estimatedRowHeight = UIScreen.main.bounds.height * 0.5
     }
 
-    // ✅ 데이터 전달을 위해 MockCashBookModel을 받는 init 추가
-    init(context: NSManagedObjectContext, cashBook: MockCashBookModel) {
-        self.context = context
-        self.cashBook = cashBook
+    // ✅ RxDataSources에서 사용할 데이터소스 생성
+    private let dataSource = RxTableViewSectionedReloadDataSource<CashBookSection>(
+        configureCell: { _, tableView, indexPath, item in
+            let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as! CustomTableViewCell
+            cell.configure(
+                subtitle: item.note,
+                date: "\(item.departure) ~ \(item.homecoming)",
+                budget: "\(item.budget) 원",
+                cashBookID: item.id
+            )
+            return cell
+        }
+    )
+
+    // ✅ `context` 없이 UUID 및 개별 데이터만 받도록 수정
+    init(cashBook: MockCashBookModel) {
+        self.viewModel = TopViewModel(cashBook: cashBook)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -38,77 +52,52 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupUI()
+        setupTableView()
+        bindViewModel() // ✅ Rx 바인딩 실행
+    }
+
+    // ✅ UI 관련 설정
+    private func setupUI() {
         view.applyBackgroundColor()
 
         // 네비게이션 타이틀을 tripName으로 설정
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.SCDream(size: .title, weight: .bold)
         ]
-        self.navigationItem.title = cashBook.tripName
-
-        print("전달된 여행 정보: \(cashBook)")
-
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = UIScreen.main.bounds.height * 0.5
-
-        setupTableView()
+        self.navigationItem.title = viewModel.sections.value.first?.items.first?.tripName ?? "여행"
     }
 
+    // ✅ UITableView 설정
     private func setupTableView() {
         view.addSubview(tableView)
 
-        tableView.dataSource = self
-        tableView.delegate = self
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: "CustomCell")
 
         tableView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        tableView.applyBackgroundColor()
     }
 
-    // MARK: - UITableViewDataSource
+    // ✅ ViewModel 바인딩 (RxDataSources)
+    private func bindViewModel() {
+        viewModel.sections
+            .bind(to: tableView.rx.items(dataSource: dataSource)) // ✅ Rx 방식으로 데이터 바인딩
+            .disposed(by: disposeBag)
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1 // 단일 데이터 표시
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as! CustomTableViewCell
-
-        // ✅ `configure`에 `cashBookID` 추가
-        cell.configure(
-            subtitle: cashBook.note,
-            date: "\(cashBook.departure) ~ \(cashBook.homecoming)",
-            expense: "", // 필요하면 추가
-            budget: "\(cashBook.budget) 원",
-            context: context,
-            cashBookID: cashBook.id // ✅ `cashBookID` 추가
-        )
-
-        return cell
-    }
-
-    // MARK: - UITableViewDelegate
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: false)
-        print("Selected trip: \(cashBook.tripName)")
+        // ✅ 선택한 셀 이벤트 감지
+        tableView.rx.modelSelected(MockCashBookModel.self)
+            .subscribe(onNext: { [weak self] selectedCashBook in
+                print("📌 Selected trip: \(selectedCashBook.tripName)")
+            })
+            .disposed(by: disposeBag)
     }
 }
 
-//extension TopViewController {
-//    static let fixedUUID = UUID() // 🔹 프리뷰에서 재사용할 고정된 UUID
-//}
-
-
 @available(iOS 17.0, *)
 #Preview("TopViewController") {
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    let sampleCashBookID = UUID() // ✅ 고정된 UUID 사용
-
     let sampleCashBook = MockCashBookModel(
-        id: sampleCashBookID, // ✅ UUID 유지
+        id: UUID(),
         tripName: "제주도 여행",
         note: "제주에서 3박 4일 일정",
         budget: 500000,
@@ -117,12 +106,6 @@ class TopViewController: UIViewController, UITableViewDataSource, UITableViewDel
     )
 
     return UINavigationController(
-        rootViewController: TopViewController(
-            context: context,
-            cashBook: sampleCashBook
-        )
+        rootViewController: TopViewController(cashBook: sampleCashBook)
     )
 }
-
-
-

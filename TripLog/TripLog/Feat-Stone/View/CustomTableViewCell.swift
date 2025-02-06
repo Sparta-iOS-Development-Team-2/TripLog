@@ -1,6 +1,7 @@
 import UIKit
 import SnapKit
-import CoreData
+import RxSwift
+import RxCocoa
 
 class CustomTableViewCell: UITableViewCell {
 
@@ -8,19 +9,26 @@ class CustomTableViewCell: UITableViewCell {
     private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
     private let containerView = UIView() // TodayViewController와 CalendarViewController를 담을 컨테이너 뷰
-    
-    private var todayViewController: TodayViewController?
-    private let calendarViewController = CalendarViewController()
-    
-    private var context: NSManagedObjectContext? // CoreData 컨텍스트 저장
+
+    private var disposeBag = DisposeBag()
+    private var cashBookID: UUID?
+
+    // ✅ TodayViewController & CalendarViewController는 lazy var로 최초 1회만 생성
+    private lazy var todayViewController: TodayViewController = {
+        let vc = TodayViewController(cashBookID: cashBookID ?? UUID())
+        return vc
+    }()
+
+    private lazy var calendarViewController: CalendarViewController = {
+        return CalendarViewController()
+    }()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         selectionStyle = .none // 셀 선택 시 회색 깜박거림 방지
         setupLayout()
         applyBackgroundColor()
-        
         containerView.clipsToBounds = true // 내부 뷰가 넘치지 않도록 설정
     }
 
@@ -28,48 +36,47 @@ class CustomTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(subtitle: String, date: String, expense: String, budget: String, context: NSManagedObjectContext, cashBookID: UUID) {
-        self.context = context // 컨텍스트 저장
+    // ✅ `context` 없이 `cashBookID`만 받도록 수정
+    func configure(subtitle: String, date: String, budget: String, cashBookID: UUID) {
         titleDateView.configure(subtitle: subtitle, date: date)
+        self.cashBookID = cashBookID
 
-        // 기존 TodayViewController 제거 후 다시 추가 (재사용 방지)
-        todayViewController?.view.removeFromSuperview()
-        todayViewController = TodayViewController(context: context, cashBookID: cashBookID) // ✅ `cashBookID` 추가
+        // ✅ TodayViewController의 cashBookID 업데이트 (새로운 객체 생성 없이 기존 인스턴스 활용)
+        todayViewController.viewModel.input.fetchTrigger.accept(cashBookID)
 
-        guard let todayVC = todayViewController else { return }
+        // ✅ ProgressView와 TodayViewController 데이터 바인딩
+        bindToProgressView(budget: budget)
 
-        // 초기 총 금액을 가져와 ProgressView 업데이트
-        let initialExpense = todayVC.viewModel.totalAmount.value
-        progressView.configure(expense: initialExpense, budget: budget)
-
-        // 지출 변경 감지하여 progressView 업데이트
-        todayVC.onExpenseUpdated = { [weak self] updatedExpense in
-            DispatchQueue.main.async {
-                self?.progressView.configure(expense: updatedExpense, budget: budget)
-            }
+        // ✅ 컨테이너에 뷰 추가 (중복 추가 방지)
+        if todayViewController.view.superview == nil {
+            containerView.addSubview(todayViewController.view)
+            todayViewController.view.snp.makeConstraints { $0.edges.equalToSuperview() }
         }
 
-        // TodayViewController 추가
-        containerView.addSubview(todayVC.view)
-        todayVC.view.snp.makeConstraints { $0.edges.equalToSuperview() }
-
-        // CalendarViewController 추가 (중복 제거)
-        calendarViewController.view.removeFromSuperview()
-        containerView.addSubview(calendarViewController.view)
-        calendarViewController.view.snp.makeConstraints { $0.edges.equalToSuperview() }
+        if calendarViewController.view.superview == nil {
+            containerView.addSubview(calendarViewController.view)
+            calendarViewController.view.snp.makeConstraints { $0.edges.equalToSuperview() }
+        }
 
         // 기본적으로 TodayViewController 보이도록 설정
-        todayVC.view.isHidden = false
+        todayViewController.view.isHidden = false
         calendarViewController.view.isHidden = true
     }
 
+    // ✅ ProgressView와 TodayViewController 데이터 바인딩
+    private func bindToProgressView(budget: String) {
+        disposeBag = DisposeBag() // 셀 재사용 시 기존 바인딩 해제
+
+        todayViewController.viewModel.output.totalAmount
+            .drive(onNext: { [weak self] updatedExpense in
+                self?.progressView.configure(expense: updatedExpense, budget: budget)
+            })
+            .disposed(by: disposeBag)
+    }
+
     private func setupLayout() {
-        // 모든 서브뷰 추가
         [titleDateView, progressView, buttonStackView, containerView].forEach {
             contentView.addSubview($0)
-        }
-        contentView.snp.makeConstraints{
-            $0.top.equalToSuperview().offset(8)
         }
 
         titleDateView.snp.makeConstraints {
@@ -90,11 +97,11 @@ class CustomTableViewCell: UITableViewCell {
 
         containerView.snp.makeConstraints {
             $0.top.equalTo(buttonStackView.snp.bottom).offset(16)
-            $0.leading.trailing.bottom.equalToSuperview().inset(16) // 좌우 여백 추가
-            $0.height.equalTo(UIScreen.main.bounds.height * 0.6).priority(.required) // 화면의 60% 차지
+            $0.leading.trailing.bottom.equalToSuperview().inset(16)
+            $0.height.equalTo(UIScreen.main.bounds.height * 0.6).priority(.required)
         }
 
-        // 버튼 액션 설정 (더 명확한 전환 방식 적용)
+        // 버튼 액션 설정
         buttonStackView.setButtonActions(
             todayAction: { [weak self] in
                 self?.showTodayView()
@@ -105,15 +112,13 @@ class CustomTableViewCell: UITableViewCell {
         )
     }
 
-    // TodayViewController 활성화
     private func showTodayView() {
-        todayViewController?.view.isHidden = false
+        todayViewController.view.isHidden = false
         calendarViewController.view.isHidden = true
     }
 
-    // CalendarViewController 활성화
     private func showCalendarView() {
-        todayViewController?.view.isHidden = true
+        todayViewController.view.isHidden = true
         calendarViewController.view.isHidden = false
     }
 
