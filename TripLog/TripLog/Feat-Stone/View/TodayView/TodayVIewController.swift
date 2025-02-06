@@ -11,6 +11,8 @@ class TodayViewController: UIViewController {
     
     // 🔹 상단 UI StackView
     private let topStackView = UIStackView()
+    
+    var onTotalAmountUpdated: ((String)->Void)?
 
     // "지출 내역" 헤더 레이블
     private let headerTitleLabel = UILabel().then {
@@ -131,6 +133,13 @@ class TodayViewController: UIViewController {
     }
     
     private func bindViewModel() {
+        viewModel.output.expenses
+            .drive(onNext: { expenses in
+                print("📌 expenses 데이터 확인:", expenses) // ✅ 콘솔에 데이터 출력
+            })
+            .disposed(by: disposeBag)
+
+        
         // 🔹 테이블 뷰 바인딩
         viewModel.output.expenses
             .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
@@ -147,12 +156,33 @@ class TodayViewController: UIViewController {
         // 🔹 **총 지출 금액을 `exchangeRate`의 합으로 반영**
         viewModel.output.expenses
             .map { expenses in
-                let totalExchangeRate = expenses
-                    .map { Int($0.amount * 1.4) } // ✅ exchangeRate 변환된 값 사용
-                    .reduce(0, +)
+                let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +)
                 return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원"
             }
-            .drive(totalAmountLabel.rx.text)
+            .drive(onNext: { [weak self] totalAmount in
+                self?.totalAmountLabel.text = totalAmount // ✅ totalAmountLabel 업데이트
+                self?.onTotalAmountUpdated?(totalAmount) // ✅ **값 변경 시 클로저 실행 (TopViewController에 전달)**
+            })
+            .disposed(by: disposeBag)
+        
+        
+        // ✅ 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기
+        tableView.rx.modelSelected(MockMyCashBookModel.self)
+            .do(onNext: { selectedExpense in
+                print("📌 선택된 셀 데이터 확인: \(selectedExpense)") // ✅ 선택 이벤트 로그 추가
+            })
+            .flatMapLatest { [weak self] selectedExpense -> Observable<Void> in
+                guard let self = self else {
+                    print("📌 self가 nil입니다.") // ✅ 메모리 해제 문제 확인
+                    return .empty()
+                }
+                return ModalViewManager.showModal(on: self, state: .editConsumption(data: selectedExpense))
+            }
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                print("📌 수정 모달 닫힘 후 데이터 새로고침") // ✅ 모달 닫힌 후 이벤트 확인
+                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+            })
             .disposed(by: disposeBag)
         
         // 🔹 모달 표시 바인딩 (RxSwift 적용)
@@ -176,6 +206,19 @@ class TodayViewController: UIViewController {
             })
             .disposed(by: disposeBag)
     }
+    
+    private func presentExpenseEditModal(data: MockMyCashBookModel) {
+        ModalViewManager.showModal(on: self, state: .editConsumption(data: data))
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                print("📌 수정된 내역: \(data)")
+                
+                // ✅ 모달 닫힌 후 데이터 새로고침
+                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+            })
+            .disposed(by: disposeBag)
+    }
+
 }
 
 // 천 단위 숫자 포맷 변환

@@ -8,16 +8,14 @@ class CustomTableViewCell: UITableViewCell {
     private let titleDateView = TitleDateView()
     private let progressView = TopProgressView()
     private let buttonStackView = CustomButtonStackView()
-    private let containerView = UIView() // TodayViewController와 CalendarViewController를 담을 컨테이너 뷰
+    private let containerView = UIView()
 
     private var disposeBag = DisposeBag()
     private var cashBookID: UUID?
-
-    // ✅ TodayViewController & CalendarViewController는 lazy var로 최초 1회만 생성
-    private lazy var todayViewController: TodayViewController = {
-        let vc = TodayViewController(cashBookID: cashBookID ?? UUID())
-        return vc
-    }()
+    private var todayViewController: TodayViewController?
+    
+    // ✅ **총 지출 금액이 변경될 때 실행될 클로저 (TopViewController로 전달)**
+    var onTotalAmountUpdated: ((String) -> Void)?
 
     private lazy var calendarViewController: CalendarViewController = {
         return CalendarViewController()
@@ -36,42 +34,46 @@ class CustomTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // ✅ `context` 없이 `cashBookID`만 받도록 수정
+    // ✅ `cashBookID`를 받아서 `TodayViewController`를 동적으로 생성
     func configure(subtitle: String, date: String, budget: String, cashBookID: UUID) {
         titleDateView.configure(subtitle: subtitle, date: date)
         self.cashBookID = cashBookID
 
-        // ✅ TodayViewController의 cashBookID 업데이트 (새로운 객체 생성 없이 기존 인스턴스 활용)
-        todayViewController.viewModel.input.fetchTrigger.accept(cashBookID)
+        // ✅ **기존 todayViewController 제거 후 새로 생성**
+        todayViewController?.view.removeFromSuperview()
+        todayViewController = TodayViewController(cashBookID: cashBookID)
 
-        // ✅ ProgressView와 TodayViewController 데이터 바인딩
-        bindToProgressView(budget: budget)
+        guard let todayVC = todayViewController else { return }
 
-        // ✅ 컨테이너에 뷰 추가 (중복 추가 방지)
-        if todayViewController.view.superview == nil {
-            containerView.addSubview(todayViewController.view)
-            todayViewController.view.snp.makeConstraints { $0.edges.equalToSuperview() }
-        }
+        // ✅ **TodayViewController의 totalAmount 값을 감지하여 ProgressView 업데이트**
+        bindToProgressView(todayVC: todayVC, budget: budget)
 
+        // ✅ **컨테이너에 TodayViewController 추가**
+        containerView.addSubview(todayVC.view)
+        todayVC.view.snp.makeConstraints { $0.edges.equalToSuperview() }
+
+        // ✅ **CalendarViewController 추가 (중복 방지)**
         if calendarViewController.view.superview == nil {
             containerView.addSubview(calendarViewController.view)
             calendarViewController.view.snp.makeConstraints { $0.edges.equalToSuperview() }
         }
 
         // 기본적으로 TodayViewController 보이도록 설정
-        todayViewController.view.isHidden = false
+        todayVC.view.isHidden = false
         calendarViewController.view.isHidden = true
     }
 
-    // ✅ ProgressView와 TodayViewController 데이터 바인딩
-    private func bindToProgressView(budget: String) {
+    private func bindToProgressView(todayVC: TodayViewController, budget: String) {
         disposeBag = DisposeBag() // 셀 재사용 시 기존 바인딩 해제
 
-        todayViewController.viewModel.output.totalAmount
-            .drive(onNext: { [weak self] updatedExpense in
-                self?.progressView.configure(expense: updatedExpense, budget: budget)
-            })
-            .disposed(by: disposeBag)
+        // ✅ **예산 값 한 번만 설정**
+        progressView.setBudget(budget)
+
+        // ✅ **TodayViewController의 totalAmount 값을 감지하여 ProgressView의 expense 업데이트**
+        todayVC.onTotalAmountUpdated = { [weak self] totalAmount in
+            self?.progressView.expense.accept(totalAmount) // ✅ Rx로 값 업데이트
+            self?.onTotalAmountUpdated?(totalAmount) // ✅ **TopViewController로 전달**
+        }
     }
 
     private func setupLayout() {
@@ -113,12 +115,12 @@ class CustomTableViewCell: UITableViewCell {
     }
 
     private func showTodayView() {
-        todayViewController.view.isHidden = false
+        todayViewController?.view.isHidden = false
         calendarViewController.view.isHidden = true
     }
 
     private func showCalendarView() {
-        todayViewController.view.isHidden = true
+        todayViewController?.view.isHidden = true
         calendarViewController.view.isHidden = false
     }
 

@@ -64,6 +64,9 @@ class ExpenseCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        contentView.isUserInteractionEnabled = true // ✅ 터치 이벤트가 정상 전달되도록 설정
+        selectionStyle = .none
 
         contentView.addSubview(deleteButtonView)
         deleteButtonView.addSubview(deleteButton)
@@ -83,14 +86,12 @@ class ExpenseCell: UITableViewCell {
         }
         containerView.addSubview(secondRowStackView)
 
-        selectionStyle = .none
-
         setupLayout()
         applyBackgroundColor()
 
-        // 삭제 버튼 클릭 이벤트
         deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
     }
+
 
     private func setupLayout() {
         deleteButtonView.snp.makeConstraints {
