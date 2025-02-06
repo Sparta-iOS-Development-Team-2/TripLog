@@ -21,66 +21,53 @@ final class TabBarView: UIView {
     let cashBookTapped = PublishRelay<Void>()
     let settingTapped = PublishRelay<Void>()
     let tabBarAddButtonTapped = PublishRelay<Void>()
+     
+    private var cashBookTabButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        // 배경색과 텍스트색 설정
+        config.baseBackgroundColor = .clear
+        config.baseForegroundColor = UIColor.CustomColors.Accent.blue
+        
+        // 텍스트와 폰트 설정
+        var title = AttributedString.init("가계부")
+        title.font =  UIFont.SCDream(size: .body, weight: .bold)
+        config.attributedTitle = title
+        
+        // 이미지와 위치 설정
+        config.image = UIImage(systemName: "book")
+        config.imagePadding = 5
+        config.imagePlacement = .top
+        
+        let button = UIButton(configuration: config)
+        
+       return button
+    }()
     
-    // 탭바 아이템 제스처 생성
-    private let cashBookTap = UITapGestureRecognizer()
-    private let settingTap = UITapGestureRecognizer()
-    
-    private let cashBookImageView = UIImageView().then {
-        $0.image = UIImage(systemName: "book")
-        $0.tintColor = UIColor.CustomColors.Accent.blue
-        $0.backgroundColor = .clear
-    }
-    
-    private let cashBookLabel = UILabel().then {
-        $0.text = "가계부"
-        $0.font = UIFont.SCDream(size: .body, weight: .bold)
-        $0.textColor = UIColor.CustomColors.Accent.blue
-        $0.textAlignment = .center
-    }
-    
-    private let cashBookVerticalStackView = UIStackView().then {
-        $0.axis = .vertical
-        $0.alignment = .center
-        $0.spacing = 4
-    }
-    
-    private let cashBookTabView = UIView().then {
-        $0.backgroundColor = .clear
-    }
-    
-    private let settingImageView = UIImageView().then {
-        $0.image = UIImage(systemName: "gearshape")
-        $0.tintColor = UIColor.CustomColors.Accent.blue
-        $0.backgroundColor = .clear
-    }
-    
-    private let settingLabel = UILabel().then {
-        $0.text = "설정"
-        $0.font = UIFont.SCDream(size: .body, weight: .bold)
-        $0.textColor = UIColor.CustomColors.Accent.blue
-        $0.textAlignment = .center
-    }
-    
-    private let settingVerticalStackView = UIStackView().then {
-        $0.axis = .vertical
-        $0.alignment = .center
-        $0.spacing = 4
-    }
-    
-    private let settingTabView = UIView().then {
-        $0.backgroundColor = .clear
-    }
-    
+    private var settingTabButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        // 배경색과 텍스트색 설정
+        config.baseBackgroundColor = .clear
+        config.baseForegroundColor = UIColor.CustomColors.Accent.blue
+        
+        // 텍스트와 폰트 설정
+        var title = AttributedString.init("설정")
+        title.font =  UIFont.SCDream(size: .body, weight: .bold)
+        config.attributedTitle = title
+        
+        // 이미지와 위치 설정
+        config.image = UIImage(systemName: "gearshape")
+        config.imagePadding = 5
+        config.imagePlacement = .top
+        
+        let button = UIButton(configuration: config)
+        
+       return button
+    }()
+
     let tabBarAddButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.tintColor = UIColor.CustomColors.Background.background
-        $0.layer.cornerRadius = (64 - 10) / 2  // ((버튼 뷰 크기 - 버튼 패딩) / 2)
-    }
-    
-    private let tabBarAddButtonView = UIView().then {
-        $0.backgroundColor = UIColor.CustomColors.Background.background
-        $0.layer.cornerRadius = 32 // (버튼 뷰 크기 / 2)
+        $0.tintColor = UIColor.CustomColors.Border.plus
+        $0.backgroundColor = UIColor.CustomColors.Accent.blue
     }
     
     //MARK: - Initializer
@@ -89,7 +76,6 @@ final class TabBarView: UIView {
         
         setupUI()
         setupUIConstraints()
-        setupGestureRecognizers()
         bind()
     }
     
@@ -97,6 +83,14 @@ final class TabBarView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+    
+            tabBarAddButton.applyTabBarButtonStyle()
+            
+        }
+    }
 }
 
 //MARK: - Private Method
@@ -106,86 +100,51 @@ private extension TabBarView {
     func setupUI() {
         
         // 탭바 추가 버튼 스타일 적용
-        tabBarAddButton.applyTabBarButton()
-        
-        // 탭바 그림자 적용
-        tabBarAddButtonView.applyViewShadow()
-        
-        cashBookTabView.addSubview(cashBookVerticalStackView)
-        settingTabView.addSubview(settingVerticalStackView)
-        tabBarAddButtonView.addSubview(tabBarAddButton)
+        tabBarAddButton.applyTabBarButtonStyle()
         
         [
-            cashBookImageView,
-            cashBookLabel
-        ].forEach { cashBookVerticalStackView.addArrangedSubview($0) }
-        
-        [
-            settingImageView,
-            settingLabel
-        ].forEach { settingVerticalStackView.addArrangedSubview($0) }
-        
-        [
-            cashBookTabView,
-            tabBarAddButtonView,
-            settingTabView
+            cashBookTabButton,
+            tabBarAddButton,
+            settingTabButton
         ].forEach { addSubview($0) }
     }
     
     /// setupUIConstraints
     func setupUIConstraints() {
         
-        cashBookTabView.snp.makeConstraints {
+        cashBookTabButton.snp.makeConstraints {
             //중앙에서 왼쪽으로 50% 이동
             $0.centerX.equalToSuperview().multipliedBy(0.5)
             $0.verticalEdges.equalToSuperview()
+            $0.width.equalTo(60)
         }
         
-        cashBookVerticalStackView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(8)
-            $0.width.equalTo(50)
-        }
-        
-        tabBarAddButtonView.snp.makeConstraints {
+        tabBarAddButton.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.width.height.equalTo(64)
             $0.top.equalToSuperview().offset(-24)
         }
         
-        tabBarAddButton.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(5)
-        }
-        
-        settingTabView.snp.makeConstraints {
+        settingTabButton.snp.makeConstraints {
             //중앙에서 오른쪽으로 50% 이동
             $0.centerX.equalToSuperview().multipliedBy(1.5)
             $0.verticalEdges.equalToSuperview()
+            $0.width.equalTo(60)
         }
         
-        settingVerticalStackView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(8)
-            $0.width.equalTo(50)
-        }
     }
     
-    /// Gesture Recognizer 추가
-    func setupGestureRecognizers() {
-       
-        cashBookTabView.addGestureRecognizer(cashBookTap)
-        settingTabView.addGestureRecognizer(settingTap)
-    }
-    
-    /// 탭바 아이템, 버튼 바인딩
+    /// 탭바 아이템 바인딩
     func bind() {
         
         // 가계부 리스트 탭
-        cashBookTap.rx.event
+        cashBookTabButton.rx.tap
             .map { _ in }
             .bind(to: cashBookTapped)
             .disposed(by: disposeBag)
         
         // 설정 탭
-        settingTap.rx.event
+        settingTabButton.rx.tap
             .map { _ in }
             .bind(to: settingTapped)
             .disposed(by: disposeBag)
@@ -204,16 +163,26 @@ extension TabBarView {
     func updateTabItem(for state: TabBarState) {
         switch state {
         case .cashBookList:
-            cashBookImageView.tintColor = UIColor.CustomColors.Accent.blue
-            cashBookLabel.textColor = UIColor.CustomColors.Accent.blue
-            settingImageView.tintColor = UIColor.CustomColors.Text.textSecondary
-            settingLabel.textColor = UIColor.CustomColors.Text.textSecondary
+            cashBookTabButton.updateConfiguration { config in
+                config.baseForegroundColor = UIColor.CustomColors.Accent.blue
+                config.image = UIImage(systemName: "book.fill")
+            }
+            settingTabButton.updateConfiguration { config in
+                config.baseForegroundColor = UIColor.CustomColors.Text.textSecondary
+                config.image = UIImage(systemName: "gearshape")
+            }
             
         case .setting:
-            settingImageView.tintColor = UIColor.CustomColors.Accent.blue
-            settingLabel.textColor = UIColor.CustomColors.Accent.blue
-            cashBookImageView.tintColor = UIColor.CustomColors.Text.textSecondary
-            cashBookLabel.textColor = UIColor.CustomColors.Text.textSecondary
+            cashBookTabButton.updateConfiguration { config in
+                config.baseForegroundColor = UIColor.CustomColors.Text.textSecondary
+                config.image = UIImage(systemName: "book")
+            }
+            settingTabButton.updateConfiguration { config in
+                config.baseForegroundColor = UIColor.CustomColors.Accent.blue
+                config.image = UIImage(systemName: "gearshape.fill")
+            }
         }
     }
 }
+
+
