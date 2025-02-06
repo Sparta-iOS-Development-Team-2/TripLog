@@ -101,7 +101,7 @@ extension UIView {
         layer.shadowColor = darkModeCheck(UIColor.white.cgColor, UIColor.black.cgColor)
         layer.shadowOpacity = darkModeCheck(0.3, 0.1)
         layer.shadowRadius = 1.5
-        layer.shadowOffset = CGSize(width: 0, height: -2)
+        layer.shadowOffset = CGSize(width: 0, height: -3)
         layer.masksToBounds = false
     }
     
@@ -178,7 +178,6 @@ extension UIView {
     
     /// TabBar Style
     func applyTabBarStyle() {
-        applyCornerRadius()
         applyTabBarShadow()
         applyBackgroundColor()
     }

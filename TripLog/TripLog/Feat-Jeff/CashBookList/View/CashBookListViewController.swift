@@ -78,12 +78,13 @@ final class CashBookListViewController: UIViewController {
         viewWillAppearSubject.onNext(())
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-    
-            addCellView.applyBoxStyle()
             
+            listCollectionView.backgroundColor = UIColor.CustomColors.Background.background
+            addCellView.applyBoxStyle()
         }
     }
     
@@ -171,13 +172,26 @@ private extension CashBookListViewController {
             .bind(to: addButtonTapped)
             .disposed(by: disposeBag)
         
-        // 선택된 셀 동작처리(추후 구현)
+        // 선택된 셀의 오늘 지출화면으로 이동
         listCollectionView.rx.modelSelected(MockCashBookModel.self)
-            .subscribe(onNext: { selectedItem in
-                print("노트 : \(selectedItem.note), 예산 : \(selectedItem.budget) ")
-                self.navigationController?.pushViewController(TopViewController(), animated: true)
+            .subscribe(onNext: { [weak self] selectedItem in
+                guard let self = self else { return }
+                let data = self.getData(selectedItem)
+                self.navigationController?.pushViewController(TopViewController(cashBook: data), animated: true)
             })
             .disposed(by: disposeBag)
+    }
+    
+    /// 셀에서 선택된 데이터를 Model에 넣어서 전달
+    func getData(_ selectedData: ControlEvent<MockCashBookModel>.Element) -> MockCashBookModel {
+        let data = MockCashBookModel(
+            id: selectedData.id,
+            tripName: selectedData.tripName,
+            note: selectedData.note,
+            budget: selectedData.budget,
+            departure: selectedData.departure,
+            homecoming: selectedData.homecoming)
+        return data
     }
     
     /// CollectionView Layout

@@ -21,7 +21,7 @@ final class TabBarView: UIView {
     let cashBookTapped = PublishRelay<Void>()
     let settingTapped = PublishRelay<Void>()
     let tabBarAddButtonTapped = PublishRelay<Void>()
-     
+    
     private var cashBookTabButton: UIButton = {
         var config = UIButton.Configuration.plain()
         // 배경색과 텍스트색 설정
@@ -40,7 +40,7 @@ final class TabBarView: UIView {
         
         let button = UIButton(configuration: config)
         
-       return button
+        return button
     }()
     
     private var settingTabButton: UIButton = {
@@ -61,12 +61,12 @@ final class TabBarView: UIView {
         
         let button = UIButton(configuration: config)
         
-       return button
+        return button
     }()
-
+    
     let tabBarAddButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.tintColor = UIColor.CustomColors.Border.plus
+        $0.tintColor = UIColor.CustomColors.Background.background
         $0.backgroundColor = UIColor.CustomColors.Accent.blue
     }
     
@@ -83,14 +83,15 @@ final class TabBarView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-    
-            tabBarAddButton.applyTabBarButtonStyle()
             
+            tabBarAddButton.applyTabBarButtonStyle()
         }
     }
+    
 }
 
 //MARK: - Private Method
@@ -154,6 +155,7 @@ private extension TabBarView {
             .bind(to: tabBarAddButtonTapped)
             .disposed(by: disposeBag)
     }
+    
 }
 
 //MARK: - Method
@@ -183,6 +185,7 @@ extension TabBarView {
             }
         }
     }
+    
 }
 
 

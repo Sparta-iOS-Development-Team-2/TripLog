@@ -9,7 +9,7 @@ import CoreData
 import RxSwift
 import RxCocoa
 
-class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsControllerDelegate {
+final class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsControllerDelegate {
     
     struct Input {
         let callViewWillAppear: Observable<Void>
@@ -57,7 +57,7 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
         let fetchedData = fetchedResultsController.fetchedObjects ?? []
         
         // 패치 결과로 업데이트
-        let sectionData = [
+        let sectionData: [SectionOfListCellData] = fetchedData.isEmpty ? [] : [
             SectionOfListCellData(
                 id: UUID(), // 섹션 구분
                 items: fetchedData.map { entity in
@@ -103,7 +103,6 @@ class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsController
             .asObservable()
         
         let addCellViewHidden = updatedData
-            .debug()
             .map { $0.isEmpty ? 1.0 : 0.0 }
             .asDriver(onErrorJustReturn: 0.0)
         
