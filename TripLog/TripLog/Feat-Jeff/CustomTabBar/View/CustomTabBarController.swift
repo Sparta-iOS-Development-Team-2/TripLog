@@ -30,15 +30,14 @@ final class CustomTabBarController: UIViewController {
         bind()
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             
             customTabBar.applyTabBarStyle()
-            
         }
     }
-    
     
 }
 
@@ -139,11 +138,11 @@ private extension CustomTabBarController {
     }
     
     /// 선택한 탭바의 화면으로 전환 (애니메이션 추가)
-      func switchToViewController(_ viewController: UIViewController) {
+    func switchToViewController(_ viewController: UIViewController) {
         UIView.transition(with: view, duration: 0.3, options: .transitionCrossDissolve, animations: {
             self.view.bringSubviewToFront(viewController.view)
             self.view.bringSubviewToFront(self.customTabBar) // 탭바가 항상 위에 있도록 추가
         }, completion: nil)
-      }
+    }
     
 }

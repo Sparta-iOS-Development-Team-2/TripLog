@@ -78,13 +78,13 @@ final class CashBookListViewController: UIViewController {
         viewWillAppearSubject.onNext(())
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-    
+            
             listCollectionView.backgroundColor = UIColor.CustomColors.Background.background
             addCellView.applyBoxStyle()
-            
         }
     }
     

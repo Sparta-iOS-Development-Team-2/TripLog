@@ -9,7 +9,7 @@ import CoreData
 import RxSwift
 import RxCocoa
 
-class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsControllerDelegate {
+final class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsControllerDelegate {
     
     struct Input {
         let callViewWillAppear: Observable<Void>

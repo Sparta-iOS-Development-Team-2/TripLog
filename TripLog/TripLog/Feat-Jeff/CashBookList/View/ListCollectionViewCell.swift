@@ -66,13 +66,20 @@ final class ListCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // 앱의 라이트모드/다크모드가 변경 되었을 때 이를 감지하여 CALayer의 컬러를 재정의 해주는 메소드
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-    
-            contentView.applyBoxStyle()
             
+            contentView.applyBoxStyle()
         }
+    }
+    
+    /// 셀이 재사용될 때 모든 상태를 초기화
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        resetCell()
     }
     
 }
@@ -124,6 +131,14 @@ private extension ListCollectionViewCell {
         periodLabel.snp.makeConstraints {
             $0.height.equalTo(20)
         }
+    }
+    
+    /// 셀 재사용 시 리셋 메서드
+    func resetCell() {
+        tripNameLabel.text = nil
+        noteLabel.text = nil
+        budgetLabel.text = nil
+        periodLabel.text = nil
     }
     
 }
