@@ -77,7 +77,7 @@ class CalendarCustomHeaderView: UIView {
     }
     
     func updateTitle(date: Date) {
-        var formatter = DateFormatter()
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 M월"
         titleLabel.text = formatter.string(from: date)
     }
