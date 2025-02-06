@@ -12,7 +12,7 @@ final class AddCellView: UIView {
     
     private let addNameLabel = UILabel().then {
         $0.text = "여행 추가하기"
-        $0.font = UIFont.SCDream(size: .headline, weight: .medium)
+        $0.font = UIFont.SCDream(size: .headline, weight: .bold)
         $0.textColor = .Dark.base
         $0.numberOfLines = 1
         $0.textAlignment = .left

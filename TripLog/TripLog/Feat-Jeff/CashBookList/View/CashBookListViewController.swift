@@ -82,6 +82,7 @@ final class CashBookListViewController: UIViewController {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
     
+            listCollectionView.backgroundColor = UIColor.CustomColors.Background.background
             addCellView.applyBoxStyle()
             
         }

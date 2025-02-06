@@ -85,7 +85,7 @@ private extension CustomTabBarController {
         
         customTabBar.snp.makeConstraints {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            $0.leading.trailing.equalToSuperview().inset(-10)
+            $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(60)
         }
     }

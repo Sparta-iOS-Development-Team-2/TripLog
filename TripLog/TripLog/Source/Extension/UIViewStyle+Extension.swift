@@ -178,7 +178,6 @@ extension UIView {
     
     /// TabBar Style
     func applyTabBarStyle() {
-        applyCornerRadius()
         applyTabBarShadow()
         applyBackgroundColor()
     }
