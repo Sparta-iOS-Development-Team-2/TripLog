@@ -16,7 +16,6 @@ import FSCalendar
 class CalendarViewModel: ViewModelType {
     // MARK: - Input & Output
     struct Input {
-        let selectedDate: BehaviorRelay<Date>
         let previousButtonTapped: Observable<Void>
         let nextButtonTapped: Observable<Void>
     }
@@ -60,33 +59,26 @@ class CalendarViewModel: ViewModelType {
     /// - Parameter input: ViewModel의 Input
     /// - Returns: ViewModel의 Output
     func transform(input: Input) -> Output {
-        input.selectedDate
-            .asDriver(onErrorDriveWith: .empty())
-            .drive{ [weak self] date in
-                guard let self else { return }
-                self.currentPageRelay.accept(date) }
-            .disposed(by: disposeBag)
-        
         input.previousButtonTapped
-            .map { [weak self] _ -> Date in
-                guard let currentDate = self?.currentPageRelay.value,
-                      let date = self?.previousMonth(from: currentDate) else { return Date() }
-                return date }
-            .asDriver(onErrorDriveWith: .empty())
-            .drive{ [weak self] date in
-                guard let self else { return }
-                self.currentPageRelay.accept(date) }
+            .withUnretained(self)
+            .map { owner, _ -> Date in
+                let currentDate = owner.currentPageRelay.value
+                let date = owner.previousMonth(from: currentDate)
+                return date
+            }
+            .asSignal(onErrorJustReturn: previousMonth(from: currentPageRelay.value))
+            .emit(to: currentPageRelay)
             .disposed(by: disposeBag)
         
         input.nextButtonTapped
-            .map { [weak self] _ -> Date in
-                guard let currentDate = self?.currentPageRelay.value,
-                      let date = self?.nextMonth(from: currentDate) else { return Date() }
-                return date }
-            .asDriver(onErrorDriveWith: .empty())
-            .drive{ [weak self] date in
-                guard let self else { return }
-                self.currentPageRelay.accept(date) }
+            .withUnretained(self)
+            .map { owner, _ -> Date in
+                let currentDate = owner.currentPageRelay.value
+                let date = owner.nextMonth(from: currentDate)
+                return date
+            }
+            .asSignal(onErrorJustReturn: nextMonth(from: currentPageRelay.value))
+            .emit(to: currentPageRelay)
             .disposed(by: disposeBag)
         
         return Output(updatedDate: self.currentPageRelay)

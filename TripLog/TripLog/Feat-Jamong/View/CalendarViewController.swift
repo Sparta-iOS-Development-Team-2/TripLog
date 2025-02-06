@@ -61,7 +61,6 @@ final class CalendarViewController: UIViewController {
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
     private var fakeTripExpenses: [Date: Double] = [:]
     private let disposeBag = DisposeBag()
-    private var currentPage = BehaviorRelay<Date>(value: Date())
     
     // MARK: - View Lifecycle
     override func viewDidLoad() {
@@ -171,16 +170,18 @@ final class CalendarViewController: UIViewController {
     // CalendarViewModel 바인딩
     private func setupBindings() {
         let input: CalendarViewModel.Input = .init(
-            selectedDate: currentPage,
             previousButtonTapped: customHeaderView.rx.previousButtonTapped,
             nextButtonTapped: customHeaderView.rx.nextButtonTapped)
         
         let output = calendarViewModel.transform(input: input)
+        
         output.updatedDate
-            .asDriver(onErrorDriveWith: .empty())
-            .drive { [weak self] date in
-                self?.customHeaderView.updateTitle(date: date)
-                self?.calendarView.updatePageLoad(date: date)
+            .asSignal(onErrorJustReturn: Date())
+            .distinctUntilChanged()
+            .withUnretained(self)
+            .emit { owner, date in
+                owner.customHeaderView.updateTitle(date: date)
+                owner.calendarView.updatePageLoad(date: date)
             }
             .disposed(by: disposeBag)
     }
@@ -188,9 +189,6 @@ final class CalendarViewController: UIViewController {
 
 // MARK: - FSCalendarDelegate, FSCalendarDataSource
 extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
-    func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
-        self.currentPage.accept(calendar.currentPage)
-    }
     
     /// 각 날짜에 대한 캘린더 셀을 생성하고 구성한다.
     /// - Parameters:

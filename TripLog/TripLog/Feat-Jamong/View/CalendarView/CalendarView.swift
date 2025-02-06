@@ -22,6 +22,7 @@ final class CalendarView: UIView {
         $0.allowsMultipleSelection = false
         $0.locale = Locale(identifier: "ko_KR")
         $0.placeholderType = .fillHeadTail
+        $0.scrollEnabled = false
         
         // 헤더 설정
         $0.headerHeight = 0
@@ -109,7 +110,9 @@ final class CalendarView: UIView {
     }
     
     func updatePageLoad(date: Date) {
+        calendar.scrollEnabled = true
         calendar.setCurrentPage(date, animated: true)
+        calendar.scrollEnabled = false
     }
 }
 
