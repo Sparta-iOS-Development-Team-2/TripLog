@@ -20,8 +20,9 @@ final class CalendarViewController: UIViewController {
     // MARK: - UI Components
     /// 전체 컨텐츠를 스크롤 가능하게 하는 스크롤 뷰
     private lazy var scrollView = UIScrollView().then {
-        $0.showsVerticalScrollIndicator = true
+        $0.showsVerticalScrollIndicator = false
         $0.alwaysBounceVertical = true
+        $0.contentInset.bottom = 100
     }
     
     /// 수직으로 뷰들을 쌓는 스택 뷰
@@ -96,7 +97,7 @@ final class CalendarViewController: UIViewController {
     
     /// 기본 뷰 설정
     private func configureBaseView() {
-        view.backgroundColor = UIColor.CustomColors.Background.background
+        view.backgroundColor = UIColor.CustomColors.Background.detailBackground
     }
     
     /// 스크롤 뷰 설정
