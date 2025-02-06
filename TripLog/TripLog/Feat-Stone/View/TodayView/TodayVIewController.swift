@@ -44,7 +44,7 @@ class TodayViewController: UIViewController {
     private let tableView = UITableView().then {
         $0.register(ExpenseCell.self, forCellReuseIdentifier: ExpenseCell.identifier)
         $0.separatorStyle = .none
-        $0.applyBackgroundColor()
+        $0.backgroundColor = .clear
         $0.showsVerticalScrollIndicator = false
         $0.rowHeight = 108
         $0.clipsToBounds = true
@@ -54,11 +54,11 @@ class TodayViewController: UIViewController {
     
     private let floatingButton = UIButton(type: .system).then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.tintColor = .white
+        $0.tintColor = UIColor.CustomColors.Background.background
         $0.layer.cornerRadius = 32 // ((버튼 뷰 크기 - 버튼 패딩) / 2)
         $0.backgroundColor = UIColor.Personal.normal
         $0.applyFloatingButtonShadow()
-//        $0.applyFloatingButtonStroke()
+        $0.applyFloatingButtonStroke()
     }
 
     
@@ -78,7 +78,8 @@ class TodayViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.applyBackgroundColor()
+        view.backgroundColor = UIColor.CustomColors.Background.detailBackground
+        
         setupViews()
         setupConstraints()
         bindViewModel()
@@ -124,49 +125,67 @@ class TodayViewController: UIViewController {
             
         tableView.snp.makeConstraints {
             $0.top.equalTo(topStackView.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(8)
             $0.bottom.equalToSuperview()
         }
         
         floatingButton.snp.makeConstraints {
             $0.width.height.equalTo(64)
-            $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            $0.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(120)
         }
     }
     
     private func bindViewModel() {
-        viewModel.output.expenses
-            .drive(onNext: { expenses in
-                print("📌 expenses 데이터 확인:", expenses) // ✅ 콘솔에 데이터 출력
-            })
-            .disposed(by: disposeBag)
+        
+        // 🔹 동일한 `cashBookID`를 가진 항목만 표시하도록 필터링
+            let filteredExpenses = viewModel.output.expenses
+                .map { [weak self] expenses -> [MockMyCashBookModel] in
+                    guard let self = self else { return [] }
+                    return (expenses as? [MockMyCashBookModel])?.filter { $0.cashBookID == self.cashBookID } ?? []
+                }
+//                .share(replay: 1) // ✅ 여러 곳에서 사용되므로 공유
 
+            // 🔹 **콘솔 출력 (디버깅용)**
+            filteredExpenses
+                .drive(onNext: { expenses in
+                    print("📌 expenses 데이터 확인:", expenses) // ✅ 콘솔에 데이터 출력
+                })
+                .disposed(by: disposeBag)
+
+            // 🔹 테이블 뷰 바인딩 (필터링 적용)
+            filteredExpenses
+                .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
+                    cell.configure(
+                        date: "오늘",
+                        title: expense.note,
+                        category: expense.category,
+                        amount: "$ \(NumberFormatter.formattedString(from: Int(expense.amount)))",
+                        exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4))) 원",
+                        payment: expense.payment
+                    )
+                }
+                .disposed(by: disposeBag)
+
+            // 🔹 **총 지출 금액을 `exchangeRate`의 합으로 반영 (필터링된 데이터만 적용)**
+            filteredExpenses
+                .map { expenses in
+                    let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +)
+                    return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원"
+                }
+                .drive(onNext: { [weak self] totalAmount in
+                    self?.totalAmountLabel.text = totalAmount // ✅ totalAmountLabel 업데이트
+                    self?.onTotalAmountUpdated?(totalAmount) // ✅ **값 변경 시 클로저 실행 (TopViewController에 전달)**
+                })
+                .disposed(by: disposeBag)
         
-        // 🔹 테이블 뷰 바인딩
-        viewModel.output.expenses
-            .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
-                cell.configure(
-                    date: "오늘",
-                    title: expense.note,
-                    category: expense.category,
-                    amount: "$ \(NumberFormatter.formattedString(from: Int(expense.amount)))",
-                    exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4))) 원"
-                )
-            }
-            .disposed(by: disposeBag)
-        
-        // 🔹 **총 지출 금액을 `exchangeRate`의 합으로 반영**
-        viewModel.output.expenses
-            .map { expenses in
-                let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +)
-                return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원"
-            }
-            .drive(onNext: { [weak self] totalAmount in
-                self?.totalAmountLabel.text = totalAmount // ✅ totalAmountLabel 업데이트
-                self?.onTotalAmountUpdated?(totalAmount) // ✅ **값 변경 시 클로저 실행 (TopViewController에 전달)**
-            })
-            .disposed(by: disposeBag)
+            filteredExpenses
+                .drive(onNext: { [weak self] _ in
+                    guard let self = self else { return }
+                    self.tableView.reloadData() // ✅ 셀이 변경될 때 프로그레스 바 반영
+                })
+                .disposed(by: disposeBag)
+            
         
         
         // ✅ 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기

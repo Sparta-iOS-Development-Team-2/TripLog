@@ -10,16 +10,16 @@ class TopViewController: UIViewController {
     private let viewModel: TopViewModel
     private let disposeBag = DisposeBag()
 
-    private let tableView = UITableView().then {
+    private lazy var tableView = UITableView().then {
         $0.separatorStyle = .none
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
         $0.isScrollEnabled = false
         $0.alwaysBounceVertical = false
-        $0.rowHeight = UITableView.automaticDimension
-        $0.estimatedRowHeight = UIScreen.main.bounds.height * 0.5
+        $0.rowHeight = self.view.bounds.height
+//        $0.estimatedRowHeight = UIScreen.main.bounds.height * 0.5
+        $0.applyBackgroundColor()
     }
-
     // ✅ RxDataSources에서 사용할 데이터소스 생성
     private let dataSource = RxTableViewSectionedReloadDataSource<CashBookSection>(
         configureCell: { _, tableView, indexPath, item in
@@ -52,9 +52,19 @@ class TopViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.applyBackgroundColor()
+        
         setupUI()
         setupTableView()
         bindViewModel() // ✅ Rx 바인딩 실행
+        
+        print("📌 전달받은 여행 정보")
+            print("ID: \(viewModel.sections.value.first?.items.first?.id.uuidString ?? "N/A")")
+            print("여행 이름: \(viewModel.sections.value.first?.items.first?.tripName ?? "N/A")")
+            print("메모: \(viewModel.sections.value.first?.items.first?.note ?? "N/A")")
+            print("예산: \(viewModel.sections.value.first?.items.first?.budget ?? 0) 원")
+            print("출발일: \(viewModel.sections.value.first?.items.first?.departure ?? "N/A")")
+            print("도착일: \(viewModel.sections.value.first?.items.first?.homecoming ?? "N/A")")
     }
 
     // ✅ UI 관련 설정
@@ -93,6 +103,20 @@ class TopViewController: UIViewController {
                 print("📌 Selected trip: \(selectedCashBook.tripName)")
             })
             .disposed(by: disposeBag)
+    }
+    
+    private func formatDate(_ dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyyMMdd" // 현재 포맷
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy.MM.dd" // 원하는 포맷
+
+        if let date = inputFormatter.date(from: dateString) {
+            return outputFormatter.string(from: date)
+        } else {
+            return dateString // 변환 실패 시 원래 값 반환
+        }
     }
 }
 

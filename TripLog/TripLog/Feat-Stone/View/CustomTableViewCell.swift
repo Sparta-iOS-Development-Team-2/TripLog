@@ -33,10 +33,34 @@ class CustomTableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    private func formatDateRange(_ dateRange: String) -> String {
+        let dates = dateRange.split(separator: "~").map { $0.trimmingCharacters(in: .whitespaces) }
+        guard dates.count == 2 else { return dateRange } // 예외 처리
+
+        let formattedStartDate = formatDate(String(dates[0]))
+        let formattedEndDate = formatDate(String(dates[1]))
+
+        return "\(formattedStartDate) - \(formattedEndDate)"
+    }
+
+    private func formatDate(_ dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyyMMdd" // 현재 날짜 포맷
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy.MM.dd" // 원하는 출력 포맷
+
+        if let date = inputFormatter.date(from: dateString) {
+            return outputFormatter.string(from: date)
+        } else {
+            return dateString // 변환 실패 시 원래 값 반환
+        }
+    }
 
     // ✅ `cashBookID`를 받아서 `TodayViewController`를 동적으로 생성
     func configure(subtitle: String, date: String, budget: String, cashBookID: UUID) {
-        titleDateView.configure(subtitle: subtitle, date: date)
+        titleDateView.configure(subtitle: subtitle, date: formatDateRange(date)) // 날짜 포맷 적용
         self.cashBookID = cashBookID
 
         // ✅ **기존 todayViewController 제거 후 새로 생성**
@@ -93,14 +117,15 @@ class CustomTableViewCell: UITableViewCell {
 
         buttonStackView.snp.makeConstraints {
             $0.top.equalTo(progressView.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(-1)
             $0.height.equalTo(50)
         }
 
         containerView.snp.makeConstraints {
-            $0.top.equalTo(buttonStackView.snp.bottom).offset(16)
-            $0.leading.trailing.bottom.equalToSuperview().inset(16)
-            $0.height.equalTo(UIScreen.main.bounds.height * 0.6).priority(.required)
+            $0.top.equalTo(buttonStackView.snp.bottom)
+            $0.leading.trailing.equalToSuperview()
+//            $0.height.equalTo(UIScreen.main.bounds.height * 0.7).priority(.required)
+            $0.bottom.equalToSuperview()
         }
 
         // 버튼 액션 설정

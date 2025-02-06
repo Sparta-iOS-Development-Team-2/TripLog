@@ -87,7 +87,7 @@ class ExpenseCell: UITableViewCell {
         containerView.addSubview(secondRowStackView)
 
         setupLayout()
-        applyBackgroundColor()
+        backgroundColor = .clear
 
         deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
     }
@@ -130,10 +130,13 @@ class ExpenseCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(date: String, title: String, category: String, amount: String, exchangeRate: String) {
+    func configure(date: String, title: String, category: String, amount: String, exchangeRate: String, payment: Bool) {
+
+        let paymentStatus = payment ? "카드" : "현금"
+
         dateLabel.text = date
         titleLabel.text = title
-        categoryLabel.text = category
+        categoryLabel.text = "\(category) / \(paymentStatus)"
         amountLabel.text = amount
         exchangeRateLabel.text = exchangeRate
     }
