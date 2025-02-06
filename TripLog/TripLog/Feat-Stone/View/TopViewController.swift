@@ -60,6 +60,8 @@ class TopViewController: UIViewController {
     // ✅ UI 관련 설정
     private func setupUI() {
         view.applyBackgroundColor()
+        
+        navigationController?.navigationBar.isHidden = false
 
         // 네비게이션 타이틀을 tripName으로 설정
         navigationController?.navigationBar.titleTextAttributes = [
