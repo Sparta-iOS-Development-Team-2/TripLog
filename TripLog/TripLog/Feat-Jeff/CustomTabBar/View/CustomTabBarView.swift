@@ -66,7 +66,7 @@ final class TabBarView: UIView {
 
     let tabBarAddButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
-        $0.tintColor = UIColor.CustomColors.Border.plus
+        $0.tintColor = UIColor.CustomColors.Background.background
         $0.backgroundColor = UIColor.CustomColors.Accent.blue
     }
     
