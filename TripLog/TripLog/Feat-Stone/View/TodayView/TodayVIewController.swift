@@ -53,11 +53,14 @@ class TodayViewController: UIViewController {
     }
     
     private let floatingButton = UIButton(type: .system).then {
-        $0.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
-        $0.tintColor = UIColor.Personal.normal
-        $0.layer.cornerRadius = 32
-        $0.applyFloatingButtonStyle()
+        $0.setImage(UIImage(systemName: "plus"), for: .normal)
+        $0.tintColor = .white
+        $0.layer.cornerRadius = 32 // ((버튼 뷰 크기 - 버튼 패딩) / 2)
+        $0.backgroundColor = UIColor.Personal.normal
+        $0.applyFloatingButtonShadow()
+//        $0.applyFloatingButtonStroke()
     }
+
     
     private let cashBookID: UUID // ✅ 저장된 cashBookID
 
