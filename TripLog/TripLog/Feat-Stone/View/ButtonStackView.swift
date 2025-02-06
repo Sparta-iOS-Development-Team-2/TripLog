@@ -67,7 +67,7 @@ class CustomButtonStackView: UIStackView {
         distribution = .fillEqually
     }
 
-    // ✅ 버튼 스타일 업데이트
+    // 버튼 스타일 업데이트
     private func updateButtonStyles() {
         let todayFontWeight: UIFont.Weight = isTodaySelected ? .bold : .medium
         let calendarFontWeight: UIFont.Weight = isTodaySelected ? .medium : .bold
@@ -80,19 +80,19 @@ class CustomButtonStackView: UIStackView {
     }
 
 
-    // ✅ 오늘 지출 버튼 클릭
+    // 오늘 지출 버튼 클릭
     @objc private func todayButtonTapped() {
         isTodaySelected = true
         todayButtonAction?()
     }
 
-    // ✅ 캘린더 버튼 클릭
+    // 캘린더 버튼 클릭
     @objc private func calendarButtonTapped() {
         isTodaySelected = false
         calendarButtonAction?()
     }
     
-    // ✅ 버튼 액션 설정 메서드 추가
+    // 버튼 액션 설정 메서드 추가
     private var todayButtonAction: (() -> Void)?
     private var calendarButtonAction: (() -> Void)?
 

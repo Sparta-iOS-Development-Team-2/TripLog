@@ -1,10 +1,3 @@
-//
-//  ExpenseCell.swift
-//  TripLog
-//
-//  Created by 김석준 on 1/24/25.
-//
-
 import UIKit
 import SnapKit
 import Then
@@ -13,7 +6,7 @@ class ExpenseCell: UITableViewCell {
     static let identifier = "ExpenseCell"
 
     private let containerView = UIView().then {
-        $0.layer.masksToBounds = false // 그림자가 잘리면 안 되므로 false 설정
+        $0.layer.masksToBounds = false
         $0.applyBoxStyle()
     }
 
@@ -53,9 +46,30 @@ class ExpenseCell: UITableViewCell {
         $0.distribution = .equalSpacing
     }
 
+    // 삭제 버튼을 감싸는 UIView
+    private let deleteButtonView = UIView().then {
+        $0.backgroundColor = .red
+        $0.layer.cornerRadius = 10
+        $0.clipsToBounds = true
+    }
+
+    private let deleteButton = UIButton().then {
+        $0.setTitle("삭제", for: .normal)
+        $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        $0.backgroundColor = .clear
+    }
+
+    var onDeleteTapped: (() -> Void)?
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        contentView.isUserInteractionEnabled = true // ✅ 터치 이벤트가 정상 전달되도록 설정
+        selectionStyle = .none
 
+        contentView.addSubview(deleteButtonView)
+        deleteButtonView.addSubview(deleteButton)
         contentView.addSubview(containerView)
 
         [dateLabel, titleLabel, categoryLabel, amountLabel, exchangeRateLabel].forEach {
@@ -67,25 +81,37 @@ class ExpenseCell: UITableViewCell {
         }
         containerView.addSubview(firstRowStackView)
 
-        [categoryLabel, exchangeRateLabel].forEach{
+        [categoryLabel, exchangeRateLabel].forEach {
             secondRowStackView.addArrangedSubview($0)
         }
         containerView.addSubview(secondRowStackView)
 
-        selectionStyle = .none
-
         setupLayout()
-        applyBackgroundColor()
+        backgroundColor = .clear
+
+        deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
     }
 
+
     private func setupLayout() {
+        deleteButtonView.snp.makeConstraints {
+            $0.trailing.equalToSuperview().offset(80) // 기본적으로 숨겨진 상태
+            $0.centerY.equalToSuperview()
+            $0.width.equalTo(80)
+            $0.height.equalToSuperview().inset(8)
+        }
+
+        deleteButton.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
         containerView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(8)
         }
 
         dateLabel.snp.makeConstraints {
             $0.leading.equalToSuperview().offset(16)
-            $0.top.equalToSuperview().offset(8)
+            $0.top.equalToSuperview().offset(16)
         }
 
         firstRowStackView.snp.makeConstraints {
@@ -104,11 +130,42 @@ class ExpenseCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(date: String, title: String, category: String, amount: String, exchangeRate: String) {
+    func configure(date: String, title: String, category: String, amount: String, exchangeRate: String, payment: Bool) {
+
+        let paymentStatus = payment ? "카드" : "현금"
+
         dateLabel.text = date
         titleLabel.text = title
-        categoryLabel.text = category
+        categoryLabel.text = "\(category) / \(paymentStatus)"
         amountLabel.text = amount
         exchangeRateLabel.text = exchangeRate
+    }
+
+    // 삭제 버튼 표시
+    func showDeleteButton(animated: Bool = true) {
+        deleteButtonView.snp.updateConstraints {
+            $0.trailing.equalToSuperview()
+        }
+        if animated {
+            UIView.animate(withDuration: 0.3) {
+                self.layoutIfNeeded()
+            }
+        }
+    }
+
+    // 삭제 버튼 숨기기
+    func hideDeleteButton(animated: Bool = true) {
+        deleteButtonView.snp.updateConstraints {
+            $0.trailing.equalToSuperview().offset(80)
+        }
+        if animated {
+            UIView.animate(withDuration: 0.3) {
+                self.layoutIfNeeded()
+            }
+        }
+    }
+
+    @objc private func deleteButtonTapped() {
+        onDeleteTapped?()
     }
 }

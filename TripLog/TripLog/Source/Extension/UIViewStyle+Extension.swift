@@ -108,9 +108,9 @@ extension UIView {
     /// Floating Button Shadow
     func applyFloatingButtonShadow() {
         layer.shadowColor = darkModeCheck(UIColor.white.cgColor, UIColor.black.cgColor)
-        layer.shadowOpacity = darkModeCheck(1.0, 0.1)
-        layer.shadowRadius = 1.5
-        layer.shadowOffset = CGSize(width: 0, height: -2)
+        layer.shadowOpacity = darkModeCheck(0.2, 0.1)
+        layer.shadowRadius = 2
+        layer.shadowOffset = CGSize(width: 0, height: 0)
         layer.masksToBounds = false
     }
     
