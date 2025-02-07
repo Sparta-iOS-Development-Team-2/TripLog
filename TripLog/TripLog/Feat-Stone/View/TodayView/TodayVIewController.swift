@@ -259,7 +259,7 @@ extension TodayViewController: UITableViewDelegate {
     }
 
     // 기본 삭제 기능 비활성화
-    func tableView(_ tableView: UITableView, canFocusRowAt indexPath: IndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return false // 기본 삭제 버튼 비활성화
     }
 

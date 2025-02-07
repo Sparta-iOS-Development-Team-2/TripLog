@@ -98,6 +98,7 @@ private extension CashBookListViewController {
         
         navigationController?.navigationBar.isHidden = true
         view.backgroundColor = UIColor.CustomColors.Background.background
+        listCollectionView.backgroundColor = UIColor.CustomColors.Background.background
         
         [
             titleLabel,
