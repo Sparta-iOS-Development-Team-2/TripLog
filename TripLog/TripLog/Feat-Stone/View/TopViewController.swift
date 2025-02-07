@@ -46,7 +46,7 @@ class TopViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: true) // 항상 내비게이션 바 보이기
+        navigationController?.navigationBar.isHidden = false
     }
 
     override func viewDidLoad() {
