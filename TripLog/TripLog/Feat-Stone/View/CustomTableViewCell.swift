@@ -113,6 +113,7 @@ class CustomTableViewCell: UITableViewCell {
         progressView.snp.makeConstraints {
             $0.top.equalTo(titleDateView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(64)
         }
 
         buttonStackView.snp.makeConstraints {
@@ -124,7 +125,6 @@ class CustomTableViewCell: UITableViewCell {
         containerView.snp.makeConstraints {
             $0.top.equalTo(buttonStackView.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-//            $0.height.equalTo(UIScreen.main.bounds.height * 0.7).priority(.required)
             $0.bottom.equalToSuperview()
         }
 
