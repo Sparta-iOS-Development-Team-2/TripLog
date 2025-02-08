@@ -55,6 +55,8 @@ class TodayViewController: UIViewController {
         $0.clipsToBounds = true
         $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
         $0.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        $0.allowsSelection = true
+        $0.allowsMultipleSelection = false
     }
     
     private let floatingButton = UIButton(type: .system).then {
@@ -89,10 +91,14 @@ class TodayViewController: UIViewController {
         setupConstraints()
         bindViewModel()
         
-        tableView.delegate = self
+//        tableView.delegate = self
         
         // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
         viewModel.input.fetchTrigger.accept(cashBookID)
+        
+        // ✅ Rx 방식으로 delegate 설정
+        tableView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
         
         updateExpense()
     }
