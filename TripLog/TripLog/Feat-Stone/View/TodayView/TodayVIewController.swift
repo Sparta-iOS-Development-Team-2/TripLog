@@ -295,7 +295,7 @@ extension TodayViewController: UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        // 삭제 버튼 컨테이너 뷰 생성
+        // ✅ 삭제 버튼 컨테이너 뷰 생성 (디자인 유지)
         let deleteView = UIView(frame: CGRect(x: 0, y: 0, width: 70, height: 40)).then {
             $0.backgroundColor = .red
             $0.layer.cornerRadius = 8
@@ -308,39 +308,45 @@ extension TodayViewController: UITableViewDelegate {
         }
 
         deleteView.addSubview(deleteButton)
-        deleteButton.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-            make.width.equalTo(30) // 버튼의 좌우 크기 조절
-            make.height.equalTo(30) // 버튼의 높이 조절
+        deleteButton.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.equalTo(30)
+            $0.height.equalTo(30)
         }
 
-        let customDeleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] _, _, completionHandler in
+        let deleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] _, _, completionHandler in
             guard let self = self else { return }
-            
-            // ✅ Rx 방식으로 삭제 요청을 전달
-            self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
-            
-            completionHandler(true)
+
+            // ✅ 삭제 확인 알럿 띄우기
+            let alertController = UIAlertController(
+                title: "삭제 확인",
+                message: "정말로 삭제하시겠습니까?",
+                preferredStyle: .alert
+            )
+
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel) { _ in
+                completionHandler(false) // ✅ 취소 시 삭제되지 않음
+            }
+
+            let confirmAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
+                // ✅ Rx 방식으로 삭제 요청을 전달
+                self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
+                completionHandler(true) // ✅ 삭제 완료
+            }
+
+            alertController.addAction(cancelAction)
+            alertController.addAction(confirmAction)
+
+            // ✅ 현재 뷰 컨트롤러에서 알럿 표시
+            self.present(alertController, animated: true)
         }
 
+        // ✅ 기존 디자인 적용 (배경 설정)
+        deleteAction.backgroundColor = UIColor.CustomColors.Background.background
+        // deleteAction.image = deleteView.asImage() // UIView를 UIImage로 변환하여 버튼 크기 반영 (필요 시 적용)
 
-        // 기본 배경 제거 후, 커스텀 뷰 적용
-        customDeleteAction.backgroundColor = UIColor.CustomColors.Background.background
-       // customDeleteAction.image = deleteView.asImage() // UIView를 UIImage로 변환하여 버튼 크기 반영
-
-        let configuration = UISwipeActionsConfiguration(actions: [customDeleteAction])
-        configuration.performsFirstActionWithFullSwipe = false // 전체 스와이프 방지
-
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        configuration.performsFirstActionWithFullSwipe = false // ✅ 전체 스와이프 방지
         return configuration
     }
-
-}
-
-@available(iOS 17.0, *)
-#Preview("TodayViewController") {
-    // ✅ `context` 제거 후 `cashBookID`만 전달하도록 수정
-    let sampleCashBookID = UUID()
-    let viewController = TodayViewController(cashBookID: sampleCashBookID)
-
-    return UINavigationController(rootViewController: viewController)
 }
