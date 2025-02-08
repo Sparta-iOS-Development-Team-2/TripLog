@@ -6,13 +6,12 @@ import Then
 final class CustomProgressView: UIView {
 
     // MARK: - UI Components
-
     private lazy var progress = UIView().then {
         $0.backgroundColor = UIColor.Personal.normal
     }
 
     private let progressLabel = UILabel().then {
-        $0.text = "0%" // 기본값 세팅
+        $0.text = "0%"
         $0.font = .SCDream(size: .caption, weight: .regular)
         $0.textColor = .white
         $0.textAlignment = .right
@@ -31,21 +30,25 @@ final class CustomProgressView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        configureSubViews()
-    }
+        print("🔹 layoutSubviews() 호출됨, bounds.width:", bounds.width)
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            self.applyTextFieldStroke()
+        // ✅ 초기 width가 설정되지 않으면 progress 업데이트 적용되지 않음 → 강제 업데이트
+        DispatchQueue.main.async {
+            self.updateProgress(self.progressValue)
         }
     }
 
-    /// **프로그레스 바의 상태를 업데이트**
-    /// - Parameter value: 프로그레스 바의 진행도 (%)
+    private var progressValue: CGFloat = 0.0 // ✅ 현재 progress 값을 저장
+
+    /// ✅ 프로그레스 바의 상태를 업데이트
     func updateProgress(_ value: CGFloat) {
         let progressValue = min(max(value, 0), 1) // 값이 0~1 사이를 벗어나지 않도록 제한
-        let newWidth = self.bounds.width * progressValue // ✅ 전체 너비 기준으로 설정
+        self.progressValue = progressValue // ✅ 값 저장
+
+        // ✅ 전체 너비 대비 비율 설정
+        let newWidth = self.bounds.width * progressValue
+
+        print("🔹 Progress bar width update: \(newWidth), View width: \(self.bounds.width)")
 
         // Progress Label 업데이트
         progressLabel.text = "\(Int(progressValue * 100))%"
@@ -56,51 +59,26 @@ final class CustomProgressView: UIView {
         // Auto Layout을 이용한 애니메이션 적용
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear, animations: {
             self.progress.snp.updateConstraints {
-                $0.width.equalTo(newWidth)
+                $0.width.equalTo(newWidth) // ✅ 동적으로 너비 설정
             }
             self.layoutIfNeeded()
-        }, completion: { _ in
-            // ✅ width가 0 이상일 때만 Gradient 애니메이션 실행
-            if progressValue > 0 {
-                self.progress.applyGradientAnimation(colors: [
-                    UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0),
-                    UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0)
-                ])
-            }
         })
     }
-}
 
-// MARK: - UI Setting Method
-
-private extension CustomProgressView {
-
-    func setupUI() {
-        configureSelf()
-        setupLayout()
-    }
-
-    func configureSelf() {
+    // MARK: - UI Setting Method
+    private func setupUI() {
         self.backgroundColor = .clear
-        self.applyTextFieldStroke()
         self.clipsToBounds = true
         [progress, progressLabel].forEach { addSubview($0) }
-    }
 
-    func setupLayout() {
         progress.snp.makeConstraints {
             $0.leading.top.bottom.equalToSuperview().inset(1)
-            $0.width.equalTo(0) // 초기 너비 0
+            $0.width.equalTo(1) // ✅ 초기 너비 0
         }
 
         progressLabel.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview()
             $0.trailing.equalTo(progress.snp.trailing).inset(5)
         }
-    }
-
-    func configureSubViews() {
-        layer.cornerRadius = self.bounds.height / 2
-        progress.layer.cornerRadius = (self.bounds.height - 2) / 2
     }
 }

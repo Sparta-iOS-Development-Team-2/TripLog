@@ -24,10 +24,11 @@ class TodayViewModel {
     private let expensesRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
     private let totalAmountRelay = BehaviorRelay<String>(value: "0 원")
     private let showAddExpenseModalRelay = PublishRelay<Void>()
+    let totalExpenseRelay = BehaviorRelay<Int>(value: 0)
     
     private let disposeBag = DisposeBag()
     
-    // ✅ Input과 Output을 늦게 초기화하기 위해 `lazy` 사용
+    // ✅ Input과 Output을 늦게 초기화하기 위해 lazy 사용
     lazy var input: Input = {
         return Input(
             fetchTrigger: fetchTrigger,
@@ -79,10 +80,9 @@ class TodayViewModel {
         // ✅ 총 사용 금액 계산
         expensesRelay
             .map { expenses in
-                let total = expenses.reduce(0) { $0 + $1.amount }
-                return "\(Int(total)) 원"
+                expenses.reduce(0) { $0 + Int($1.amount) } // ✅ `Int` 값 반환
             }
-            .bind(to: totalAmountRelay)
+            .bind(to: totalExpenseRelay) // ✅ `Int` 타입으로 바인딩 성공
             .disposed(by: disposeBag)
         
         // ✅ 지출 추가 처리 (저장 후 자동으로 fetchTrigger 실행)

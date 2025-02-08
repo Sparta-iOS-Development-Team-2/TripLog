@@ -24,30 +24,27 @@ class TopProgressView: UIView {
         $0.textAlignment = .right
     }
 
-    // ✅ **Rx로 관리되는 총 지출 금액 (TopViewController에서 바인딩 가능)**
     let expense = BehaviorRelay<String>(value: "0 원")
 
-    private var budgetAmount: Int = 0 // ✅ 예산 금액 (초기 한 번 설정)
-    
+    private var budgetAmount: Int = 0
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupLayout()
-        bindExpense() // ✅ **Rx 값 변경 시 UI 자동 업데이트**
+        bindExpense()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupLayout()
-        bindExpense() // ✅ **Rx 값 변경 시 UI 자동 업데이트**
+        bindExpense()
     }
 
-    // ✅ **예산 한 번만 설정**
     func setBudget(_ budget: String) {
         budgetAmount = Int(budget.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0
         budgetLabel.text = "예산: \(NumberFormatter.wonFormat(budgetAmount))"
     }
 
-    // ✅ **Rx로 expense 값 변경될 때 자동 UI 업데이트**
     private func bindExpense() {
         expense
             .subscribe(onNext: { [weak self] expenseText in
@@ -59,11 +56,10 @@ class TopProgressView: UIView {
 
                 self.expenseLabel.text = "지출: \(NumberFormatter.wonFormat(expenseAmount))"
                 self.balanceLabel.text = "잔액: \(formattedBalance)"
-                
                 self.balanceLabel.textColor = (balance < 0) ? .red : UIColor.Personal.normal
                 
                 let progressValue = (self.budgetAmount > 0) ? Float(expenseAmount) / Float(self.budgetAmount) : 0.0
-                self.progressBar.updateProgress(CGFloat(progressValue))
+                self.progressBar.updateProgress(CGFloat(progressValue)) // ✅ 프로그레스 업데이트
             })
             .disposed(by: disposeBag)
     }

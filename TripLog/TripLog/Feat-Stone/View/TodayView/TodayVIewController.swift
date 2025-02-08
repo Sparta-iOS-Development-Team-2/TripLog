@@ -13,6 +13,11 @@ class TodayViewController: UIViewController {
     private let topStackView = UIStackView()
     
     var onTotalAmountUpdated: ((String)->Void)?
+    
+    let totalExpense = BehaviorRelay<Int>(value: 0)
+
+    // ✅ TripLogTopView에 반영할 총 지출 금액 Relay (클로저 방식)
+    var onTotalExpenseUpdated: ((Int) -> Void)?
 
     // "지출 내역" 헤더 레이블
     private let headerTitleLabel = UILabel().then {
@@ -84,8 +89,12 @@ class TodayViewController: UIViewController {
         setupConstraints()
         bindViewModel()
         
+        tableView.delegate = self
+        
         // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
         viewModel.input.fetchTrigger.accept(cashBookID)
+        
+        updateExpense()
     }
     
     // 🔹 UI 요소 추가
@@ -132,61 +141,69 @@ class TodayViewController: UIViewController {
         floatingButton.snp.makeConstraints {
             $0.width.height.equalTo(64)
             $0.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(120)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
+    }
+    
+    private func updateExpense() {
+
+        let TotalExpense = totalExpense.value
+        totalExpense.accept(TotalExpense)
     }
     
     private func bindViewModel() {
         
         // 🔹 동일한 `cashBookID`를 가진 항목만 표시하도록 필터링
-            let filteredExpenses = viewModel.output.expenses
-                .map { [weak self] expenses -> [MockMyCashBookModel] in
-                    guard let self = self else { return [] }
-                    return (expenses as? [MockMyCashBookModel])?.filter { $0.cashBookID == self.cashBookID } ?? []
-                }
-//                .share(replay: 1) // ✅ 여러 곳에서 사용되므로 공유
+        let filteredExpenses = viewModel.output.expenses
+            .map { [weak self] expenses -> [MockMyCashBookModel] in
+                guard let self = self else { return [] }
+                return (expenses as? [MockMyCashBookModel])?.filter { $0.cashBookID == self.cashBookID } ?? []
+            }
 
-            // 🔹 **콘솔 출력 (디버깅용)**
-            filteredExpenses
-                .drive(onNext: { expenses in
-                    print("📌 expenses 데이터 확인:", expenses) // ✅ 콘솔에 데이터 출력
-                })
-                .disposed(by: disposeBag)
+        // 🔹 **콘솔 출력 (디버깅용)**
+        filteredExpenses
+            .drive(onNext: { expenses in
+                print("📌 expenses 데이터 확인:", expenses) // ✅ 콘솔에 데이터 출력
+            })
+            .disposed(by: disposeBag)
 
-            // 🔹 테이블 뷰 바인딩 (필터링 적용)
-            filteredExpenses
-                .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
-                    cell.configure(
-                        date: "오늘",
-                        title: expense.note,
-                        category: expense.category,
-                        amount: "$ \(NumberFormatter.formattedString(from: Int(expense.amount)))",
-                        exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4))) 원",
-                        payment: expense.payment
-                    )
-                }
-                .disposed(by: disposeBag)
+        // 🔹 테이블 뷰 바인딩 (필터링 적용)
+        filteredExpenses
+            .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
+                cell.configure(
+                    date: "오늘",
+                    title: expense.note,
+                    category: expense.category,
+                    amount: "$ \(NumberFormatter.formattedString(from: Int(expense.amount)))",
+                    exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4))) 원",
+                    payment: expense.payment
+                )
+            }
+            .disposed(by: disposeBag)
 
-            // 🔹 **총 지출 금액을 `exchangeRate`의 합으로 반영 (필터링된 데이터만 적용)**
-            filteredExpenses
-                .map { expenses in
-                    let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +)
-                    return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원"
-                }
-                .drive(onNext: { [weak self] totalAmount in
-                    self?.totalAmountLabel.text = totalAmount // ✅ totalAmountLabel 업데이트
-                    self?.onTotalAmountUpdated?(totalAmount) // ✅ **값 변경 시 클로저 실행 (TopViewController에 전달)**
-                })
-                .disposed(by: disposeBag)
-        
-            filteredExpenses
-                .drive(onNext: { [weak self] _ in
-                    guard let self = self else { return }
-                    self.tableView.reloadData() // ✅ 셀이 변경될 때 프로그레스 바 반영
-                })
-                .disposed(by: disposeBag)
-            
-        
+        // 🔹 **총 지출 금액을 `exchangeRate`의 합으로 반영 (필터링된 데이터만 적용)**
+        filteredExpenses
+            .map { expenses -> (Int, String) in
+                let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +)
+                let formattedTotal = NumberFormatter.formattedString(from: totalExchangeRate)
+                print("----\(formattedTotal)") // ✅ 디버깅용 출력
+                return (totalExchangeRate, "\(formattedTotal) 원") // ✅ 튜플 반환
+            }
+            .drive(onNext: { [weak self] (totalExpense, totalAmount) in
+                guard let self = self else { return }
+                    
+                self.totalAmountLabel.text = totalAmount // ✅ totalAmountLabel 업데이트
+                self.onTotalExpenseUpdated?(totalExpense) // ✅ TopViewController로 전달
+            })
+            .disposed(by: disposeBag)
+
+
+        filteredExpenses
+            .drive(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                self.tableView.reloadData() // ✅ 셀이 변경될 때 프로그레스 바 반영
+            })
+            .disposed(by: disposeBag)
         
         // ✅ 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기
         tableView.rx.modelSelected(MockMyCashBookModel.self)
@@ -212,6 +229,13 @@ class TodayViewController: UIViewController {
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
                 self.presentExpenseAddModal()
+            })
+            .disposed(by: disposeBag)
+        // ✅ `totalExpenseRelay` 값 변경될 때 `onTotalExpenseUpdated` 실행
+        viewModel.totalExpenseRelay
+            .subscribe(onNext: { [weak self] totalExpense in
+                self?.onTotalExpenseUpdated?(totalExpense) // ✅ 값 변경 시 클로저 실행
+                print("-----------\(totalExpense)")
             })
             .disposed(by: disposeBag)
     }
@@ -253,10 +277,6 @@ extension NumberFormatter {
 }
 
 extension TodayViewController: UITableViewDelegate {
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        tableView.delegate = self
-    }
 
     // 기본 삭제 기능 비활성화
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -284,7 +304,7 @@ extension TodayViewController: UITableViewDelegate {
         deleteView.addSubview(deleteButton)
         deleteButton.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.width.equalTo(50) // 버튼의 좌우 크기 조절
+            make.width.equalTo(30) // 버튼의 좌우 크기 조절
             make.height.equalTo(30) // 버튼의 높이 조절
         }
 
