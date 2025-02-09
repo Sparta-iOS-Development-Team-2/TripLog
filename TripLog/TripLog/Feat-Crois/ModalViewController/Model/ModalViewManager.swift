@@ -20,18 +20,30 @@ enum ModalViewManager {
     ///
     /// - Example
     /// ```swift
-    /// ModalViewManager.showModal(on: self, state: .editBudget(data: data))
-    ///     .subscribe(onNext: { _ in
-    ///         print("Completed")
-    ///     }).disposed(by: disposeBag)
+    ///  customTabBar.tabBarAddButtonTapped
+    ///    .flatMap {
+    ///        return ModalViewManager.showModal(state: .createNewCashBook)
+    ///            .compactMap { $0 as? MockCashBookModel }
+    ///    }
+    ///    .asSignal(onErrorSignalWith: .empty())
+    ///    .emit { data in
+    ///        CoreDataManager.shared.save(type: CashBookEntity.self, data: data)
+    ///    }.disposed(by: disposeBag)
     /// ```
     ///
     /// ``ModalViewState``
-    static func showModal(on view: UIViewController, state: ModalViewState) -> Observable<Void> {
+    static func showModal(state: ModalViewState) -> Observable<MockDataProtocol> {
+        guard let view = AppHelpers.getTopViewController() else {
+            return .error(NSError(domain: "No top view controller", code: -1))
+        }
+        
         let modalVC = ModalViewController(state: state)
         view.present(modalVC, animated: true)
         
-        return modalVC.rx.completedLogic.asObservable()
+        return Observable<MockDataProtocol>.merge(
+            modalVC.rx.sendCashBookData.map { $0 as MockDataProtocol },
+            modalVC.rx.sendConsumptionData.map { $0 as MockDataProtocol }
+        )
     }
     
 }
