@@ -13,9 +13,6 @@ extension CurrencyEntity: CoreDataManagable {
     typealias Model = CurrencyRate
     typealias Entity = CurrencyEntity
     
-    /// (사용X)
-    ///
-    /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
     static func save(_ data: Model, context: NSManagedObjectContext) {
         let element = CurrencyElement()
         guard let entity = NSEntityDescription.entity(
