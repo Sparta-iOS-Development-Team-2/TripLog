@@ -44,7 +44,7 @@ final class TripLogNewView: UIView {
         [titleDateView, progressView, buttonStackView, switcherView].forEach { addSubview($0) }
 
         titleDateView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(16)
+            $0.top.equalToSuperview().offset(4)
             $0.leading.trailing.equalToSuperview().inset(16)
         }
 
@@ -55,14 +55,14 @@ final class TripLogNewView: UIView {
 
         buttonStackView.snp.makeConstraints {
             $0.top.equalTo(progressView.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.trailing.equalToSuperview().inset(-1)
             $0.height.equalTo(50)
         }
 
         switcherView.snp.makeConstraints {
             $0.top.equalTo(buttonStackView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide) // ✅ 안전 영역까지 확장
+            $0.bottom.equalToSuperview()
             $0.height.greaterThanOrEqualTo(400).priority(.low) // ✅ 자동 높이 조정 가능하도록 설정
         }
     }
@@ -85,3 +85,4 @@ extension TripLogNewView {
         progressView.expense.accept("\(NumberFormatter.formattedString(from: totalExpense)) 원")
     }
 }
+
