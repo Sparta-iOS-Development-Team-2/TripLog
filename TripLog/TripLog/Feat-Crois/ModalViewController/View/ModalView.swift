@@ -64,6 +64,7 @@ final class ModalView: UIView {
     private var cashBookID: UUID?
     private var consumptionID: UUID?
     private var expenseDate: Date?
+    private var exchangeRate: String?
     
     // MARK: - Initializer
     
@@ -248,14 +249,15 @@ private extension ModalView {
                     .disposed(by: disposeBag)
             }
             
-        case .createNewConsumption(cashBookID: let id, date: let date):
+        case .createNewConsumption(data: let data):
             if
                let secondSection = self.secondSection as? ModalTextField,
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalAmountView
             {
-                self.cashBookID = id
-                self.expenseDate = date
+                self.cashBookID = data.cashBookID
+                self.expenseDate = data.date
+                self.exchangeRate = data.exchangeRate
                 
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
