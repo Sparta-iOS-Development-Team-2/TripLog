@@ -8,10 +8,14 @@ final class TripLogNewView: UIView {
     
     private let disposeBag = DisposeBag()
     
-    private let titleDateView = TitleDateView()
-    private let progressView = TopProgressView()
-    private let buttonStackView = CustomButtonStackView()
     private let switcherView: TripSwitcherView
+    
+    /// 🔹 `titleDateView`, `progressView`, `buttonStackView`를 감싸는 컨테이너 뷰
+    private let tripSummaryContainerView = UIView()
+    
+    private let titleDateView = TitleDateView()
+    let progressView = TopProgressView()
+    private let buttonStackView = CustomButtonStackView()
 
     /// ✅ `TripSwitcherView`를 인자로 받아 초기화
     init(switcherView: TripSwitcherView) {
@@ -41,29 +45,39 @@ final class TripLogNewView: UIView {
     }
 
     private func setupLayout() {
-        [titleDateView, progressView, buttonStackView, switcherView].forEach { addSubview($0) }
+        addSubview(tripSummaryContainerView)
+        addSubview(switcherView)
+
+        /// ✅ tripSummaryContainerView 내부에 `titleDateView`, `progressView`, `buttonStackView` 추가
+        [titleDateView, progressView, buttonStackView].forEach { tripSummaryContainerView.addSubview($0) }
+
+        /// ✅ `tripSummaryContainerView` 레이아웃 설정
+        tripSummaryContainerView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(4)
+            $0.leading.trailing.equalToSuperview()
+        }
 
         titleDateView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(4)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.top.leading.trailing.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(8)
         }
 
         progressView.snp.makeConstraints {
             $0.top.equalTo(titleDateView.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.trailing.equalToSuperview().inset(8)
         }
 
         buttonStackView.snp.makeConstraints {
             $0.top.equalTo(progressView.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(-1)
+            $0.leading.trailing.equalToSuperview()
             $0.height.equalTo(50)
+            $0.bottom.equalToSuperview() // ✅ 마지막 요소이므로 `tripSummaryContainerView`의 bottom을 설정
         }
 
         switcherView.snp.makeConstraints {
-            $0.top.equalTo(buttonStackView.snp.bottom).offset(16)
+            $0.top.equalTo(tripSummaryContainerView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
-            $0.height.greaterThanOrEqualTo(400).priority(.low) // ✅ 자동 높이 조정 가능하도록 설정
+            $0.bottom.equalTo(safeAreaLayoutGuide)
         }
     }
 
@@ -85,4 +99,3 @@ extension TripLogNewView {
         progressView.expense.accept("\(NumberFormatter.formattedString(from: totalExpense)) 원")
     }
 }
-

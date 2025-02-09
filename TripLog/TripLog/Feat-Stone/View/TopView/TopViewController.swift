@@ -26,6 +26,7 @@ class TopViewController: UIViewController {
         $0.isScrollEnabled = false
         $0.alwaysBounceVertical = false
         $0.rowHeight = self.view.bounds.height
+//        $0.backgroundColor = UIColor.CustomColors.Background.detailBackground
         $0.applyBackgroundColor()
     }
 
@@ -53,6 +54,18 @@ class TopViewController: UIViewController {
         setupTableView()
         setupTripSummary()
         bindTodayViewController() // ✅ `TodayViewController`의 totalExpense 업데이트 바인딩
+        
+        setupLayout()
+    }
+    
+    private func setupLayout() {
+        view.addSubview(tripSummaryView)
+
+        tripSummaryView.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top) // ✅ safeArea의 상단 맞추기
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom) // ✅ safeArea의 하단까지 확장
+        }
     }
 
     private func setupUI() {
@@ -74,6 +87,11 @@ class TopViewController: UIViewController {
         }
         
         tableView.tableHeaderView = tripSummaryView
+        
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.1){
+            let initialTotalExpense = self.todayViewController.viewModel.totalExpenseRelay.value
+            self.tripSummaryView.updateExpense(initialTotalExpense)
+        }
     }
 
     private func setupTripSummary() {
@@ -96,11 +114,21 @@ class TopViewController: UIViewController {
 
     /// ✅ `TodayViewController`에서 `totalExpense` 값을 받아 `tripSummaryView` 업데이트
     private func bindTodayViewController() {
+        
+        let initialTotalExpense = todayViewController.viewModel.totalExpenseRelay.value
+        tripSummaryView.updateExpense(initialTotalExpense)
+        
         todayViewController.onTotalExpenseUpdated = { [weak self] totalExpense in
             guard let self = self else { return }
             
-            // ✅ `tripSummaryView`의 `progressView` 업데이트
-            self.tripSummaryView.updateExpense(totalExpense)
+            // ✅ 프로그레스 뷰 리셋 후 업데이트
+            self.tripSummaryView.progressView.progressBar.updateProgress(0)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    self.tripSummaryView.updateExpense(totalExpense)
+                }
+            
+            
         }
     }
 }

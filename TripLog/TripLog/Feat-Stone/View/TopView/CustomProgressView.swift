@@ -52,6 +52,11 @@ final class CustomProgressView: UIView {
         let newWidth = self.bounds.width * progressValue
 
         print("🔹 Progress bar width update: \(newWidth), View width: \(self.bounds.width)")
+        
+        // ✅ 기존 애니메이션 정리
+        progress.layer.removeAllAnimations()
+        progress.subviews.forEach { $0.removeFromSuperview() } // ✅ 기존 Gradient 제거
+
 
         // Progress Label 업데이트
         progressLabel.text = "\(Int(progressValue * 100))%"
@@ -59,7 +64,6 @@ final class CustomProgressView: UIView {
         // ✅ 프로그레스가 0일 때 숨김, 0이 아닐 때 표시
         progress.alpha = progressValue == 0 ? 0 : 1
 
-        // Auto Layout을 이용한 애니메이션 적용
         // Auto Layout을 이용한 애니메이션 적용
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear, animations: {
             self.progress.snp.updateConstraints {

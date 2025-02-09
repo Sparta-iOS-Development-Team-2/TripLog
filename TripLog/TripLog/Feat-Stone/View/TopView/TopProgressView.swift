@@ -8,7 +8,7 @@ class TopProgressView: UIView {
     
     private let disposeBag = DisposeBag()
     
-    private let progressBar = CustomProgressView()
+    let progressBar = CustomProgressView()
     
     private let expenseLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .caption, weight: .medium)

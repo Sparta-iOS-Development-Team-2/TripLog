@@ -155,6 +155,7 @@ class TodayViewController: UIViewController {
 
         let TotalExpense = totalExpense.value
         totalExpense.accept(TotalExpense)
+        //totalExpenseRelay.accept(TotalExpense)
     }
     
     private func bindViewModel() {
