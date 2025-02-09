@@ -118,16 +118,22 @@ private extension MainViewController {
                     onboardingVC.view.removeFromSuperview()
                 }
                 // "시작하기" 버튼을 눌렀는지 여부로 첫 실행 여부 판정
-                UserDefaults.standard.set(true, forKey: "isFirstLaunch")
+                UserDefaults.standard.set(false, forKey: "isFirstLaunch")
             }.disposed(by: disposeBag)
     }
     
     /// 온보딩뷰를 보여주는 메소드
     func showOnboardingView() {
         // 처음으로 앱을 실행한 유저인 경우에만 보여줌
-        let isFirstLaunch = UserDefaults.standard.bool(forKey: "isFirstLaunch")
-        guard isFirstLaunch else { return }
+        let isFirstLaunch: Bool
         
+        if UserDefaults.standard.object(forKey: "isFirstLaunch") == nil {
+            isFirstLaunch = true
+        } else {
+            isFirstLaunch = UserDefaults.standard.bool(forKey: "isFirstLaunch")
+        }
+        
+        guard isFirstLaunch else { return }
         UIView.transition(with: view, duration: 0.3, options: .transitionCrossDissolve) {
             self.setupOnboardingView()
         }
