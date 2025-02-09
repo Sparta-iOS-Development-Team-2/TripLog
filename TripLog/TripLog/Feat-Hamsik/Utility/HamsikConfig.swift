@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+struct FireStoreConfig {
+    let collectionName = "Currency"
+}

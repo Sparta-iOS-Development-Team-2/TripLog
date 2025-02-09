@@ -10,7 +10,10 @@ import FirebaseFirestore
 
 class FireStoreManager {
     static let shared = FireStoreManager()
-    private init() {}
+    let config: FireStoreConfig
+    private init() {
+        config = FireStoreConfig()
+    }
     
     /// FireStore 인스턴스
     let db = Firestore.firestore()
@@ -101,5 +104,24 @@ class FireStoreManager {
             }
         }
         
+    }
+    
+    func checkConnection() {
+        let db = Firestore.firestore()
+        
+        db.collection(config.collectionName).getDocuments { (snapshot, error) in
+            if let error = error {
+                print("Firestore 접근 실패: \(error.localizedDescription)")
+            } else if let snapshot = snapshot {
+                let documents = snapshot.documents
+                print("Firestore 연결 성공: 문서 \(documents.count)개")
+                
+                if let firstDocument = documents.first {
+                    print("첫 번째 문서: \(firstDocument.data())")
+                } else {
+                    print("문서가 없습니다.")
+                }
+            }
+        }
     }
 }
