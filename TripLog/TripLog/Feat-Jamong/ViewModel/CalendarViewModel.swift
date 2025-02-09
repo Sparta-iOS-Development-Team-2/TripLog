@@ -12,6 +12,11 @@ import Then
 import SnapKit
 import FSCalendar
 
+// 1. CashBookId를 받아오는 로직 [완료]
+// 2. CoreData와 연결하여 CashBookId를 통해 데이터를 가져오고 삭제, 수정할 수 있는 로직
+// 3. ViewController에 Date에 따른 ExpenseLabel 보내주는 로직
+// 4. 캘린더뷰 - 지출목록의 Date에 따른 데이터 연결해주는 로직
+// 5. 지출목록의 추가하고 삭제할때 바인딩하는 로직
 
 class CalendarViewModel: ViewModelType {
     // MARK: - Input & Output
@@ -27,6 +32,9 @@ class CalendarViewModel: ViewModelType {
     // MARK: - Properties
     let disposeBag = DisposeBag()
     
+    // 가계부 ID 저장
+    private let cashBookID: UUID
+    
     // 지출 데이터를 저장
     private var expenseData: [Date: [MockMyCashBookModel]] = [:]
     
@@ -35,6 +43,13 @@ class CalendarViewModel: ViewModelType {
     
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
+    
+    
+    // MARK: - Initalization
+    init(cashBookID: UUID) {
+        self.cashBookID = cashBookID
+    }
+    
     
     // MARK: - Method
     // expensesData 접근가능 메서드

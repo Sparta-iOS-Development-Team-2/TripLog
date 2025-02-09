@@ -56,7 +56,20 @@ final class CalendarViewController: UIViewController {
         $0.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10)
     }
     
-    private let calendarViewModel = CalendarViewModel()
+    private let calendarViewModel : CalendarViewModel
+    
+    // MARK: - Initalization
+    
+    /// 가계부 ID 받아오기
+    /// - Parameter cashBook: 가계부 ID
+    init(cashBook: UUID) {
+        self.calendarViewModel = CalendarViewModel(cashBookID: cashBook)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Properties
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
