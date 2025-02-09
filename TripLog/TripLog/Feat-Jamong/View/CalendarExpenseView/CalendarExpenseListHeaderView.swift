@@ -47,28 +47,28 @@ final class CalendarExpenseListHeaderView: UIView {
     }
     
     /// 선택된 날짜를 표시하는 레이블
-    private let dateLabel = UILabel().then {
+    fileprivate let dateLabel = UILabel().then {
         $0.font = .SCDream(size: .display, weight: .bold)
         $0.textColor = UIColor.CustomColors.Text.textPrimary
     }
     
     /// 지출 추가 버튼
-    private let addButton = UIButton(type: .system).then {
-        $0.applyButtonStyle()
-        $0.backgroundColor = UIColor.CustomColors.Accent.blue
+    fileprivate let addButton = UIButton(type: .system).then {
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = UIColor.CustomColors.Accent.blue
+        config.imagePadding = 4
+        config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16)
         
         let imageConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
-        let plusImage = UIImage(systemName: "plus", withConfiguration: imageConfig)
-        $0.setImage(plusImage, for: .normal)
-        $0.tintColor = UIColor.CustomColors.Border.border
-        $0.setTitle("추가하기", for: .normal)
-        $0.setTitleColor(UIColor.CustomColors.Border.border, for: .normal)
-        $0.titleLabel?.font = .SCDream(size: .body, weight: .medium)
-        $0.titleLabel?.numberOfLines = 1
-        $0.titleLabel?.lineBreakMode = .byTruncatingTail
-        $0.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
-        $0.imageEdgeInsets = UIEdgeInsets(top: 0, left: -4, bottom: 0, right: 4)
-        $0.titleEdgeInsets = UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4)
+        config.image = UIImage(systemName: "plus")?
+            .applyingSymbolConfiguration(imageConfig)
+        
+        config.baseForegroundColor = UIColor.CustomColors.Background.detailBackground
+        config.attributedTitle = AttributedString("추가하기", attributes: AttributeContainer([
+            .font: UIFont.SCDream(size: .headline, weight: .medium)
+        ]))
+        
+        $0.configuration = config
         $0.layer.cornerRadius = 8
         $0.layer.masksToBounds = true
     }
@@ -109,8 +109,6 @@ final class CalendarExpenseListHeaderView: UIView {
     
     // MARK: - Setup
     private func setupUI() {
-        backgroundColor = UIColor.CustomColors.Background.background
-        
         setupStackViews()
         setupConstraints()
     }
@@ -140,15 +138,14 @@ final class CalendarExpenseListHeaderView: UIView {
     private func setupConstraints() {
         topStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
-            $0.leading.equalToSuperview().offset(24)
-            $0.trailing.equalToSuperview().offset(-24)
+            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.height.equalTo(40)
         }
         
         bottomStackView.snp.makeConstraints {
-            $0.top.equalTo(topStackView.snp.bottom).offset(16)
-            $0.leading.equalToSuperview().offset(24)
-            $0.trailing.equalToSuperview().offset(-24)
-            $0.bottom.equalToSuperview().offset(-20)
+            $0.top.equalTo(topStackView.snp.bottom)
+            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.bottom.equalToSuperview()
         }
     }
     
@@ -159,5 +156,20 @@ final class CalendarExpenseListHeaderView: UIView {
         
         expenseAmountLabel.text = "\(expense)원"
         balanceAmountLabel.text = "\(balance.formatted())원"
+    }
+}
+
+extension Reactive where Base: CalendarExpenseListHeaderView {
+    var addButtonTapped: Observable<Date> {
+        base.addButton.rx.tap
+            .withUnretained(base)
+            .map { owner, _ -> Date in
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyyMMdd"
+                
+                guard let date = formatter.date(from: owner.dateLabel.text ?? "") else { return Date() }
+                return date
+            }
+            .asObservable()
     }
 }

@@ -45,7 +45,7 @@ final class CustomProgressView: UIView {
     /// - Parameter value: 프로그레스 바의 진행도 (%)
     func updateProgress(_ value: CGFloat) {
         let progressValue = min(max(value, 0), 1) // 값이 0~1 사이를 벗어나지 않도록 제한
-        let newWidth = self.bounds.width * progressValue // ✅ 전체 너비 기준으로 설정
+        let newWidth = (UIScreen.main.bounds.width - 34) * progressValue // ✅ 전체 너비 기준으로 설정
 
         // Progress Label 업데이트
         progressLabel.text = "\(Int(progressValue * 100))%"
