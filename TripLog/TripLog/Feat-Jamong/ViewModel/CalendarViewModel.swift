@@ -18,10 +18,12 @@ class CalendarViewModel: ViewModelType {
     struct Input {
         let previousButtonTapped: Observable<Void>
         let nextButtonTapped: Observable<Void>
+        let addButtonTapped: Observable<Date>
     }
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
+        let addButtonTapped: PublishRelay<Date>
     }
     
     // MARK: - Properties
@@ -35,6 +37,7 @@ class CalendarViewModel: ViewModelType {
     
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
+    private let addButtonTapped = PublishRelay<Date>()
     
     // MARK: - Method
     // expensesData 접근가능 메서드
@@ -81,7 +84,13 @@ class CalendarViewModel: ViewModelType {
             .emit(to: currentPageRelay)
             .disposed(by: disposeBag)
         
-        return Output(updatedDate: self.currentPageRelay)
+        input.addButtonTapped
+            .asSignal(onErrorJustReturn: Date())
+            .emit(to: addButtonTapped)
+            .disposed(by: disposeBag)
+        
+        return Output(updatedDate: self.currentPageRelay,
+                      addButtonTapped: self.addButtonTapped)
     }
     
     // MARK: - Helper Methods

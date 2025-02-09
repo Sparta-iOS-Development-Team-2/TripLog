@@ -17,7 +17,6 @@ class TopViewController: UIViewController {
         $0.isScrollEnabled = false
         $0.alwaysBounceVertical = false
         $0.rowHeight = self.view.bounds.height
-//        $0.estimatedRowHeight = UIScreen.main.bounds.height * 0.5
         $0.applyBackgroundColor()
     }
     // ✅ RxDataSources에서 사용할 데이터소스 생성
@@ -46,7 +45,7 @@ class TopViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: true) // 항상 내비게이션 바 보이기
+        navigationController?.navigationBar.isHidden = false
     }
 
     override func viewDidLoad() {

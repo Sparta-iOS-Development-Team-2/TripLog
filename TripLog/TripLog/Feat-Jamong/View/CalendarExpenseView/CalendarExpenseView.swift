@@ -17,7 +17,7 @@ import SnapKit
 final class CalendarExpenseView: UIView {
     // MARK: - UI Components
     /// 지출 내역의 헤더를 표시하는 뷰
-    private let headerView = CalendarExpenseListHeaderView()
+    fileprivate let headerView = CalendarExpenseListHeaderView()
     
     /// 지출 목록을 표시하는 테이블뷰
     private let tableView = UITableView().then {
@@ -133,5 +133,11 @@ extension CalendarExpenseView: UITableViewDataSource, UITableViewDelegate {
         cell.configure(with: expense)
         
         return cell
+    }
+}
+
+extension Reactive where Base: CalendarExpenseView {
+    var addButtondTapped: Observable<Date> {
+        base.headerView.rx.addButtonTapped
     }
 }

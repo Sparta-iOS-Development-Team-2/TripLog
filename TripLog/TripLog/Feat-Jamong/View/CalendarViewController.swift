@@ -62,6 +62,7 @@ final class CalendarViewController: UIViewController {
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
     private var fakeTripExpenses: [Date: Double] = [:]
     private let disposeBag = DisposeBag()
+//    private var cashBookID: UUID
     
     // MARK: - View Lifecycle
     override func viewDidLoad() {
@@ -172,7 +173,8 @@ final class CalendarViewController: UIViewController {
     private func setupBindings() {
         let input: CalendarViewModel.Input = .init(
             previousButtonTapped: customHeaderView.rx.previousButtonTapped,
-            nextButtonTapped: customHeaderView.rx.nextButtonTapped)
+            nextButtonTapped: customHeaderView.rx.nextButtonTapped,
+            addButtonTapped: expenseListView.rx.addButtondTapped)
         
         let output = calendarViewModel.transform(input: input)
         
@@ -183,6 +185,18 @@ final class CalendarViewController: UIViewController {
             .emit { owner, date in
                 owner.customHeaderView.updateTitle(date: date)
                 owner.calendarView.updatePageLoad(date: date)
+            }
+            .disposed(by: disposeBag)
+        
+        output.addButtonTapped
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, date in
+                ModalViewManager.showModal(on: owner, state: .createNewConsumption(cashBookID: UUID(), date: date))
+                    .asSignal(onErrorSignalWith: .empty())
+                    .emit { _ in
+                        debugPrint("모달뷰 닫힘")
+                    }.dispose()
             }
             .disposed(by: disposeBag)
     }
@@ -228,13 +242,14 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     private func configureCellAppearance(_ cell: CalendarCustomCell, for date: Date, in calendar: FSCalendar) {
         if calendar.selectedDate == date {
             configureSelectedCell(cell)
+            expenseListView.configure(date: date, expenses: [], balance: 0)
         } else {
             configureUnselectedCell(cell, for: date)
         }
     }
     
     private func configureSelectedCell(_ cell: CalendarCustomCell) {
-        cell.contentView.backgroundColor = .systemBlue
+        cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
         cell.contentView.layer.cornerRadius = 10
         cell.contentView.layer.masksToBounds = true
         cell.titleLabel.textColor = .white
@@ -243,7 +258,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     
     private func configureUnselectedCell(_ cell: CalendarCustomCell, for date: Date) {
         let isToday = Calendar.current.isDateInToday(date)
-        cell.titleLabel.textColor = isToday ? .systemBlue : UIColor.CustomColors.Text.textPrimary
+        cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
         cell.expenseLabel.textColor = .red
         cell.contentView.layer.cornerRadius = 0
         cell.contentView.backgroundColor = .clear
