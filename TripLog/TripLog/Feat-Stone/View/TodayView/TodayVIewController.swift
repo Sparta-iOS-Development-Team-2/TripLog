@@ -296,24 +296,28 @@ extension TodayViewController: UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        // ✅ 삭제 버튼 컨테이너 뷰 생성 (디자인 유지)
-        let deleteView = UIView(frame: CGRect(x: 0, y: 0, width: 70, height: 40)).then {
-            $0.backgroundColor = .red
-            $0.layer.cornerRadius = 8
-        }
+        
+        // ✅ "삭제" 버튼을 위한 UIView 생성
+        let deleteView = UIView(frame: CGRect(x: 0, y: 0, width: 70, height: tableView.rowHeight)) // ✅ 셀 높이와 맞춤
+        deleteView.backgroundColor = .red
+        deleteView.layer.cornerRadius = 8
 
-        let deleteButton = UIButton(type: .system).then {
-            $0.setTitle("삭제", for: .normal)
-            $0.setTitleColor(.white, for: .normal)
-            $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
-        }
+        // ✅ "삭제" 텍스트 버튼 추가
+        let deleteLabel = UILabel()
+        deleteLabel.text = "삭제"
+        deleteLabel.textColor = .white
+        deleteLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        deleteLabel.textAlignment = .center
 
-        deleteView.addSubview(deleteButton)
-        deleteButton.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.width.equalTo(30)
+        deleteView.addSubview(deleteLabel)
+        deleteLabel.snp.makeConstraints {
+            $0.center.equalToSuperview() // ✅ 정중앙 배치
+            $0.width.equalTo(50)
             $0.height.equalTo(30)
         }
+
+        // ✅ UIView를 UIImage로 변환하여 UIContextualAction에 적용
+        let deleteImage = deleteView.asImage()
 
         let deleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] _, _, completionHandler in
             guard let self = self else { return }
@@ -330,7 +334,6 @@ extension TodayViewController: UITableViewDelegate {
             }
 
             let confirmAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
-                // ✅ Rx 방식으로 삭제 요청을 전달
                 self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
                 completionHandler(true) // ✅ 삭제 완료
             }
@@ -342,12 +345,23 @@ extension TodayViewController: UITableViewDelegate {
             self.present(alertController, animated: true)
         }
 
-        // ✅ 기존 디자인 적용 (배경 설정)
-        deleteAction.backgroundColor = UIColor.CustomColors.Background.background
-        // deleteAction.image = deleteView.asImage() // UIView를 UIImage로 변환하여 버튼 크기 반영 (필요 시 적용)
-
+        deleteAction.image = deleteImage
+        deleteAction.backgroundColor = UIColor.CustomColors.Background.detailBackground // ✅ 배경을 투명하게 설정하여 겹침 방지
+    
+        // ✅ 전체 스와이프 방지 및 크기 최소화
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
-        configuration.performsFirstActionWithFullSwipe = false // ✅ 전체 스와이프 방지
+        configuration.performsFirstActionWithFullSwipe = false
+        
         return configuration
+    }
+}
+
+// ✅ UIView를 UIImage로 변환하는 확장 함수
+extension UIView {
+    func asImage() -> UIImage {
+        let renderer = UIGraphicsImageRenderer(bounds: bounds)
+        return renderer.image { rendererContext in
+            layer.render(in: rendererContext.cgContext)
+        }
     }
 }

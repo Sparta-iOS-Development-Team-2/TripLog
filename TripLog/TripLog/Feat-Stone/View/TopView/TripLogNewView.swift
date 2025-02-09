@@ -59,12 +59,12 @@ final class TripLogNewView: UIView {
 
         titleDateView.snp.makeConstraints {
             $0.top.leading.trailing.equalToSuperview()
-            $0.leading.trailing.equalToSuperview().inset(8)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
 
         progressView.snp.makeConstraints {
             $0.top.equalTo(titleDateView.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(8)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
 
         buttonStackView.snp.makeConstraints {
