@@ -50,8 +50,6 @@ class MainViewController: UIViewController {
         super.viewWillAppear(animated)
         
         navigationController?.navigationBar.isHidden = true
-        FireStoreManager.shared.checkConnection()
-        APIManager.shared.checkConnection()
     }
 }
 

@@ -106,6 +106,35 @@ class FireStoreManager {
         
     }
     
+    func fetchAllData() async throws -> [CurrencyRate] {
+        let snapshot = try await Firestore.firestore().collection(config.collectionName).getDocuments()
+        print("snapShot count : \(snapshot.documents.count)")
+        
+        var decodedRates: [CurrencyRate] = []
+        
+        for document in snapshot.documents {
+            if let data = document.data()["CurrencyRate"] as? String {
+                // JSON 문자열을 Data로 변환
+                guard let jsonData = data.data(using: .utf8) else {
+                    print("JSON 문자열을 Data로 변환 실패: \(document.documentID)")
+                    continue
+                }
+                
+                // JSON 데이터를 CurrencyRate 타입으로 변환
+                do {
+                    let rate = try JSONDecoder().decode(CurrencyRate.self, from: jsonData)
+                    decodedRates.append(rate)
+                } catch {
+                    print("JSON Decoding 실패: \(error.localizedDescription), document ID: \(document.documentID)")
+                }
+            } else {
+                print("문서에서 'CurrencyRate' 키를 찾을 수 없음: \(document.documentID)")
+            }
+        }
+        
+        return decodedRates
+    }
+    
     func checkConnection() {
         let db = Firestore.firestore()
         
