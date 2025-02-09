@@ -11,5 +11,5 @@ import Foundation
 struct ModalConsumptionData {
     let cashBookID: UUID
     let date: Date
-    let exchangeRate: String
+    let exchangeRate: CurrencyRate
 }
