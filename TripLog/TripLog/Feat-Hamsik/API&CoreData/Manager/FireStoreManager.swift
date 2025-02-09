@@ -57,18 +57,6 @@ class FireStoreManager {
         }
     }
     
-    
-    /// Firestore에 저장된 모든 환율정보 가져오기
-    /// - Returns: 모든 환율정보
-    func fetchCurrencyFromFirestore() async -> [CurrencyRate] {
-        Task {
-            let data = try await db.collection("Currency").getDocuments()
-
-            return data
-        }
-        return []
-    }
-    
     /// Firestore에 저장된 환율정보 가져오기
     /// - Parameters:
     ///   - date: 조회할 환율 날짜(= 문서이름)
@@ -106,11 +94,11 @@ class FireStoreManager {
         
     }
     
-    func fetchAllData() async throws -> [CurrencyRate] {
+    func fetchAllData() async throws -> [CurrencyRateElement] {
         let snapshot = try await Firestore.firestore().collection(config.collectionName).getDocuments()
         print("snapShot count : \(snapshot.documents.count)")
         
-        var decodedRates: [CurrencyRate] = []
+        var decodedRates: [CurrencyRateElement] = []
         
         for document in snapshot.documents {
             if let data = document.data()["CurrencyRate"] as? String {
@@ -122,8 +110,14 @@ class FireStoreManager {
                 
                 // JSON 데이터를 CurrencyRate 타입으로 변환
                 do {
-                    let rate = try JSONDecoder().decode(CurrencyRate.self, from: jsonData)
-                    decodedRates.append(rate)
+                    var rate = try JSONDecoder().decode(CurrencyRate.self, from: jsonData)
+                    
+                    // 각 CurrencyRateElement에 documentID를 rateDate로 설정
+                    for i in 0..<rate.count {
+                        rate[i].rateDate = document.documentID
+                    }
+                    
+                    decodedRates.append(contentsOf: rate)
                 } catch {
                     print("JSON Decoding 실패: \(error.localizedDescription), document ID: \(document.documentID)")
                 }

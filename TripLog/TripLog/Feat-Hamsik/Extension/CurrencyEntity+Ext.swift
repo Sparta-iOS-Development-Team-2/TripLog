@@ -16,7 +16,27 @@ extension CurrencyEntity: CoreDataManagable {
     /// (사용X)
     ///
     /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
-    static func save(_ data: CurrencyRate, context: NSManagedObjectContext) { }
+    static func save(_ data: Model, context: NSManagedObjectContext) {
+        let element = CurrencyElement()
+        guard let entity = NSEntityDescription.entity(
+            forEntityName: EntityKeys.Name.CurrencyEntity.rawValue, in: context
+        ) else { return }
+        context.perform {
+            for item in data {
+                let entity = NSManagedObject(entity: entity, insertInto: context)
+                entity.setValue(item.rateDate, forKey: element.rateDate)
+                entity.setValue(item.curUnit, forKey: element.currencyCode)
+                entity.setValue(item.curNm, forKey: element.currencyName)
+                entity.setValue(Double(item.dealBasR?.replacingOccurrences(of: ",", with: "") ?? "1") ?? 1.0, forKey: element.baseRate)
+            }
+            do {
+                try context.save()
+                print("환율 저장 완료")
+            } catch {
+                print("환율 저장 실패: \(error)")
+            }
+        }
+    }
     
     /// CoreData에 저장된 환율정보를 불러오는 함수
     /// - Parameters:
@@ -25,6 +45,7 @@ extension CurrencyEntity: CoreDataManagable {
     /// - Returns: 검색결과(특정 검색 결과)
     static func fetch(context: NSManagedObjectContext, predicate: Any? = nil) -> [Entity] {
         let request: NSFetchRequest<CurrencyEntity> = CurrencyEntity.fetchRequest()
+        let element = CurrencyElement()
         
         guard let predicate = predicate as? String else {
             // 검색 조건이 없을 때 동작
@@ -39,16 +60,13 @@ extension CurrencyEntity: CoreDataManagable {
         }
         
         // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "tripName == $@", predicate)
+        request.predicate = NSPredicate(format: "\(element.rateDate) == %@", predicate)
         do {
             let result = try context.fetch(request)
-            for item in result {
-                print("검색 결과: \n이름: \(item.value(forKey: "tripName") ?? "")")
-            }
+            print("검색결과 : \(result.count)")
             return result
         } catch {
             print("데이터 읽기 실패: \(error)")
-
             return []
         }
     }
