@@ -36,7 +36,7 @@ final class OnboardingView: UIView {
     
     private let imageView = UIImageView().then {
         $0.image = UIImage(named: "page1")
-        $0.contentMode = .scaleAspectFit
+        $0.contentMode = .scaleAspectFill
         $0.backgroundColor = .clear
     }
     
