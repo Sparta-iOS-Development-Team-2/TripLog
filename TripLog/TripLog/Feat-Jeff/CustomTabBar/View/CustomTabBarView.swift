@@ -22,47 +22,43 @@ final class TabBarView: UIView {
     let settingTapped = PublishRelay<Void>()
     let tabBarAddButtonTapped = PublishRelay<Void>()
     
-    private var cashBookTabButton: UIButton = {
+    private let cashBookTabButton = UIButton().then {
         var config = UIButton.Configuration.plain()
         // 배경색과 텍스트색 설정
         config.baseBackgroundColor = .clear
         config.baseForegroundColor = UIColor.CustomColors.Accent.blue
         
         // 텍스트와 폰트 설정
-        var title = AttributedString.init("가계부")
-        title.font =  UIFont.SCDream(size: .body, weight: .bold)
-        config.attributedTitle = title
+        config.attributedTitle = AttributedString("가계부", attributes: AttributeContainer([
+            .font: UIFont.SCDream(size: .body, weight: .bold)
+        ]))
         
         // 이미지와 위치 설정
         config.image = UIImage(systemName: "book")
         config.imagePadding = 5
         config.imagePlacement = .top
         
-        let button = UIButton(configuration: config)
-        
-        return button
-    }()
-    
-    private var settingTabButton: UIButton = {
+        $0.configuration = config
+    }
+           
+    private let settingTabButton = UIButton().then {
         var config = UIButton.Configuration.plain()
         // 배경색과 텍스트색 설정
         config.baseBackgroundColor = .clear
         config.baseForegroundColor = UIColor.CustomColors.Accent.blue
         
         // 텍스트와 폰트 설정
-        var title = AttributedString.init("설정")
-        title.font =  UIFont.SCDream(size: .body, weight: .bold)
-        config.attributedTitle = title
+        config.attributedTitle = AttributedString("설정", attributes: AttributeContainer([
+            .font: UIFont.SCDream(size: .body, weight: .bold)
+        ]))
         
         // 이미지와 위치 설정
         config.image = UIImage(systemName: "gearshape")
         config.imagePadding = 5
         config.imagePlacement = .top
         
-        let button = UIButton(configuration: config)
-        
-        return button
-    }()
+        $0.configuration = config
+    }
     
     let tabBarAddButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
