@@ -86,8 +86,8 @@ class CalendarViewModel: ViewModelType {
         
         return Output(
             updatedDate: self.currentPageRelay,
-            addButtonTapped: self.addButtonTapped,
-            expenses: expenseRelay
+            expenses: expenseRelay,
+            addButtonTapped: self.addButtonTapped
         )
     }
     

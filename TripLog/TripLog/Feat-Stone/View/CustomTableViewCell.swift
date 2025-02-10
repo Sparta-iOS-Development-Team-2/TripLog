@@ -18,7 +18,7 @@ class CustomTableViewCell: UITableViewCell {
     var onTotalAmountUpdated: ((String) -> Void)?
 
     private lazy var calendarViewController: CalendarViewController = {
-        return CalendarViewController()
+        return CalendarViewController(cashBook: cashBookID ?? UUID())
     }()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

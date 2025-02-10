@@ -199,7 +199,7 @@ class TodayViewController: UIViewController {
                     return .empty()
                 }
                 // TODO: 모달뷰 로직 추후 수정 요청(석준)
-                return ModalViewManager.showModal(state: .editConsumption(data: selectedExpense)).map { $0 }
+                return ModalViewManager.showModal(state: .editConsumption(data: selectedExpense, exchangeRate: [])).map { $0 }
             }
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
