@@ -98,7 +98,7 @@ class TodayViewModel {
         deleteExpenseTrigger
             .subscribe(onNext: { [weak self] index in
                 guard let self = self else { return }
-                var currentExpenses = self.expensesRelay.value
+                let currentExpenses = self.expensesRelay.value
                 guard index < currentExpenses.count else { return }
                     
                 let targetExpense = currentExpenses[index]

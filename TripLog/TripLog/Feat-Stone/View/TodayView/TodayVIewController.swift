@@ -206,7 +206,7 @@ class TodayViewController: UIViewController {
         
         
         filteredExpenses
-            .drive(onNext: { [weak self] _ in
+            .drive(onNext: { [weak self] expenses in
                 guard let self = self else { return }
                 self.tableView.reloadData() // ✅ 셀이 변경될 때 프로그레스 바 반영
             })
@@ -222,7 +222,8 @@ class TodayViewController: UIViewController {
                     print("📌 self가 nil입니다.") // ✅ 메모리 해제 문제 확인
                     return .empty()
                 }
-                return ModalViewManager.showModal(on: self, state: .editConsumption(data: selectedExpense))
+                // TODO: 모달뷰 로직 추후 수정 요청(석준)
+                return ModalViewManager.showModal(state: .editConsumption(data: selectedExpense, exchangeRate: [])).map { $0 }
             }
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
@@ -248,29 +249,67 @@ class TodayViewController: UIViewController {
     }
                            
     @objc private func presentExpenseAddModal() {
-        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: self.cashBookID, date: Date()))
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                print("📌 사용된 cashBookID: \(self.cashBookID)")
-                print("📌 저장된 날짜: \(Date())")
-
-                // ✅ 모달 닫힌 후 데이터 새로고침
-                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
-            })
-            .disposed(by: disposeBag)
-    }
-    
-    private func presentExpenseEditModal(data: MockMyCashBookModel) {
-        ModalViewManager.showModal(on: self, state: .editConsumption(data: data))
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                print("📌 수정된 내역: \(data)")
+        ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: self.cashBookID, date: Date(), exchangeRate: [])))
+            .asSignal(onErrorSignalWith: .empty())
+            .emit(onNext: { [weak self] data in
+                guard let self = self,
+                let cashBookData = data as? MockMyCashBookModel else { return }
+                debugPrint("📌 모달뷰 닫힘 후 데이터 갱신 시작")
                 
-                // ✅ 모달 닫힌 후 데이터 새로고침
+                CoreDataManager.shared.save(type: MyCashBookEntity.self, data: cashBookData)
+                
+                // ✅ fetchTrigger 실행하여 데이터 갱신 요청
                 self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+
+                // ✅ fetchTrigger 실행 후 1초 뒤 `expenses`를 다시 구독하여 값 확인
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self.viewModel.output.expenses
+                        .drive(onNext: { fetchedExpenses in
+                            print("📌 🔥 fetchTrigger 실행 후 expenses 업데이트됨: \(fetchedExpenses.count)개 항목")
+                        })
+                        .disposed(by: self.disposeBag)
+
+                    // ✅ 테이블 뷰 강제 갱신 (UI 반영 확인용)
+                    self.tableView.reloadData()
+                }
             })
             .disposed(by: disposeBag)
     }
+
+    private func presentExpenseEditModal(data: MockMyCashBookModel) {
+        ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: []))
+            .asSignal(onErrorSignalWith: .empty())
+            .emit(onNext: { [weak self] updatedData in
+                guard let self = self,
+                      let updatedExpense = updatedData as? MockMyCashBookModel else { return }
+                debugPrint("📌 모달뷰 닫힘 후 수정된 데이터: \(updatedExpense)")
+
+                // ✅ 기존 데이터를 CoreData에 업데이트 (entityID 추가)
+                CoreDataManager.shared.update(
+                    type: MyCashBookEntity.self,
+                    entityID: updatedExpense.id, // ⚠️ 수정할 entity의 ID 전달
+                    data: updatedExpense
+                )
+
+                // ✅ fetchTrigger 실행하여 데이터 갱신 요청
+                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+
+                // ✅ fetchTrigger 실행 후 1초 뒤 `expenses`를 다시 구독하여 값 확인
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self.viewModel.output.expenses
+                        .drive(onNext: { fetchedExpenses in
+                            print("📌 🔥 fetchTrigger 실행 후 expenses 업데이트됨: \(fetchedExpenses.count)개 항목")
+                        })
+                        .disposed(by: self.disposeBag)
+
+                    // ✅ 테이블 뷰 강제 갱신 (UI 반영 확인용)
+                    self.tableView.reloadData()
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+
+
 
 }
 
@@ -298,8 +337,8 @@ extension TodayViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
         // ✅ "삭제" 버튼을 위한 UIView 생성
-        let deleteView = UIView(frame: CGRect(x: 0, y: 0, width: 70, height: tableView.rowHeight)) // ✅ 셀 높이와 맞춤
-        deleteView.backgroundColor = .red
+        let deleteView = UIView(frame: CGRect(x: 0, y: 0, width: 70, height: 108)) // ✅ 셀 높이와 맞춤
+        deleteView.backgroundColor = UIColor.CustomColors.Background.detailBackground
         deleteView.layer.cornerRadius = 8
 
         // ✅ "삭제" 텍스트 버튼 추가
@@ -308,6 +347,7 @@ extension TodayViewController: UITableViewDelegate {
         deleteLabel.textColor = .white
         deleteLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         deleteLabel.textAlignment = .center
+        deleteLabel.textColor = .white
 
         deleteView.addSubview(deleteLabel)
         deleteLabel.snp.makeConstraints {
@@ -319,10 +359,9 @@ extension TodayViewController: UITableViewDelegate {
         // ✅ UIView를 UIImage로 변환하여 UIContextualAction에 적용
         let deleteImage = deleteView.asImage()
 
-        let deleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] _, _, completionHandler in
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completionHandler in
             guard let self = self else { return }
 
-            // ✅ 삭제 확인 알럿 띄우기
             let alertController = UIAlertController(
                 title: "삭제 확인",
                 message: "정말로 삭제하시겠습니까?",
@@ -330,25 +369,21 @@ extension TodayViewController: UITableViewDelegate {
             )
 
             let cancelAction = UIAlertAction(title: "취소", style: .cancel) { _ in
-                completionHandler(false) // ✅ 취소 시 삭제되지 않음
+                completionHandler(false)
             }
 
             let confirmAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
                 self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
-                completionHandler(true) // ✅ 삭제 완료
+                completionHandler(true)
             }
 
             alertController.addAction(cancelAction)
             alertController.addAction(confirmAction)
-
-            // ✅ 현재 뷰 컨트롤러에서 알럿 표시
             self.present(alertController, animated: true)
         }
 
-        deleteAction.image = deleteImage
-        deleteAction.backgroundColor = UIColor.CustomColors.Background.detailBackground // ✅ 배경을 투명하게 설정하여 겹침 방지
-    
-        // ✅ 전체 스와이프 방지 및 크기 최소화
+        deleteAction.backgroundColor = .red
+
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
         configuration.performsFirstActionWithFullSwipe = false
         

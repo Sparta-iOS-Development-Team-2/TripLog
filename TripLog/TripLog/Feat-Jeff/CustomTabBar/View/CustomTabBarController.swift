@@ -128,13 +128,16 @@ private extension CustomTabBarController {
             .disposed(by: disposeBag)
         
         // 탭바의 추가하기 버튼 바인딩
+        // TODO: 데이터 임의 바인딩, 추후 수정 요청(재훈)
         customTabBar.tabBarAddButtonTapped
+            .flatMap {
+                return ModalViewManager.showModal(state: .createNewCashBook)
+                    .compactMap { $0 as? MockCashBookModel }
+            }
             .asSignal(onErrorSignalWith: .empty())
-            .withUnretained(self)
-            .emit(onNext: { owner, _ in
-                ModalViewManager.showModal(on: owner, state: .createNewCashBook)
-            })
-            .disposed(by: disposeBag)
+            .emit { data in
+                CoreDataManager.shared.save(type: CashBookEntity.self, data: data)
+            }.disposed(by: disposeBag)
     }
     
     /// 선택한 탭바의 화면으로 전환 (애니메이션 추가)

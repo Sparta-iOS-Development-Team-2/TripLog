@@ -124,8 +124,8 @@ extension CalendarView {
         calendar.register(CalendarCustomCell.self, forCellReuseIdentifier: "CalendarCustomCell")
         
         calendar.appearance.do {
-            $0.eventDefaultColor = .systemBlue
-            $0.eventSelectionColor = .systemBlue
+            $0.eventDefaultColor = UIColor.CustomColors.Accent.blue
+            $0.eventSelectionColor = UIColor.CustomColors.Accent.blue
         }
     }
 }

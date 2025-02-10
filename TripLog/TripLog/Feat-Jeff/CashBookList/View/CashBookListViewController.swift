@@ -98,6 +98,7 @@ private extension CashBookListViewController {
         
         navigationController?.navigationBar.isHidden = true
         view.backgroundColor = UIColor.CustomColors.Background.background
+        listCollectionView.backgroundColor = UIColor.CustomColors.Background.background
         
         [
             titleLabel,
@@ -155,7 +156,8 @@ private extension CashBookListViewController {
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit(onNext: { owner, _ in
-                ModalViewManager.showModal(on: owner, state: .createNewCashBook)
+                // TODO: 모달뷰 로직 추후 수정 요청(재훈)
+//                ModalViewManager.showModal(on: owner, state: .createNewCashBook)
             })
             .disposed(by: disposeBag)
         
@@ -249,7 +251,7 @@ private extension CashBookListViewController {
                         return
                     }
                     
-                    ModalViewManager.showModal(on: self, state: .editCashBook(data: data))
+//                    ModalViewManager.showModal(on: self, state: .editCashBook(data: data))
                     completion(true)
                 }
                 return UISwipeActionsConfiguration(actions: [editAction])

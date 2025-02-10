@@ -11,7 +11,7 @@ class TopViewController: UIViewController {
     private let disposeBag = DisposeBag()
 
     private let todayViewController: TodayViewController
-    private let calendarViewController = CalendarViewController()
+    private let calendarViewController: CalendarViewController
 
     private lazy var switcherView: TripSwitcherView = {
         return TripSwitcherView(todayView: todayViewController.view, calendarView: calendarViewController.view)
@@ -33,6 +33,7 @@ class TopViewController: UIViewController {
     init(cashBook: MockCashBookModel) {
         self.viewModel = TopViewModel(cashBook: cashBook)
         self.todayViewController = TodayViewController(cashBookID: cashBook.id)
+        self.calendarViewController = CalendarViewController(cashBook: cashBook.id) // ✅ cashBook.id 전달
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -43,6 +44,7 @@ class TopViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: true)
+        navigationController?.navigationBar.isHidden = false
     }
 
     override func viewDidLoad() {

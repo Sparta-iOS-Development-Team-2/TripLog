@@ -7,7 +7,7 @@ final class CustomProgressView: UIView {
 
     // MARK: - UI Components
     private lazy var progress = UIView().then {
-        $0.backgroundColor = UIColor.Personal.normal
+        $0.backgroundColor = UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0) // ✅ 단일 파란색 적용
     }
 
     private let progressLabel = UILabel().then {
@@ -41,43 +41,30 @@ final class CustomProgressView: UIView {
         progress.layer.cornerRadius = (self.bounds.height - 2) / 2
     }
 
-    private var progressValue: CGFloat = -1.0 // ✅ 현재 progress 값을 저장
+    private var progressValue: CGFloat = 0.0 // ✅ 초기값을 0으로 설정
 
     /// ✅ 프로그레스 바의 상태를 업데이트
     func updateProgress(_ value: CGFloat) {
         let progressValue = min(max(value, 0), 1) // 값이 0~1 사이를 벗어나지 않도록 제한
         self.progressValue = progressValue // ✅ 값 저장
 
-        // ✅ 전체 너비 대비 비율 설정
         let newWidth = self.bounds.width * progressValue
 
         print("🔹 Progress bar width update: \(newWidth), View width: \(self.bounds.width)")
-        
+
         // ✅ 기존 애니메이션 정리
         progress.layer.removeAllAnimations()
-        progress.subviews.forEach { $0.removeFromSuperview() } // ✅ 기존 Gradient 제거
 
-
-        // Progress Label 업데이트
+        // ✅ Progress Label 업데이트
         progressLabel.text = "\(Int(progressValue * 100))%"
-
-        // ✅ 프로그레스가 0일 때 숨김, 0이 아닐 때 표시
         progress.alpha = progressValue == 0 ? 0 : 1
 
-        // Auto Layout을 이용한 애니메이션 적용
+        // ✅ Auto Layout을 이용한 애니메이션 적용
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear, animations: {
             self.progress.snp.updateConstraints {
                 $0.width.equalTo(newWidth)
             }
             self.layoutIfNeeded()
-        }, completion: { _ in
-            // ✅ width가 0 이상일 때만 Gradient 애니메이션 실행
-            if progressValue > 0 {
-                self.progress.applyGradientAnimation(colors: [
-                    UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0),
-                    UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0)
-                ])
-            }
         })
     }
 
@@ -98,5 +85,4 @@ final class CustomProgressView: UIView {
             $0.trailing.equalTo(progress.snp.trailing).inset(5)
         }
     }
-    
 }

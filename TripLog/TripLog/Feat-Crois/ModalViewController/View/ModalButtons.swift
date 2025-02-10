@@ -27,7 +27,7 @@ final class ModalButtons: UIView {
     
     fileprivate let createButton = UIButton().then {
         $0.titleLabel?.font = .SCDream(size: .headline, weight: .medium)
-        $0.setTitleColor(.white, for: .normal)
+        $0.setTitleColor(.CustomColors.Background.detailBackground, for: .normal)
         $0.titleLabel?.numberOfLines = 1
         $0.titleLabel?.textAlignment = .center
         $0.backgroundColor = .Personal.normal

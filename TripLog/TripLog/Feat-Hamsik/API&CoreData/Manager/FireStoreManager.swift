@@ -10,7 +10,10 @@ import FirebaseFirestore
 
 class FireStoreManager {
     static let shared = FireStoreManager()
-    private init() {}
+    let config: FireStoreConfig
+    private init() {
+        config = FireStoreConfig()
+    }
     
     /// FireStore 인스턴스
     let db = Firestore.firestore()
@@ -54,18 +57,6 @@ class FireStoreManager {
         }
     }
     
-    
-    /// Firestore에 저장된 모든 환율정보 가져오기
-    /// - Returns: 모든 환율정보
-    func fetchCurrencyFromFirestore() async -> [CurrencyRate] {
-        Task {
-            let data = try await db.collection("Currency").getDocuments()
-
-            return data
-        }
-        return []
-    }
-    
     /// Firestore에 저장된 환율정보 가져오기
     /// - Parameters:
     ///   - date: 조회할 환율 날짜(= 문서이름)
@@ -101,5 +92,59 @@ class FireStoreManager {
             }
         }
         
+    }
+    
+    func fetchAllData() async throws -> [CurrencyRateElement] {
+        let snapshot = try await Firestore.firestore().collection(config.collectionName).getDocuments()
+        print("snapShot count : \(snapshot.documents.count)")
+        
+        var decodedRates: [CurrencyRateElement] = []
+        
+        for document in snapshot.documents {
+            if let data = document.data()["CurrencyRate"] as? String {
+                // JSON 문자열을 Data로 변환
+                guard let jsonData = data.data(using: .utf8) else {
+                    print("JSON 문자열을 Data로 변환 실패: \(document.documentID)")
+                    continue
+                }
+                
+                // JSON 데이터를 CurrencyRate 타입으로 변환
+                do {
+                    var rate = try JSONDecoder().decode(CurrencyRate.self, from: jsonData)
+                    
+                    // 각 CurrencyRateElement에 documentID를 rateDate로 설정
+                    for i in 0..<rate.count {
+                        rate[i].rateDate = document.documentID
+                    }
+                    
+                    decodedRates.append(contentsOf: rate)
+                } catch {
+                    print("JSON Decoding 실패: \(error.localizedDescription), document ID: \(document.documentID)")
+                }
+            } else {
+                print("문서에서 'CurrencyRate' 키를 찾을 수 없음: \(document.documentID)")
+            }
+        }
+        
+        return decodedRates
+    }
+    
+    func checkConnection() {
+        let db = Firestore.firestore()
+        
+        db.collection(config.collectionName).getDocuments { (snapshot, error) in
+            if let error = error {
+                print("Firestore 접근 실패: \(error.localizedDescription)")
+            } else if let snapshot = snapshot {
+                let documents = snapshot.documents
+                print("Firestore 연결 성공: 문서 \(documents.count)개")
+                
+                if let firstDocument = documents.first {
+                    print("첫 번째 문서: \(firstDocument.data())")
+                } else {
+                    print("문서가 없습니다.")
+                }
+            }
+        }
     }
 }
