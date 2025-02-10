@@ -56,7 +56,20 @@ final class CalendarViewController: UIViewController {
         $0.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10)
     }
     
-    private let calendarViewModel = CalendarViewModel()
+    private let calendarViewModel : CalendarViewModel
+    
+    // MARK: - Initalization
+    
+    /// 가계부 ID 받아오기
+    /// - Parameter cashBook: 가계부 ID
+    init(cashBook: UUID) {
+        self.calendarViewModel = CalendarViewModel(cashBookID: cashBook)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Properties
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
@@ -223,11 +236,20 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         return cell
     }
     
+    /// 셀의 날짜 레이블을 설정하는 메서드
+    /// - Parameters:
+    ///   - cell: 설정할 캘린더 커스텀 셀
+    ///   - date: 표시할 날짜
     private func configureCellDate(_ cell: CalendarCustomCell, for date: Date) {
         let day = Calendar.current.component(.day, from: date)
         cell.titleLabel.text = "\(day)"
     }
     
+    
+    /// 셀의 지출금액 레이블을 설정하는 메서드
+    /// - Parameters:
+    ///   - cell: 설정할 캘린더 커스텀 셀
+    ///   - date: 지출금액을 계산할 날짜
     private func configureCellExpense(_ cell: CalendarCustomCell, for date: Date) {
         let totalExpense = calendarViewModel.totalExpense(for: date)
         if totalExpense > 0 {
@@ -239,6 +261,11 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         }
     }
     
+    /// 셀의 전체적인 외관을 설정하는 메서드
+    /// - Parameters:
+    ///   - cell: 설정할 캘린더 커스텀 셀
+    ///   - date: 셀에 표시될 날짜
+    ///   - calendar: 현재 FSCalendar 인스턴스
     private func configureCellAppearance(_ cell: CalendarCustomCell, for date: Date, in calendar: FSCalendar) {
         if calendar.selectedDate == date {
             configureSelectedCell(cell)
@@ -248,6 +275,8 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         }
     }
     
+    /// 선택된 셀의 스타일을 설정하는 메서드
+    /// - Parameter cell: 스타일을 적용할 셀
     private func configureSelectedCell(_ cell: CalendarCustomCell) {
         cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
         cell.contentView.layer.cornerRadius = 10
@@ -256,6 +285,10 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         cell.expenseLabel.textColor = .white
     }
     
+    /// 선택되지 않은 셀의 스타일을 설정하는 메서드
+    /// - Parameters:
+    ///   - cell: 스타일을 적용할 셀
+    ///   - date: 셀의 날짜
     private func configureUnselectedCell(_ cell: CalendarCustomCell, for date: Date) {
         let isToday = Calendar.current.isDateInToday(date)
         cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
