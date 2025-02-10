@@ -14,7 +14,7 @@ import RxCocoa
 /// 모달 뷰 컨트롤러의 뷰로 쓰일 모달 뷰
 final class ModalView: UIView {
     typealias ModalCashBookData = (id: UUID, tripName: String, note: String, budget: Int,departure: String, homecoming: String, state: ModalViewState)
-    typealias ModalConsumptionData = (id: UUID, cashBookID: UUID, expenseDate: Date, payment: Bool, note: String, category: String, amount: Double, country: String, state: ModalViewState)
+    typealias ModalConsumptionData = (id: UUID, cashBookID: UUID, expenseDate: Date, payment: Bool, note: String, category: String, amount: Double, country: String, state: ModalViewState, exchangeRate: Double)
     
     // MARK: - Rx Properties
     
@@ -64,6 +64,7 @@ final class ModalView: UIView {
     private var cashBookID: UUID?
     private var consumptionID: UUID?
     private var expenseDate: Date?
+    private var exchangeRate: CurrencyRate?
     
     // MARK: - Initializer
     
@@ -192,6 +193,21 @@ private extension ModalView {
         return expenseDate
     }
     
+    /// 환율을 계산해서 원화로 반환하는 메소드
+    /// - Parameters:
+    ///   - country: 환율을 적용할 국가 통화코드
+    ///   - amount: 기준 원화
+    /// - Returns: 환율을 적용한 원화
+    func exchangeRateCalculation(_ country: String, _ amount: Double) -> Double {
+        guard
+            let currency = exchangeRate?.filter({ $0.curUnit == country }).first,
+            let rate = Double(currency.dealBasR ?? "")
+        else { return 0 }
+        
+        let result = amount / rate
+        return result
+    }
+    
     /// 모달뷰를 세팅하는 메소드
     func setupModal() {
         switch self.state {
@@ -248,14 +264,15 @@ private extension ModalView {
                     .disposed(by: disposeBag)
             }
             
-        case .createNewConsumption(cashBookID: let id, date: let date):
+        case .createNewConsumption(data: let data):
             if
                let secondSection = self.secondSection as? ModalTextField,
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalAmountView
             {
-                self.cashBookID = id
-                self.expenseDate = date
+                self.cashBookID = data.cashBookID
+                self.expenseDate = data.date
+                self.exchangeRate = data.exchangeRate
                 
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -270,7 +287,7 @@ private extension ModalView {
                     .disposed(by: disposeBag)
             }
             
-        case .editConsumption(data: let data):
+        case .editConsumption(data: let data, exchangeRate: let rate):
             if let firstSection = self.firstSection as? ModalSegmentView,
                let secondSection = self.secondSection as? ModalTextField,
                let thirdSection = self.thirdSection as? ModalTextField,
@@ -284,6 +301,7 @@ private extension ModalView {
                 self.cashBookID = data.cashBookID
                 self.consumptionID = data.id
                 self.expenseDate = data.expenseDate
+                self.exchangeRate = rate
                 
                 secondSection.rx.textFieldIsBlank
                     .bind(to: firstTextFieldIsBlank)
@@ -341,6 +359,8 @@ private extension ModalView {
                 let forth = forthSection as? ModalAmountView
             else { return nil }
             
+            let exchangeRate = exchangeRateCalculation(forth.currencyExtraction(), forth.amountExtraction())
+            
             let consumptionData = (getConsumptionID(),
                                    getCashBookID(),
                                    getExpenseDate(),
@@ -349,7 +369,8 @@ private extension ModalView {
                                    third.textFieldExtraction(),
                                    forth.amountExtraction(),
                                    forth.currencyExtraction(),
-                                   state)
+                                   state,
+                                   exchangeRate)
         
             return consumptionData
             
@@ -377,7 +398,7 @@ private extension ModalView {
             buttons.rx.activeButtondTapped
                 .map { [weak self] _ -> ModalView.ModalConsumptionData in
                     guard let data = self?.consumptionDataExtraction() else {
-                        return (UUID(), UUID(), Date(), false, "", "", 0, "", ModalViewState.createNewCashBook)
+                        return (UUID(), UUID(), Date(), false, "", "", 0, "", ModalViewState.createNewCashBook, 0)
                     }
                     
                     return data
