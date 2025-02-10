@@ -22,20 +22,11 @@ final class OnboardingViewController: UIViewController {
     
     fileprivate let onboardingView = OnboardingView()
     
-    private let pageControl = UIPageControl().then {
-        $0.currentPageIndicatorTintColor = .CustomColors.Accent.blue
-        $0.pageIndicatorTintColor = .CustomColors.Accent.blue.withAlphaComponent(0.5)
-        $0.backgroundColor = .clear
-        $0.currentPage = 0 // 초기값 세팅
-        $0.numberOfPages = 3 // 최대 페이지 수
-    }
-    
     // MARK: - OnboardingViewController LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.isHidden = true
         view = onboardingView
-        setupPageControl()
         bind()
     }
     
@@ -45,31 +36,19 @@ final class OnboardingViewController: UIViewController {
 
 private extension OnboardingViewController {
     
-    func setupPageControl() {
-        view.addSubview(pageControl)
-        
-        pageControl.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalTo(view.safeAreaLayoutGuide)
-            $0.height.equalTo(50)
-        }
-    }
-    
     func bind() {
         onboardingView.rx.leftSwipeAction
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
-            .emit { owner, index in
+            .emit { owner, _ in
                 owner.onboardingView.changeCurrentPage()
-                owner.pageControl.currentPage = index
             }.disposed(by: disposeBag)
         
         onboardingView.rx.rightSwipeAction
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
-            .emit { owner, index in
+            .emit { owner, _ in
                 owner.onboardingView.changeCurrentPage()
-                owner.pageControl.currentPage = index
             }.disposed(by: disposeBag)
     }
     
