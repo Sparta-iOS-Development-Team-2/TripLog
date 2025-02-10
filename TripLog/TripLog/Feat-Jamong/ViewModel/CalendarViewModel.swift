@@ -12,6 +12,11 @@ import Then
 import SnapKit
 import FSCalendar
 
+// 1. CashBookId를 받아오는 로직 [완료]
+// 2. CoreData와 연결하여 CashBookId를 통해 데이터를 가져오고 삭제, 수정할 수 있는 로직 [완료]
+// 3. ViewController에 Date에 따른 ExpenseLabel 보내주는 로직
+// 4. 캘린더뷰 - 지출목록의 Date에 따른 데이터 연결해주는 로직
+// 5. 지출목록의 추가하고 삭제할때 바인딩하는 로직
 
 class CalendarViewModel: ViewModelType {
     // MARK: - Input & Output
@@ -23,41 +28,31 @@ class CalendarViewModel: ViewModelType {
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
+        let expenses: BehaviorRelay<[MockMyCashBookModel]>
         let addButtonTapped: PublishRelay<Date>
     }
     
     // MARK: - Properties
     let disposeBag = DisposeBag()
     
-    // 지출 데이터를 저장
-    private var expenseData: [Date: [MockMyCashBookModel]] = [:]
+    // 가계부 ID 저장
+    private let cashBookID: UUID
     
-    // 선택된 날짜의 지출 데이터를 방출하는 Observable
-    let selectedDateExpenses = PublishSubject<[MockMyCashBookModel]>()
+    // 지출 데이터를 저장
+    private let expenseRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
     
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
     private let addButtonTapped = PublishRelay<Date>()
     
+    
+    // MARK: - Initalization
+    init(cashBookID: UUID) {
+        self.cashBookID = cashBookID
+        loadExpenseData()
+    }
+    
     // MARK: - Method
-    // expensesData 접근가능 메서드
-    func expensesForDate(_ date: Date) -> [MockMyCashBookModel] {
-        return expenseData[date] ?? []
-    }
-    
-    /// UserDefaults에서 지출 데이터를 로드하여 expenseData에 저장하는 메서드
-    func loadExpenseData() {
-
-    }
-    
-    /// 선택된 날짜의 총 지출 금액을 계산하는 메서드
-    /// - Parameter date: 총 지출 금액을 계산하는 날짜
-    /// - Returns: 해당 날짜의 총 지출 금액
-    func totalExpense(for date: Date) -> Double {
-        let expenses = expenseData[date] ?? []
-        return expenses.reduce(0) { $0 + $1.amount }
-    }
-    
     /// ViewModel의 Input을 Output으로 변환하는 메서드
     /// - Parameter input: ViewModel의 Input
     /// - Returns: ViewModel의 Output
@@ -83,14 +78,41 @@ class CalendarViewModel: ViewModelType {
             .asSignal(onErrorJustReturn: nextMonth(from: currentPageRelay.value))
             .emit(to: currentPageRelay)
             .disposed(by: disposeBag)
-        
+      
         input.addButtonTapped
             .asSignal(onErrorJustReturn: Date())
             .emit(to: addButtonTapped)
             .disposed(by: disposeBag)
         
-        return Output(updatedDate: self.currentPageRelay,
-                      addButtonTapped: self.addButtonTapped)
+        return Output(
+            updatedDate: self.currentPageRelay,
+            expenses: expenseRelay,
+            addButtonTapped: self.addButtonTapped
+        )
+    }
+    
+    /// Coredata에서 지출 데이터를 로드하여 expenseData에 저장하는 메서드
+    func loadExpenseData() {
+        let expenses = CoreDataManager.shared.fetch(
+            type: MyCashBookEntity.self,
+            predicate: cashBookID
+        )
+        
+        // amount외 원화 객체 수정예정
+        let models = expenses.map { entity -> MockMyCashBookModel in
+            return MockMyCashBookModel(
+                amount: entity.amount,
+                cashBookID: entity.cashBookID ?? self.cashBookID,
+                category: entity.category ?? "",
+                country: entity.country ?? "",
+                expenseDate: entity.expenseDate ?? Date(),
+                note: entity.note ?? "",
+                payment: entity.payment
+            )
+        }
+        
+        expenseRelay.accept(models)
+      
     }
     
     // MARK: - Helper Methods
@@ -106,5 +128,22 @@ class CalendarViewModel: ViewModelType {
     /// - Returns: 다음 달의 날짜
     private func nextMonth(from date: Date) -> Date {
         return Calendar.current.date(byAdding: .month, value: 1, to: date) ?? date
+    }
+    
+    /// 지정된 날짜에 해당하는 지출내역을 가져오는 메서드 
+    /// - Parameter date: 조회하는 날짜
+    /// - Returns: 해당 날짜의 지출 내역 배열
+    func expensesForDate(_ date: Date) -> [MockMyCashBookModel] {
+        return expenseRelay.value.filter { expense in
+            Calendar.current.isDate(expense.expenseDate, inSameDayAs: date)
+        }
+    }
+    
+    /// 선택된 날짜의 총 지출 금액을 계산하는 메서드 (amount -> 원화 객체로 수정예정)
+    /// - Parameter date: 총 지출 금액을 계산하는 날짜
+    /// - Returns: 해당 날짜의 총 지출 금액
+    func totalExpense(for date: Date) -> Double {
+        let dailyExpenses = expensesForDate(date)
+        return dailyExpenses.reduce(0) { $0 + $1.amount }
     }
 }

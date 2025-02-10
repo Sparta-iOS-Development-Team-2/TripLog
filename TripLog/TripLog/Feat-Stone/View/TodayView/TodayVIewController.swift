@@ -198,7 +198,8 @@ class TodayViewController: UIViewController {
                     print("📌 self가 nil입니다.") // ✅ 메모리 해제 문제 확인
                     return .empty()
                 }
-                return ModalViewManager.showModal(on: self, state: .editConsumption(data: selectedExpense))
+                // TODO: 모달뷰 로직 추후 수정 요청(석준)
+                return ModalViewManager.showModal(state: .editConsumption(data: selectedExpense, exchangeRate: [])).map { $0 }
             }
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
@@ -217,28 +218,30 @@ class TodayViewController: UIViewController {
     }
                            
     @objc private func presentExpenseAddModal() {
-        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: self.cashBookID, date: Date()))
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                print("📌 사용된 cashBookID: \(self.cashBookID)")
-                print("📌 저장된 날짜: \(Date())")
-
-                // ✅ 모달 닫힌 후 데이터 새로고침
-                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
-            })
-            .disposed(by: disposeBag)
+        // TODO: 모달뷰 로직 추후 수정 요청(석준)
+//        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: self.cashBookID, date: Date()))
+//            .subscribe(onNext: { [weak self] in
+//                guard let self = self else { return }
+//                print("📌 사용된 cashBookID: \(self.cashBookID)")
+//                print("📌 저장된 날짜: \(Date())")
+//
+//                // ✅ 모달 닫힌 후 데이터 새로고침
+//                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+//            })
+//            .disposed(by: disposeBag)
     }
     
     private func presentExpenseEditModal(data: MockMyCashBookModel) {
-        ModalViewManager.showModal(on: self, state: .editConsumption(data: data))
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                print("📌 수정된 내역: \(data)")
-                
-                // ✅ 모달 닫힌 후 데이터 새로고침
-                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
-            })
-            .disposed(by: disposeBag)
+        // TODO: 모달뷰 로직 추후 수정 요청(석준)
+//        ModalViewManager.showModal(on: self, state: .editConsumption(data: data))
+//            .subscribe(onNext: { [weak self] in
+//                guard let self = self else { return }
+//                print("📌 수정된 내역: \(data)")
+//                
+//                // ✅ 모달 닫힌 후 데이터 새로고침
+//                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+//            })
+//            .disposed(by: disposeBag)
     }
 
 }
