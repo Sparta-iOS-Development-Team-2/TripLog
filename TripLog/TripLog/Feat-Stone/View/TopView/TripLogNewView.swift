@@ -93,9 +93,3 @@ final class TripLogNewView: UIView {
         )
     }
 }
-
-//extension TripLogNewView {
-//    func updateExpense(_ totalExpense: Int) {
-//        progressView.expense.accept("\(NumberFormatter.formattedString(from: totalExpense)) 하이원")
-//    }
-//}
