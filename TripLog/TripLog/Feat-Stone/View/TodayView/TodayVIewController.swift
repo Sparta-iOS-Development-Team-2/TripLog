@@ -327,12 +327,7 @@ extension NumberFormatter {
 }
 
 extension TodayViewController: UITableViewDelegate {
-
-//    // 기본 삭제 기능 비활성화
-//    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-//        return false // 기본 삭제 버튼 비활성화
-//    }
-
+    
     // 기본 삭제 기능을 완전히 비활성화
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         // 기본 삭제 기능 비활성화 (아무 동작도 하지 않음)
@@ -340,30 +335,10 @@ extension TodayViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
-        // ✅ "삭제" 버튼을 위한 UIView 생성
-        let deleteView = UIView(frame: CGRect(x: 0, y: 0, width: 70, height: 108)) // ✅ 셀 높이와 맞춤
-        deleteView.backgroundColor = UIColor.CustomColors.Background.detailBackground
-        deleteView.layer.cornerRadius = 8
+        // ✅ "삭제" 버튼을 위한 UIView를 UIImage로 변환
+        let deleteImage = createDeleteButtonImage()
 
-        // ✅ "삭제" 텍스트 버튼 추가
-        let deleteLabel = UILabel()
-        deleteLabel.text = "삭제"
-        deleteLabel.textColor = .white
-        deleteLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-        deleteLabel.textAlignment = .center
-        deleteLabel.textColor = .white
-
-        deleteView.addSubview(deleteLabel)
-        deleteLabel.snp.makeConstraints {
-            $0.center.equalToSuperview() // ✅ 정중앙 배치
-            $0.width.equalTo(50)
-            $0.height.equalTo(30)
-        }
-
-        // ✅ UIView를 UIImage로 변환하여 UIContextualAction에 적용
-//        let deleteImage = deleteView.asImage()
-
-        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completionHandler in
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
             guard let self = self else { return }
 
             let alertController = UIAlertController(
@@ -386,13 +361,54 @@ extension TodayViewController: UITableViewDelegate {
             self.present(alertController, animated: true)
         }
 
-        deleteAction.backgroundColor = .red
+        deleteAction.image = deleteImage // ✅ "삭제" 버튼을 이미지로 설정
+        deleteAction.backgroundColor = UIColor.CustomColors.Background.detailBackground
 
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
         configuration.performsFirstActionWithFullSwipe = false
         
         return configuration
     }
+
+    /// ✅ "삭제" 버튼을 이미지로 생성하는 메서드 (cornerRadius 적용)
+    private func createDeleteButtonImage() -> UIImage? {
+        let size = CGSize(width: 70, height: 108) // ✅ 버튼 크기 설정
+        let cornerRadius: CGFloat = 16 // ✅ 원하는 radius 값 설정
+        let renderer = UIGraphicsImageRenderer(size: size)
+
+        return renderer.image { context in
+            let rect = CGRect(origin: .zero, size: size)
+            
+            // ✅ 둥근 모서리를 적용한 경로 생성
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius)
+            
+            // ✅ 클리핑 적용 (둥근 모서리 적용을 위해 필요)
+            context.cgContext.addPath(path.cgPath)
+            context.cgContext.clip()
+            
+            // ✅ 배경 색 적용
+            UIColor.red.setFill()
+            context.fill(rect)
+
+            // ✅ 텍스트 속성 설정
+            let text = "삭제"
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 16, weight: .bold),
+                .foregroundColor: UIColor.white
+            ]
+
+            // ✅ 텍스트 위치 조정 후 그리기
+            let textSize = text.size(withAttributes: attributes)
+            let textRect = CGRect(
+                x: (size.width - textSize.width) / 2,
+                y: (size.height - textSize.height) / 2,
+                width: textSize.width,
+                height: textSize.height
+            )
+            text.draw(in: textRect, withAttributes: attributes)
+        }
+    }
+
 }
 
 // ✅ UIView를 UIImage로 변환하는 확장 함수

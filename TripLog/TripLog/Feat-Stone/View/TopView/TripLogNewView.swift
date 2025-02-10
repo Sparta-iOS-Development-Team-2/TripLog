@@ -55,11 +55,11 @@ final class TripLogNewView: UIView {
         tripSummaryContainerView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(4)
             $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(buttonStackView.snp.bottom) // ✅ `tripSummaryContainerView`의 bottom을 명시적으로 설정
         }
 
         titleDateView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.top.leading.trailing.equalToSuperview().inset(16) // ✅ 중복된 `leading.trailing` 제거 후 `inset` 적용
         }
 
         progressView.snp.makeConstraints {
@@ -69,13 +69,13 @@ final class TripLogNewView: UIView {
 
         buttonStackView.snp.makeConstraints {
             $0.top.equalTo(progressView.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(-1)
             $0.height.equalTo(50)
             $0.bottom.equalToSuperview() // ✅ 마지막 요소이므로 `tripSummaryContainerView`의 bottom을 설정
         }
 
         switcherView.snp.makeConstraints {
-            $0.top.equalTo(tripSummaryContainerView.snp.bottom)
+            $0.top.equalTo(tripSummaryContainerView.snp.bottom).offset(8) // ✅ 적절한 `offset` 추가
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }

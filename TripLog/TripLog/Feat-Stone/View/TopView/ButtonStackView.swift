@@ -63,7 +63,7 @@ class CustomButtonStackView: UIStackView {
     
     private func setupLayout() {
         axis = .horizontal
-        spacing = -0.5
+        spacing = -1
         distribution = .fillEqually
 //        alignment = .center
     }

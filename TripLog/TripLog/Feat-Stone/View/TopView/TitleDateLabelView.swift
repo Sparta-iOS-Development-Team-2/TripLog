@@ -44,12 +44,12 @@ class TitleDateView: UIView {
         // 레이아웃 설정
         subtitleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.trailing.equalToSuperview()
         }
 
         dateLabel.snp.makeConstraints {
             $0.top.equalTo(subtitleLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
         
