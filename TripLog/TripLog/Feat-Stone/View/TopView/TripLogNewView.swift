@@ -75,9 +75,9 @@ final class TripLogNewView: UIView {
         }
 
         switcherView.snp.makeConstraints {
-            $0.top.equalTo(tripSummaryContainerView.snp.bottom).offset(16)
+            $0.top.equalTo(tripSummaryContainerView.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide)
+            $0.bottom.equalToSuperview()
         }
     }
 

@@ -65,6 +65,7 @@ class CustomButtonStackView: UIStackView {
         axis = .horizontal
         spacing = -0.5
         distribution = .fillEqually
+//        alignment = .center
     }
 
     // 버튼 스타일 업데이트
