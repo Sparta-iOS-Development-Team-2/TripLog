@@ -15,6 +15,7 @@ final class SyncManager {
     func syncCoreDataToFirestore() async throws {
         Task {
             do {
+                CoreDataManager.shared.delete(type: CurrencyEntity.self)
                 let fireStore = try await FireStoreManager.shared.fetchAllData()
                 CoreDataManager.shared.save(type: CurrencyEntity.self, data: fireStore)
             } catch {

@@ -37,12 +37,11 @@ class FireStoreManager {
     ///   - data: 저장할 환율 정보
     ///   - date: 저장할 환율 날짜(= 문서이름)
     private func saveCurrencyToFirestore(data: CurrencyRate, date: String = "20250101") {
-        let db = Firestore.firestore()
-        let dbRef = db.collection("Currency")
+        let dbRef = db.collection(config.collectionName)
         do {
             let encodedData: Data = try JSONEncoder().encode(data)
             if let jsonString = String(data: encodedData, encoding: .utf8) {
-                let dataToStore: [String: Any] = ["CurrencyRate": jsonString]
+                let dataToStore: [String: Any] = [config.documentData : jsonString]
                 
                 dbRef.document(date).setData(dataToStore) { error in
                     if let error = error {
@@ -62,14 +61,13 @@ class FireStoreManager {
     ///   - date: 조회할 환율 날짜(= 문서이름)
     func getStoreCurrencyRate(date: String, completion: @escaping (CurrencyRate) -> Void) {
         Task {
-            let db = Firestore.firestore()
-            let docRef = db.collection("Currency").document(date)
+            let docRef = db.collection(config.collectionName).document(date)
             
             do {
                 // Firestore의 모든 문서 가져오기
                 let document = try await docRef.getDocument()
                 
-                if let data = document.data(), let currencyRate = data["CurrencyRate"] as? String {
+                if let data = document.data(), let currencyRate = data[config.documentData] as? String {
                     // JSON 문자열을 Data 타입으로 변환
                     guard let jsonData = currencyRate.data(using: .utf8) else {
                         print("JSON 문자열을 Data로 변환하는데 실패")
@@ -101,7 +99,7 @@ class FireStoreManager {
         var decodedRates: CurrencyRate = []
         
         for document in snapshot.documents {
-            if let data = document.data()["CurrencyRate"] as? String {
+            if let data = document.data()[config.documentData] as? String {
                 // JSON 문자열을 Data로 변환
                 guard let jsonData = data.data(using: .utf8) else {
                     print("JSON 문자열을 Data로 변환 실패: \(document.documentID)")
