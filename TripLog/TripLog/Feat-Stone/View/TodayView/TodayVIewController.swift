@@ -142,7 +142,7 @@ class TodayViewController: UIViewController {
             let filteredExpenses = viewModel.output.expenses
                 .map { [weak self] expenses -> [MockMyCashBookModel] in
                     guard let self = self else { return [] }
-                    return (expenses as? [MockMyCashBookModel])?.filter { $0.cashBookID == self.cashBookID } ?? []
+                    return expenses.filter { $0.cashBookID == self.cashBookID }
                 }
 //                .share(replay: 1) // ✅ 여러 곳에서 사용되므로 공유
 

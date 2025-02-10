@@ -23,11 +23,13 @@ class CalendarViewModel: ViewModelType {
     struct Input {
         let previousButtonTapped: Observable<Void>
         let nextButtonTapped: Observable<Void>
+        let addButtonTapped: Observable<Date>
     }
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
         let expenses: BehaviorRelay<[MockMyCashBookModel]>
+        let addButtonTapped: PublishRelay<Date>
     }
     
     // MARK: - Properties
@@ -41,6 +43,7 @@ class CalendarViewModel: ViewModelType {
     
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
+    private let addButtonTapped = PublishRelay<Date>()
     
     
     // MARK: - Initalization
@@ -48,7 +51,6 @@ class CalendarViewModel: ViewModelType {
         self.cashBookID = cashBookID
         loadExpenseData()
     }
-    
     
     // MARK: - Method
     /// ViewModel의 Input을 Output으로 변환하는 메서드
@@ -76,9 +78,15 @@ class CalendarViewModel: ViewModelType {
             .asSignal(onErrorJustReturn: nextMonth(from: currentPageRelay.value))
             .emit(to: currentPageRelay)
             .disposed(by: disposeBag)
+      
+        input.addButtonTapped
+            .asSignal(onErrorJustReturn: Date())
+            .emit(to: addButtonTapped)
+            .disposed(by: disposeBag)
         
         return Output(
             updatedDate: self.currentPageRelay,
+            addButtonTapped: self.addButtonTapped,
             expenses: expenseRelay
         )
     }
@@ -94,7 +102,7 @@ class CalendarViewModel: ViewModelType {
         let models = expenses.map { entity -> MockMyCashBookModel in
             return MockMyCashBookModel(
                 amount: entity.amount,
-                cashBookID: entity.cashBookID ?? UUID(),
+                cashBookID: entity.cashBookID ?? self.cashBookID,
                 category: entity.category ?? "",
                 country: entity.country ?? "",
                 expenseDate: entity.expenseDate ?? Date(),
@@ -104,6 +112,7 @@ class CalendarViewModel: ViewModelType {
         }
         
         expenseRelay.accept(models)
+      
     }
     
     // MARK: - Helper Methods
@@ -121,8 +130,7 @@ class CalendarViewModel: ViewModelType {
         return Calendar.current.date(byAdding: .month, value: 1, to: date) ?? date
     }
     
-    
-    /// 지정된 날짜에 해당하는 지출내역을 가져오는 메서드
+    /// 지정된 날짜에 해당하는 지출내역을 가져오는 메서드 
     /// - Parameter date: 조회하는 날짜
     /// - Returns: 해당 날짜의 지출 내역 배열
     func expensesForDate(_ date: Date) -> [MockMyCashBookModel] {
