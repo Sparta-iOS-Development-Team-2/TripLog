@@ -189,7 +189,7 @@ class TodayViewController: UIViewController {
                     date: "오늘",
                     title: expense.note,
                     category: expense.category,
-                    amount: "$ \(NumberFormatter.formattedString(from: Int(expense.amount)))",
+                    amount: "\(CurrencyFormatter.formattedCurrency(from: Int(expense.amount), currencyCode: expense.country))",
                     exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4))) 원",
                     payment: expense.payment
                 )
@@ -220,23 +220,25 @@ class TodayViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
+        
+        ///.emit(onNext: { [weak self] data in guard let self = self, let cashBookData = data as? MockMyCashBookModel else { return }
         // ✅ 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기
         tableView.rx.modelSelected(MockMyCashBookModel.self)
             .do(onNext: { selectedExpense in
                 print("📌 선택된 셀 데이터 확인: \(selectedExpense)") // ✅ 선택 이벤트 로그 추가
             })
             .flatMapLatest { [weak self] selectedExpense -> Observable<Void> in
-                guard let self = self else {
+                guard let strongSelf = self else {
                     print("📌 self가 nil입니다.") // ✅ 메모리 해제 문제 확인
                     return .empty()
                 }
-                // TODO: 모달뷰 로직 추후 수정 요청(석준)
-                return ModalViewManager.showModal(state: .editConsumption(data: selectedExpense, exchangeRate: [])).map { $0 }
+                // ✅ 모달 띄우기 (Observable<Void>로 변환)
+                return ModalViewManager.showModal(state: .editConsumption(data: selectedExpense, exchangeRate: []))
+                    .map { _ in () } // ✅ `Observable<Void>`로 변환
             }
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
                 print("📌 수정 모달 닫힘 후 데이터 새로고침") // ✅ 모달 닫힌 후 이벤트 확인
-                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+                self?.viewModel.input.fetchTrigger.accept(self?.cashBookID ?? UUID())
             })
             .disposed(by: disposeBag)
         
@@ -293,15 +295,10 @@ class TodayViewController: UIViewController {
                 debugPrint("📌 모달뷰 닫힘 후 수정된 데이터: \(updatedExpense)")
 
                 // ✅ 기존 데이터를 CoreData에 업데이트 (entityID 추가)
-                CoreDataManager.shared.update(
-                    type: MyCashBookEntity.self,
-                    entityID: updatedExpense.id, // ⚠️ 수정할 entity의 ID 전달
-                    data: updatedExpense
-                )
-
+                CoreDataManager.shared.update( type: MyCashBookEntity.self,entityID: updatedExpense.id, data: updatedExpense)
+//                CoreDataManager.shared.update(type: CashBookEntity.self, entityID: data.1.id, data: updatedData)
                 // ✅ fetchTrigger 실행하여 데이터 갱신 요청
                 self.viewModel.input.fetchTrigger.accept(self.cashBookID)
-
                 // ✅ fetchTrigger 실행 후 1초 뒤 `expenses`를 다시 구독하여 값 확인
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     self.viewModel.output.expenses
