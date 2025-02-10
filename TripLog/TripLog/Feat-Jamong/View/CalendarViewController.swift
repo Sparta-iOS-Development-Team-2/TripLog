@@ -205,7 +205,7 @@ final class CalendarViewController: UIViewController {
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, date in
-                ModalViewManager.showModal(on: owner, state: .createNewConsumption(cashBookID: UUID(), date: date))
+                ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: UUID(), date: Date(), exchangeRate: [])))
                     .asSignal(onErrorSignalWith: .empty())
                     .emit { _ in
                         debugPrint("모달뷰 닫힘")
@@ -297,13 +297,13 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         cell.contentView.backgroundColor = .clear
     }
     
-    /// 날짜가 선택되었을 때 호출되는 메서드 (데이터 확인용)
-    /// - Parameters:
-    ///   - calendar: 현재 FSCalendar 인스턴스
-    ///   - date: 선택된 날짜
-    ///   - monthPosition: 선택된 날짜의 월 내 위치
-    func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-        calendarViewModel.selectedDateExpenses.onNext(calendarViewModel.expensesForDate(date))
-        calendar.reloadData()
-    }
+//    /// 날짜가 선택되었을 때 호출되는 메서드 (데이터 확인용)
+//    /// - Parameters:
+//    ///   - calendar: 현재 FSCalendar 인스턴스
+//    ///   - date: 선택된 날짜
+//    ///   - monthPosition: 선택된 날짜의 월 내 위치
+//    func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+//        calendarViewModel.selectedDateExpenses.onNext(calendarViewModel.expensesForDate(date))
+//        calendar.reloadData()
+//    }
 }
