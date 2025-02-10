@@ -13,7 +13,6 @@ extension CurrencyEntity: CoreDataManagable {
     typealias Model = CurrencyRate
     typealias Entity = CurrencyEntity
     
-    // TODO: 중복저장 방지코드 필요
     static func save(_ data: CurrencyRate, context: NSManagedObjectContext) {
         let element = CurrencyElement()
         guard let entity = NSEntityDescription.entity(
@@ -48,9 +47,11 @@ extension CurrencyEntity: CoreDataManagable {
         var resultType: CurrencyRateResultType = .isEmpty
         var retryCount = 0
         
+        request.fetchLimit = 1
+        
         guard var searchDate = predicate as? String else { return [] }
         
-        while retryCount < 3 {
+        while retryCount < 15 {
             // 검색 조건이 있을 때 동작
             request.predicate = NSPredicate(format: "\(element.rateDate) == %@", searchDate)
             do {
@@ -58,30 +59,34 @@ extension CurrencyEntity: CoreDataManagable {
                 resultType = checkResult(result)
                 
                 switch resultType {
+                    // 데이터 자체가 없을 때(생성하기)
                 case .isEmpty:
-                    FireStoreManager.shared.generateCurrencyRate(date: searchDate)
-                    print("\(searchDate) 데이터 생성")
-                    Task {
-                        do {
-                            try await SyncManager.shared.syncCoreDataToFirestore()
-                            print("동기화 완료")
-                        } catch {
-                            print("\(searchDate)데이터 생성 후 데이터 동기화 실패")
+                    retryCount += 1
+                    FireStoreManager.shared.generateCurrencyRate(date: searchDate) {
+                        Task {
+                            print("\(searchDate) 데이터 생성")
+                            do {
+                                try await SyncManager.shared.syncCoreDataToFirestore()
+                                print("동기화 완료") // 동기화 완료가 좀 느리게 동작함
+                            } catch {
+                                print("\(searchDate)데이터 생성 후 데이터 동기화 실패")
+                            }
                         }
                     }
-                    retryCount += 1
                     continue
                     
+                    // 데이터에 내용이 없을 때(검색일자 감소)
                 case .noData:
+                    retryCount += 1
                     // 검색 조건을 수정하거나 사용자에게 알림
                     print("검색날짜 변경 전: \(searchDate)")
                     searchDate = Date.getPreviousDate(from: searchDate) ?? searchDate
-                    print("검색날짜 변경 후: \(searchDate)")
-                    retryCount += 1
+                    print("검색날짜 변경 후: ->\(searchDate)")
                     continue
                     
+                    // 정상 데이터 확인
                 case .success:
-                    print("정상 값 찾음")
+                    print("정상 값 찾음: \(searchDate)")
                     return result // 반복문 종료
                 }
             } catch {

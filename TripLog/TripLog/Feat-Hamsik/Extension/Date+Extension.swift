@@ -16,21 +16,21 @@ extension Date {
     }
     
     static func getPreviousDate(from dateString: String) -> String? {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyyMMdd"
-            dateFormatter.locale = Locale(identifier: "ko_KR")
-
-            // 문자열 -> Date 변환
-            guard let date = dateFormatter.date(from: dateString) else {
-                print("잘못된 날짜 형식입니다.")
-                return nil
-            }
-            
-            // 하루 감소한 날짜 생성
-            let previousDate = Calendar.current.date(byAdding: .day, value: -1, to: date)
-            
-            // Date -> 문자열 변환
-            guard let resultDate = previousDate else { return nil }
-            return dateFormatter.string(from: resultDate)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        
+        // 문자열 -> Date 변환
+        guard let date = dateFormatter.date(from: dateString) else {
+            print("잘못된 날짜 형식입니다.")
+            return nil
         }
+        
+        // 하루 감소한 날짜 생성
+        let previousDate = Calendar.current.date(byAdding: .day, value: -1, to: date)
+        
+        // Date -> 문자열 변환
+        guard let resultDate = previousDate else { return nil }
+        return dateFormatter.string(from: resultDate)
+    }
 }

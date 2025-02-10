@@ -44,6 +44,14 @@ class MainViewController: UIViewController {
         super.viewDidLoad()
         
         setupUI()
+        
+        Task {
+            do {
+                try await SyncManager.shared.syncCoreDataToFirestore()
+            } catch {
+                print(error)
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {

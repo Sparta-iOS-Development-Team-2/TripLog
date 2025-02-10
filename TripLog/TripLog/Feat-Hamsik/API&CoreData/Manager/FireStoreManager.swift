@@ -20,12 +20,14 @@ class FireStoreManager {
     
     /// 환율정보 생성(API 요청)
     /// - Parameter date: API에 요청할 환율 날짜
-    func generateCurrencyRate(date: String) {
+    func generateCurrencyRate(date: String, closure: (() ->Void)? = nil ) {
         
         APIManager.shared.fetchCurrencyRatesWithAlamofire(dataType: APIInfo.exchangeRate, date: date) { result in
             switch result {
             case .success(let currencyRates):
                 self.saveCurrencyToFirestore(data: currencyRates, date: date)
+                // 비동기적 진행을 위한 클로져
+                closure?()
             case .failure(let error):
                 print("Alamofire 통신 실패: \(error.localizedDescription)")
             }
@@ -93,12 +95,12 @@ class FireStoreManager {
     }
     
     func fetchAllData() async throws -> CurrencyRate {
-        let snapshot = try await Firestore.firestore().collection(config.collectionName).getDocuments()
-        print("snapShot count : \(snapshot.documents.count)")
+        let allDocuments = try await Firestore.firestore().collection(config.collectionName).getDocuments()
+        print("Firestore Document count : \(allDocuments.documents.count)")
         
         var decodedRates: CurrencyRate = []
         
-        for document in snapshot.documents {
+        for document in allDocuments.documents {
             if let data = document.data()[config.documentData] as? String {
                 // JSON 문자열을 Data로 변환
                 guard let jsonData = data.data(using: .utf8) else {
