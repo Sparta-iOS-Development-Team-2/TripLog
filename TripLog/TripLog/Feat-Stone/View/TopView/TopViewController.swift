@@ -99,7 +99,7 @@ class TopViewController: UIViewController {
 
         tripSummaryView.configure(
             subtitle: cashBook.note,
-            date: "\(cashBook.departure) ~ \(cashBook.homecoming)",
+            date: "\(cashBook.departure.formattedDate()) - \(cashBook.homecoming.formattedDate())",
             budget: "\(NumberFormatter.formattedString(from: cashBook.budget)) 원",
             todayVC: todayViewController
         )
@@ -140,3 +140,21 @@ class TopViewController: UIViewController {
 //        }
 //    }
 }
+
+extension String {
+    /// `yyyyMMdd` 형식의 문자열을 `yyyy.MM.dd` 형식으로 변환
+    func formattedDate() -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyyMMdd" // 기존 형식 (예: 20250220)
+        inputFormatter.locale = Locale(identifier: "ko_KR") // 한국 시간 기준
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy.MM.dd" // 변경할 형식
+        
+        if let date = inputFormatter.date(from: self) {
+            return outputFormatter.string(from: date)
+        }
+        return self // 변환 실패 시 원본 반환
+    }
+}
+
