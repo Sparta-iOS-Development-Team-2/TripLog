@@ -15,6 +15,7 @@ class TodayViewController: UIViewController {
     var onTotalAmountUpdated: ((String)->Void)?
     
     let totalExpense = BehaviorRelay<Int>(value: 0)
+    let formattedTotalRelay = BehaviorRelay<String>(value: "0 원") // ✅ Rx로 관리
 
     // ✅ TripLogTopView에 반영할 총 지출 금액 Relay (클로저 방식)
     var onTotalExpenseUpdated: ((Int) -> Void)?
@@ -155,7 +156,6 @@ class TodayViewController: UIViewController {
 
         let TotalExpense = totalExpense.value
         totalExpense.accept(TotalExpense)
-        //totalExpenseRelay.accept(TotalExpense)
     }
     
     private func bindViewModel() {
@@ -188,23 +188,23 @@ class TodayViewController: UIViewController {
             }
             .disposed(by: disposeBag)
 
-        // 🔹 **총 지출 금액을 `exchangeRate`의 합으로 반영 (필터링된 데이터만 적용)**
         filteredExpenses
-            .map { expenses -> (Int, String) in
+            .map { expenses -> String in
                 let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +)
-                let formattedTotal = NumberFormatter.formattedString(from: totalExchangeRate)
-                print("----\(formattedTotal)") // ✅ 디버깅용 출력
-                return (totalExchangeRate, "\(formattedTotal) 원") // ✅ 튜플 반환
+                let formattedTotal = "\(NumberFormatter.wonFormat(totalExchangeRate)) 원"
+                print("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
+                return formattedTotal
             }
-            .drive(onNext: { [weak self] (totalExpense, totalAmount) in
-                guard let self = self else { return }
-                    
-                self.totalAmountLabel.text = totalAmount // ✅ totalAmountLabel 업데이트
-                self.onTotalExpenseUpdated?(totalExpense) // ✅ TopViewController로 전달
-            })
+            .startWith("0 원") // ✅ 첫 화면 로딩 시 기본 값 설정
+            .drive(formattedTotalRelay) // ✅ `formattedTotalRelay`에 값 전달
             .disposed(by: disposeBag)
 
-
+        // ✅ `totalAmountLabel`에 바인딩하여 UI 반영
+        formattedTotalRelay
+            .bind(to: totalAmountLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        
         filteredExpenses
             .drive(onNext: { [weak self] _ in
                 guard let self = self else { return }

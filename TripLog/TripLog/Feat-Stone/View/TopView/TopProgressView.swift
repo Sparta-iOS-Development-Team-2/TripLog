@@ -50,19 +50,38 @@ class TopProgressView: UIView {
             .subscribe(onNext: { [weak self] expenseText in
                 guard let self = self else { return }
                 
-                let expenseAmount = Int(expenseText.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0
-                let balance = self.budgetAmount - expenseAmount
-                let formattedBalance = NumberFormatter.wonFormat(balance)
+                // ✅ 1. Rx 스트림에서 받은 원본 데이터 확인
+                print("🔹 expenseText (원본): \(expenseText)")
 
-                self.expenseLabel.text = "지출: \(NumberFormatter.wonFormat(expenseAmount))"
+                // ✅ 2. 숫자 값으로 변환된 지출 금액 확인
+                let expenseAmount = Int(expenseText.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0
+                print("✅ expenseAmount (숫자 변환 후): \(expenseAmount)")
+
+                // ✅ 3. 잔액 계산 및 출력
+                let balance = self.budgetAmount - expenseAmount
+                print("✅ budgetAmount: \(self.budgetAmount), balance 계산 값: \(balance)")
+
+                // ✅ 4. 포맷된 잔액 확인
+                let formattedBalance = NumberFormatter.wonFormat(balance)
+                print("✅ formattedBalance: \(formattedBalance)")
+
+                // ✅ 5. UI 업데이트 전 출력
+                let formattedExpense = NumberFormatter.wonFormat(expenseAmount)
+                print("✅ formattedExpense: \(formattedExpense)")
+                
+                self.expenseLabel.text = "지출: \(formattedExpense)"
                 self.balanceLabel.text = "잔액: \(formattedBalance)"
                 self.balanceLabel.textColor = (balance < 0) ? .red : UIColor.Personal.normal
-                
+
+                // ✅ 6. Progress Bar 값 확인
                 let progressValue = (self.budgetAmount > 0) ? Float(expenseAmount) / Float(self.budgetAmount) : 0.0
+                print("✅ Progress Bar Value: \(progressValue)")
+
                 self.progressBar.updateProgress(CGFloat(progressValue)) // ✅ 프로그레스 업데이트
             })
             .disposed(by: disposeBag)
     }
+
 
     private func setupLayout() {
         [expenseLabel, budgetLabel, progressBar, balanceLabel].forEach { addSubview($0) }

@@ -53,7 +53,7 @@ class TopViewController: UIViewController {
         setupUI()
         setupTableView()
         setupTripSummary()
-        bindTodayViewController() // ✅ `TodayViewController`의 totalExpense 업데이트 바인딩
+//        bindTodayViewController() // ✅ `TodayViewController`의 totalExpense 업데이트 바인딩
         
         setupLayout()
     }
@@ -90,7 +90,7 @@ class TopViewController: UIViewController {
         
         DispatchQueue.main.asyncAfter(deadline: .now()+0.1){
             let initialTotalExpense = self.todayViewController.viewModel.totalExpenseRelay.value
-            self.tripSummaryView.updateExpense(initialTotalExpense)
+//            self.tripSummaryView.updateExpense(initialTotalExpense)
         }
     }
 
@@ -110,25 +110,33 @@ class TopViewController: UIViewController {
         tripSummaryView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: headerSize.height)
 
         tableView.tableHeaderView = tripSummaryView
+        
+        bindFormattedTotal()
+    }
+    
+    private func bindFormattedTotal() {
+        todayViewController.formattedTotalRelay
+            .bind(to: tripSummaryView.progressView.expense) // ✅ `TopProgressView`에 값 전달
+            .disposed(by: disposeBag)
     }
 
     /// ✅ `TodayViewController`에서 `totalExpense` 값을 받아 `tripSummaryView` 업데이트
-    private func bindTodayViewController() {
-        
-        let initialTotalExpense = todayViewController.viewModel.totalExpenseRelay.value
-        tripSummaryView.updateExpense(initialTotalExpense)
-        
-        todayViewController.onTotalExpenseUpdated = { [weak self] totalExpense in
-            guard let self = self else { return }
-            
-            // ✅ 프로그레스 뷰 리셋 후 업데이트
-            self.tripSummaryView.progressView.progressBar.updateProgress(0)
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    self.tripSummaryView.updateExpense(totalExpense)
-                }
-            
-            
-        }
-    }
+//    private func bindTodayViewController() {
+//        
+//        let initialTotalExpense = todayViewController.viewModel.totalExpenseRelay.value
+//        tripSummaryView.updateExpense(initialTotalExpense)
+//        
+//        todayViewController.onTotalExpenseUpdated = { [weak self] totalExpense in
+//            guard let self = self else { return }
+//            
+//            // ✅ 프로그레스 뷰 리셋 후 업데이트
+//            self.tripSummaryView.progressView.progressBar.updateProgress(0)
+//                
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//                    self.tripSummaryView.updateExpense(totalExpense)
+//                    print("totalll \(totalExpense)")
+//                }
+//            
+//        }
+//    }
 }

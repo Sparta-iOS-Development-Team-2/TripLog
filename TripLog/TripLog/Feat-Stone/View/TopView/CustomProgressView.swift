@@ -32,16 +32,16 @@ final class CustomProgressView: UIView {
         super.layoutSubviews()
         print("🔹 layoutSubviews() 호출됨, bounds.width:", bounds.width)
 
-        // ✅ 초기 width가 설정되지 않으면 progress 업데이트 적용되지 않음 → 강제 업데이트
-        DispatchQueue.main.async {
-            self.updateProgress(self.progressValue)
+        let newWidth = bounds.width * progressValue
+        if newWidth != progress.frame.width { // ✅ 기존 값과 비교 후 변경 시만 업데이트
+            updateProgress(progressValue)
         }
             
         layer.cornerRadius = self.bounds.height / 2
         progress.layer.cornerRadius = (self.bounds.height - 2) / 2
     }
 
-    private var progressValue: CGFloat = 0.0 // ✅ 현재 progress 값을 저장
+    private var progressValue: CGFloat = -1.0 // ✅ 현재 progress 값을 저장
 
     /// ✅ 프로그레스 바의 상태를 업데이트
     func updateProgress(_ value: CGFloat) {
