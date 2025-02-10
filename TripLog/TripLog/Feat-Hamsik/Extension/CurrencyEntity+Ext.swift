@@ -13,7 +13,8 @@ extension CurrencyEntity: CoreDataManagable {
     typealias Model = CurrencyRate
     typealias Entity = CurrencyEntity
     
-    static func save(_ data: Model, context: NSManagedObjectContext) {
+    // TODO: 중복저장 방지코드 필요
+    static func save(_ data: CurrencyRate, context: NSManagedObjectContext) {
         let element = CurrencyElement()
         guard let entity = NSEntityDescription.entity(
             forEntityName: EntityKeys.Name.CurrencyEntity.rawValue, in: context
@@ -43,29 +44,52 @@ extension CurrencyEntity: CoreDataManagable {
     static func fetch(context: NSManagedObjectContext, predicate: Any? = nil) -> [Entity] {
         let request: NSFetchRequest<CurrencyEntity> = CurrencyEntity.fetchRequest()
         let element = CurrencyElement()
+        var result = [CurrencyEntity]()
+        var resultType: CurrencyRateResultType = .isEmpty
+        var retryCount = 0
         
-        guard let predicate = predicate as? String else {
-            // 검색 조건이 없을 때 동작
+        guard let predicate = predicate as? String else { return [] }
+        
+        while retryCount < 3 {
+            // 검색 조건이 있을 때 동작
+            request.predicate = NSPredicate(format: "\(element.rateDate) == %@", predicate)
             do {
-                let result = try context.fetch(request)
-                print("모든 CurrencyEntity fetch 성공")
-                return result
+                result = try context.fetch(request)
+                resultType = checkResult(result)
+                
+                switch resultType {
+                case .isEmpty:
+                    print("데이터 생성 필요")
+                    // 데이터 생성 로직 추가 가능
+                    retryCount += 1
+                    continue
+                    
+                case .noData:
+                    print("검색 조건 수정 필요")
+                    // 검색 조건을 수정하거나 사용자에게 알림
+                    retryCount += 1
+                    continue
+                    
+                case .success:
+                    print("정상 값 찾음")
+                    return result // 반복문 종료
+                }
             } catch {
-                print("CurrencyEntity Fetch 실패: \(error)")
+                print("오류 발생: \(error)")
                 return []
             }
         }
         
-        // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "\(element.rateDate) == %@", predicate)
-        do {
-            let result = try context.fetch(request)
-            print("검색결과 : \(result.count)")
-            return result
-        } catch {
-            print("데이터 읽기 실패: \(error)")
-            return []
+        func checkResult(_ result: [CurrencyEntity?]) -> CurrencyRateResultType {
+            if result.isEmpty {
+                return .isEmpty
+            } else if result.first??.currencyCode == nil {
+                return .noData
+            } else {
+                return .success
+            }
         }
+        return []
     }
     
     /// (사용X)
@@ -116,6 +140,4 @@ extension CurrencyEntity: CoreDataManagable {
             }
         }
     }
-
-
 }

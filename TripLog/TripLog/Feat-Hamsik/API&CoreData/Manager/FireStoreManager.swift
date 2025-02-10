@@ -94,11 +94,11 @@ class FireStoreManager {
         
     }
     
-    func fetchAllData() async throws -> [CurrencyRateElement] {
+    func fetchAllData() async throws -> CurrencyRate {
         let snapshot = try await Firestore.firestore().collection(config.collectionName).getDocuments()
         print("snapShot count : \(snapshot.documents.count)")
         
-        var decodedRates: [CurrencyRateElement] = []
+        var decodedRates: CurrencyRate = []
         
         for document in snapshot.documents {
             if let data = document.data()["CurrencyRate"] as? String {
