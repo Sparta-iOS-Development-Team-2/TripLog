@@ -89,9 +89,9 @@ class TopViewController: UIViewController {
         
         tableView.tableHeaderView = tripSummaryView
         
-        DispatchQueue.main.asyncAfter(deadline: .now()+0.1){
-            let initialTotalExpense = self.todayViewController.viewModel.totalExpenseRelay.value
-        }
+//        DispatchQueue.main.asyncAfter(deadline: .now()+0.1){
+//            let initialTotalExpense = self.todayViewController.viewModel.totalExpenseRelay.value
+//        }
     }
 
     private func setupTripSummary() {

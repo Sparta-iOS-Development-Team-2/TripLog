@@ -167,11 +167,10 @@ class TodayViewController: UIViewController {
                 
                 let today = Calendar.current.startOfDay(for: Date()) // 🔹 오늘 날짜 (시간 제거)
                 
-                return (expenses as? [MockMyCashBookModel])?
-                    .filter {
-                        $0.cashBookID == self.cashBookID &&
-                        Calendar.current.isDate($0.expenseDate, inSameDayAs: today) // 🔹 오늘 날짜와 같은 데이터만 필터링
-                    } ?? []
+                return expenses.filter {
+                    $0.cashBookID == self.cashBookID &&
+                    Calendar.current.isDate($0.expenseDate, inSameDayAs: today) // 🔹 오늘 날짜와 같은 데이터만 필터링
+                }
             }
 
 
@@ -228,7 +227,7 @@ class TodayViewController: UIViewController {
                 print("📌 선택된 셀 데이터 확인: \(selectedExpense)") // ✅ 선택 이벤트 로그 추가
             })
             .flatMapLatest { [weak self] selectedExpense -> Observable<Void> in
-                guard let strongSelf = self else {
+                guard self != nil else {
                     print("📌 self가 nil입니다.") // ✅ 메모리 해제 문제 확인
                     return .empty()
                 }
@@ -329,10 +328,10 @@ extension NumberFormatter {
 
 extension TodayViewController: UITableViewDelegate {
 
-    // 기본 삭제 기능 비활성화
-    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        return false // 기본 삭제 버튼 비활성화
-    }
+//    // 기본 삭제 기능 비활성화
+//    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+//        return false // 기본 삭제 버튼 비활성화
+//    }
 
     // 기본 삭제 기능을 완전히 비활성화
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -362,7 +361,7 @@ extension TodayViewController: UITableViewDelegate {
         }
 
         // ✅ UIView를 UIImage로 변환하여 UIContextualAction에 적용
-        let deleteImage = deleteView.asImage()
+//        let deleteImage = deleteView.asImage()
 
         let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completionHandler in
             guard let self = self else { return }
