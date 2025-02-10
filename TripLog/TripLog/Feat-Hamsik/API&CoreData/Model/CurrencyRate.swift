@@ -12,31 +12,43 @@ struct CurrencyRateElement: Codable {
     let curUnit, ttb, tts, dealBasR: String?
     let bkpr, yyEfeeR, tenDDEfeeR, kftcBkpr: String?
     let kftcDealBasR, curNm: String?
-
+    var rateDate: String?  // Firestore 문서의 documentID로 할당할 속성(환율날짜)
+    
     enum CodingKeys: String, CodingKey {
-        /// API 호출 상태코드
         case result
-        /// 통화코드
         case curUnit = "cur_unit"
-        /// 국가/통화명
         case curNm = "cur_nm"
-        /// 매매 기준율(환율)
         case dealBasR = "deal_bas_r"
-        
-        
-        // 전신환 송금,송신
-        case ttb, tts
-        // 장부가격
-        case bkpr
-        // 년환가료율
+        case ttb, tts, bkpr
         case yyEfeeR = "yy_efee_r"
-        // 10일환가료율
         case tenDDEfeeR = "ten_dd_efee_r"
-        // 서울외국환중개 매매기준율
         case kftcBkpr = "kftc_bkpr"
-        // 서울외국환중개 장부가격
         case kftcDealBasR = "kftc_deal_bas_r"
     }
+
+    // 커스텀 이니셜라이저 추가
+    // rateDate(환율날짜)는 문서이름으로써 문서 외의 데이터라 디코딩 과정에서 대입이 불가능
+    // 추후 CoreData에 저장할 때 할당 예정이라 현 코드에서 nil을 대입하기 위해
+    // 이니셜라이저를 추가하였음.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.result = try container.decodeIfPresent(Int.self, forKey: .result)
+        self.curUnit = try container.decodeIfPresent(String.self, forKey: .curUnit)
+        self.curNm = try container.decodeIfPresent(String.self, forKey: .curNm)
+        self.dealBasR = try container.decodeIfPresent(String.self, forKey: .dealBasR)
+        self.ttb = try container.decodeIfPresent(String.self, forKey: .ttb)
+        self.tts = try container.decodeIfPresent(String.self, forKey: .tts)
+        self.bkpr = try container.decodeIfPresent(String.self, forKey: .bkpr)
+        self.yyEfeeR = try container.decodeIfPresent(String.self, forKey: .yyEfeeR)
+        self.tenDDEfeeR = try container.decodeIfPresent(String.self, forKey: .tenDDEfeeR)
+        self.kftcBkpr = try container.decodeIfPresent(String.self, forKey: .kftcBkpr)
+        self.kftcDealBasR = try container.decodeIfPresent(String.self, forKey: .kftcDealBasR)
+        
+        // nil로 할당
+        self.rateDate = nil
+    }
 }
+
 
 typealias CurrencyRate = [CurrencyRateElement]
