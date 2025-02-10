@@ -20,6 +20,12 @@ final class CashBookListViewController: UIViewController {
     private let viewWillAppearSubject = PublishSubject<Void>()
     private let addButtonTapped = PublishRelay<Void>()
     
+    private let testButton = UIButton().then {
+        $0.setTitle("버튼", for: .normal)
+        $0.backgroundColor = .gray
+        $0.addTarget(self, action: #selector(testButtonTapped(sender:)), for: .touchUpInside)
+    }
+    
     private let titleLabel = UILabel().then {
         $0.text = "나의 가계부"
         $0.font = UIFont.SCDream(size: .title, weight: .bold)
@@ -104,6 +110,7 @@ private extension CashBookListViewController {
             titleLabel,
             listCollectionView,
             addCellView,
+            testButton
         ].forEach { view.addSubview($0) }
         
         // 셀 추가 버튼 그림자 설정
@@ -130,6 +137,12 @@ private extension CashBookListViewController {
             $0.top.equalTo(titleLabel.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(safeArea.snp.bottom)
+        }
+        
+        testButton.snp.makeConstraints {
+            $0.leading.equalToSuperview().inset(50)
+            $0.height.width.equalTo(60)
+            $0.bottom.equalToSuperview().inset(100)
         }
     }
     
@@ -264,4 +277,50 @@ private extension CashBookListViewController {
         return layout
     }
     
+    /// 임시 날짜 계산 함수
+    /// Parameters:
+    ///  - last : 마지막으로 환율 데이터 업데이트한 날짜
+    func calculateDate(last: Date) -> String {
+        let calendar = Calendar.current
+        
+        guard let calculateDate = calendar.dateComponents([.day], from: last, to: Date()).day else {
+            return ""
+        }
+        let currentDate =  "\(String(calculateDate))일 전"
+        
+        switch currentDate {
+        case "0일 전" :
+            return "금일"
+        default:
+            return currentDate
+        }
+    }
+    
+    // 임시 버튼으로 popover 생성
+    @objc func testButtonTapped(sender: UIButton) {
+        // 임시 데이터 값 계산
+        let todayDate = Date()
+        let calendar = Calendar.current
+        let past = calendar.date(byAdding: .day, value: -3, to: Date())
+        
+        guard let pastDate = past else { return }
+        let currentDateCurrency = calculateDate(last: pastDate)
+        
+        PopoverManager.showPopover(on: self,
+                                   from: sender,
+                                   title: "현재의 환율은 \(currentDateCurrency) 환율입니다.",
+                                   subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
+                                   width: 170,
+                                   height: 60,
+                                   arrow: .down)
+    }
+}
+
+extension CashBookListViewController: UIPopoverPresentationControllerDelegate {
+    /// 아이폰에서 popover기능을 사용하기 위한 메서드
+    /// 기본적으로 이 기능은 iPad에서 사용되면 popover기능으로 동작하지만
+    /// 아이폰에선 default가 fullScreen으로 동작하기에 구현해줘야한다.
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
+    }
 }
