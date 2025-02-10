@@ -9,6 +9,19 @@ import Foundation
 
 extension Formatter {
     
+    // coreData에 있는 rateDate를 Date타입으로 변경
+    static let rateDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter
+    }()
+    
+    /// String -> Date타입으로 변경
+    static func rateDateValue(_ date: String) -> Date? {
+        return rateDateFormatter.date(from: date)
+    }
+    
     // 받아온 날짜 string 값
     static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()

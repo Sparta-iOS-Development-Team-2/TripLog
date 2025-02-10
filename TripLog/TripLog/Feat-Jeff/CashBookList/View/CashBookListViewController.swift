@@ -20,6 +20,7 @@ final class CashBookListViewController: UIViewController {
     private let viewWillAppearSubject = PublishSubject<Void>()
     private let addButtonTapped = PublishRelay<Void>()
     
+    // 임시 버튼(삭제 예정)
     private let testButton = UIButton().then {
         $0.setTitle("버튼", for: .normal)
         $0.backgroundColor = .gray
@@ -277,38 +278,20 @@ private extension CashBookListViewController {
         return layout
     }
     
-    /// 임시 날짜 계산 함수
-    /// Parameters:
-    ///  - last : 마지막으로 환율 데이터 업데이트한 날짜
-    func calculateDate(last: Date) -> String {
-        let calendar = Calendar.current
-        
-        guard let calculateDate = calendar.dateComponents([.day], from: last, to: Date()).day else {
-            return ""
-        }
-        let currentDate =  "\(String(calculateDate))일 전"
-        
-        switch currentDate {
-        case "0일 전" :
-            return "금일"
-        default:
-            return currentDate
-        }
-    }
     
-    // 임시 버튼으로 popover 생성
+    // 임시 버튼으로 popover 생성(삭제예정)
     @objc func testButtonTapped(sender: UIButton) {
         // 임시 데이터 값 계산
         let todayDate = Date()
-        let calendar = Calendar.current
-        let past = calendar.date(byAdding: .day, value: -3, to: Date())
+        let past = "20250208"
+        guard let currentDateCurrency = Formatter.rateDateValue(past) else { return }
+        let recentRateDate = CalculateDate.testCalculateDate(last: currentDateCurrency)
         
-        guard let pastDate = past else { return }
-        let currentDateCurrency = calculateDate(last: pastDate)
         
+        // popover 생성
         PopoverManager.showPopover(on: self,
                                    from: sender,
-                                   title: "현재의 환율은 \(currentDateCurrency) 환율입니다.",
+                                   title: "현재의 환율은 \(recentRateDate) 환율입니다.",
                                    subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
                                    width: 170,
                                    height: 60,
