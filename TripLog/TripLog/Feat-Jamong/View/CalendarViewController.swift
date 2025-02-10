@@ -75,7 +75,7 @@ final class CalendarViewController: UIViewController {
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
     private var fakeTripExpenses: [Date: Double] = [:]
     private let disposeBag = DisposeBag()
-//    private var cashBookID: UUID
+    //    private var cashBookID: UUID
     
     // MARK: - View Lifecycle
     override func viewDidLoad() {
@@ -201,19 +201,45 @@ final class CalendarViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
+        // addButton에 date는 셀에 받아온 데이트를 넣어야할듯
         output.addButtonTapped
             .asSignal(onErrorSignalWith: .empty())
-            .withUnretained(self)
-            .emit { owner, date in
-                ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: UUID(), date: Date(), exchangeRate: [])))
-                    .asSignal(onErrorSignalWith: .empty())
-                    .emit { _ in
-                        debugPrint("모달뷰 닫힘")
-                    }.dispose()
-            }
-            .disposed(by: disposeBag)
+            .emit(onNext: { [weak self] date in
+                guard let self = self else { return }
+                
+                let selectedDate = self.calendarView.calendar.selectedDate ?? date
+                
+                ModalViewManager.showModal(
+                    state: .createNewConsumption(
+                        data: .init(
+                            cashBookID: self.calendarViewModel.cashBookID,
+                            date: selectedDate,
+                            exchangeRate: []
+                        )
+                    )
+                )
+                .subscribe(onNext: { [weak self] (data: any MockDataProtocol) in
+                    // 타입 캐스팅 및 디버깅 추가
+                    guard let cashBookData = data as? MockMyCashBookModel else {
+                        print((type(of: data)))
+                        return
+                    }
+                    print(cashBookData)
+                    self?.calendarViewModel.addExpense(cashBookData)
+                    
+                    // 테스트위한 코드 해봄
+                    if let selectedDate = self?.calendarView.calendar.selectedDate {
+                        let expenses = self?.calendarViewModel.expensesForDate(selectedDate)
+                        self?.expenseListView.configure(date: selectedDate, expenses: expenses ?? [], balance: 0)
+                    }
+
+                    debugPrint("모달뷰 닫힘")
+                })
+                .disposed(by: self.disposeBag)
+            })
     }
 }
+                  
 
 // MARK: - FSCalendarDelegate, FSCalendarDataSource
 extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
@@ -297,13 +323,18 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         cell.contentView.backgroundColor = .clear
     }
     
-//    /// 날짜가 선택되었을 때 호출되는 메서드 (데이터 확인용)
-//    /// - Parameters:
-//    ///   - calendar: 현재 FSCalendar 인스턴스
-//    ///   - date: 선택된 날짜
-//    ///   - monthPosition: 선택된 날짜의 월 내 위치
-//    func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-//        calendarViewModel.selectedDateExpenses.onNext(calendarViewModel.expensesForDate(date))
-//        calendar.reloadData()
-//    }
+    /// 날짜가 선택되었을 때 호출되는 메서드
+    /// - Parameters:
+        ///   - calendar: 현재 FSCalendar 인스턴스
+        ///   - date: 선택된 날짜
+        ///   - monthPosition: 선택된 날짜의 월 내 위치
+    func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+        let expenses = calendarViewModel.expensesForDate(date)
+        
+        // 선택된 날짜의 총 지출 계산
+        let totalExpense = expenses.reduce(0) { $0 + Int($1.amount) }
+        
+        expenseListView.configure(date: date, expenses: expenses, balance: 0)
+        calendar.reloadData()
+    }
 }

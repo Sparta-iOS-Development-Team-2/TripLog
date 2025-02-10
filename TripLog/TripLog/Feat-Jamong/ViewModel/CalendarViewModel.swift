@@ -36,10 +36,13 @@ class CalendarViewModel: ViewModelType {
     let disposeBag = DisposeBag()
     
     // 가계부 ID 저장
-    private let cashBookID: UUID
+    let cashBookID: UUID
     
     // 지출 데이터를 저장
     private let expenseRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
+    
+    // 선택 날짜의 지출 데이터를 저장
+    let selectedDateData = PublishRelay<([MockMyCashBookModel], Date)>()
     
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
@@ -91,6 +94,7 @@ class CalendarViewModel: ViewModelType {
         )
     }
     
+    // MARK: - CoreData Methods
     /// Coredata에서 지출 데이터를 로드하여 expenseData에 저장하는 메서드
     func loadExpenseData() {
         let expenses = CoreDataManager.shared.fetch(
@@ -113,6 +117,47 @@ class CalendarViewModel: ViewModelType {
         
         expenseRelay.accept(models)
       
+    }
+    
+    /// 새로운 지출 데이터를 추가하는 메서드
+    /// - Parameter expense: 추가할 지출 데이터 모델
+    func addExpense(_ expense: MockMyCashBookModel) {
+        let newExpense = MockMyCashBookModel(
+            amount: expense.amount,
+            cashBookID: expense.cashBookID,
+            category: expense.category,
+            country: expense.country,
+            expenseDate: expense.expenseDate, // 모달에서 전달받은 날짜 사용
+            note: expense.note,
+            payment: expense.payment
+        )
+        
+        CoreDataManager.shared.save(
+            type: MyCashBookEntity.self,
+            data: newExpense
+        )
+        loadExpenseData()  // 데이터를 다시 로드하여 UI 업데이트
+    }
+    
+    /// 기존 지출 데이터를 수정하는 메서드
+    /// - Parameter expense: 수정할 지출 데이터 모델
+    func updateExpense(_ expense: MockMyCashBookModel) {
+        CoreDataManager.shared.update(
+            type: MyCashBookEntity.self,
+            entityID: expense.id,
+            data: expense
+        )
+        loadExpenseData()
+    }
+    
+    /// 지출 데이터를 삭제하는 메서드
+    /// - Parameter id: 삭제할 지출 데이터의 ID
+    func deleteExpense(id: UUID) {
+        CoreDataManager.shared.delete(
+            type: MyCashBookEntity.self,
+            entityID: id
+        )
+        loadExpenseData()
     }
     
     // MARK: - Helper Methods
