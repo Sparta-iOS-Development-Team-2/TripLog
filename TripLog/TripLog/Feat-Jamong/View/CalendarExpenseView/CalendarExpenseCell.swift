@@ -103,7 +103,7 @@ final class CalendarExpenseCell: UITableViewCell {
         numberFormatter.numberStyle = .decimal
         // 변경 예정 model.country -> Symbol
         foreignAmountLabel.text = "\(model.country) \(Int(model.amount).formatted())"
-        categoryLabel.text = "\(model.category)/\(model.payment ? "카드" : "현금")"
+        categoryLabel.text = "\(model.category) / \(model.payment ? "카드" : "현금")"
         
         // 한화로 변경하는 로직이 필요함 한화 * 환율데이트 수정필요
         wonAmountLabel.text = "\(Int(model.amount).formatted())원"

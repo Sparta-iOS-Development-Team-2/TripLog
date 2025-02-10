@@ -20,7 +20,7 @@ final class CalendarExpenseView: UIView {
     fileprivate let headerView = CalendarExpenseListHeaderView()
     
     /// 지출 목록을 표시하는 테이블뷰
-    private let tableView = UITableView().then {
+    let tableView = UITableView().then {
         $0.register(CalendarExpenseCell.self, forCellReuseIdentifier: "CalendarExpenseCell")
         $0.separatorStyle = .none
         $0.backgroundColor = .clear
@@ -70,8 +70,8 @@ final class CalendarExpenseView: UIView {
         tableView.snp.makeConstraints {
             $0.top.equalTo(headerView.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(60).priority(.low)
-            $0.height.equalTo(tableView.contentSize.height).priority(.high)
+//            $0.height.equalTo(60).priority(.low)
+//            $0.height.equalTo(tableView.contentSize.height).priority(.high)
             $0.bottom.equalToSuperview()
         }
         
@@ -101,20 +101,6 @@ final class CalendarExpenseView: UIView {
         // 데이터 유무에 따라 빈 상태 표시
         emptyStateLabel.isHidden = !expenses.isEmpty
         tableView.reloadData()
-        
-        // 테이블뷰 리로드 후 레이아웃 업데이트
-        DispatchQueue.main.async { [weak self] in
-            self?.updateTableViewHeight()
-        }
-    }
-    
-    /// 테이블뷰의 높이를 컨텐츠 크기에 맞게 업데이트
-    private func updateTableViewHeight() {
-        tableView.layoutIfNeeded()
-        let height = expenses.isEmpty ? 60 : tableView.contentSize.height
-        tableView.snp.updateConstraints {
-            $0.height.equalTo(height).priority(.high)
-        }
     }
 }
 
@@ -137,7 +123,7 @@ extension CalendarExpenseView: UITableViewDataSource, UITableViewDelegate {
 }
 
 extension Reactive where Base: CalendarExpenseView {
-    var addButtondTapped: Observable<Date> {
+    var addButtondTapped: Observable<Void> {
         base.headerView.rx.addButtonTapped
     }
 }

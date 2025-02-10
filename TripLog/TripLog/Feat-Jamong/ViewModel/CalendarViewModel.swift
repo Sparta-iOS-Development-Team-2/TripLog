@@ -23,12 +23,13 @@ class CalendarViewModel: ViewModelType {
     struct Input {
         let previousButtonTapped: Observable<Void>
         let nextButtonTapped: Observable<Void>
-        let addButtonTapped: Observable<Date>
+        let addButtonTapped: Observable<Void>
+        let didSelected: PublishRelay<Date>
     }
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
-        let expenses: BehaviorRelay<[MockMyCashBookModel]>
+        let expenses: BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Int)>
         let addButtonTapped: PublishRelay<Date>
     }
     
@@ -37,6 +38,7 @@ class CalendarViewModel: ViewModelType {
     
     // 가계부 ID 저장
     let cashBookID: UUID
+    let balance: Int
     
     // 지출 데이터를 저장
     private let expenseRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
@@ -44,14 +46,19 @@ class CalendarViewModel: ViewModelType {
     // 선택 날짜의 지출 데이터를 저장
     let selectedDateData = PublishRelay<([MockMyCashBookModel], Date)>()
     
+    // 셀 데이트 저장
+    private var selecetedDate = Date()
+    
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
     private let addButtonTapped = PublishRelay<Date>()
+    private let expensesData = BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Int)>(value: (Date(), [], 0))
     
     
     // MARK: - Initalization
-    init(cashBookID: UUID) {
+    init(cashBookID: UUID, balance: Int) {
         self.cashBookID = cashBookID
+        self.balance = balance
         loadExpenseData()
     }
     
@@ -83,13 +90,43 @@ class CalendarViewModel: ViewModelType {
             .disposed(by: disposeBag)
       
         input.addButtonTapped
-            .asSignal(onErrorJustReturn: Date())
-            .emit(to: addButtonTapped)
+            .withUnretained(self)
+            .map { owner, _ -> Date in
+                owner.selecetedDate
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { [weak self] date in
+                self?.addButtonTapped.accept(date)
+            }.disposed(by: disposeBag)
+            
+        
+        input.didSelected
+            .withUnretained(self)
+            .map { owner, date -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
+//                let currentDate = Calendar.current.date(byAdding: .day, value: -1, to: date)
+                owner.selecetedDate = date
+                return (date, owner.expensesForDate(date: date), owner.balance)
+            }
+            .asDriver(onErrorDriveWith: .empty())
+            .drive{ [weak self] data in
+                self?.expensesData.accept(data)
+            }
+            .disposed(by: disposeBag)
+        
+        expenseRelay
+            .withUnretained(self)
+            .map { owner, _ -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
+                return (owner.selecetedDate, owner.expensesForDate(date: owner.selecetedDate), owner.balance)
+            }
+            .asDriver(onErrorDriveWith: .empty())
+            .drive{ [weak self] data in
+                self?.expensesData.accept(data)
+            }
             .disposed(by: disposeBag)
         
         return Output(
             updatedDate: self.currentPageRelay,
-            expenses: expenseRelay,
+            expenses: expensesData,
             addButtonTapped: self.addButtonTapped
         )
     }
@@ -109,7 +146,7 @@ class CalendarViewModel: ViewModelType {
                 cashBookID: entity.cashBookID ?? self.cashBookID,
                 category: entity.category ?? "",
                 country: entity.country ?? "",
-                expenseDate: entity.expenseDate ?? Date(),
+                expenseDate: entity.expenseDate ?? self.selecetedDate,
                 note: entity.note ?? "",
                 payment: entity.payment
             )
@@ -178,7 +215,7 @@ class CalendarViewModel: ViewModelType {
     /// 지정된 날짜에 해당하는 지출내역을 가져오는 메서드 
     /// - Parameter date: 조회하는 날짜
     /// - Returns: 해당 날짜의 지출 내역 배열
-    func expensesForDate(_ date: Date) -> [MockMyCashBookModel] {
+    func expensesForDate(date: Date) -> [MockMyCashBookModel] {
         return expenseRelay.value.filter { expense in
             Calendar.current.isDate(expense.expenseDate, inSameDayAs: date)
         }
@@ -187,8 +224,8 @@ class CalendarViewModel: ViewModelType {
     /// 선택된 날짜의 총 지출 금액을 계산하는 메서드 (amount -> 원화 객체로 수정예정)
     /// - Parameter date: 총 지출 금액을 계산하는 날짜
     /// - Returns: 해당 날짜의 총 지출 금액
-    func totalExpense(for date: Date) -> Double {
-        let dailyExpenses = expensesForDate(date)
+    func totalExpense(date: Date) -> Double {
+        let dailyExpenses = expensesForDate(date: date)
         return dailyExpenses.reduce(0) { $0 + $1.amount }
     }
 }
