@@ -48,25 +48,35 @@ extension CurrencyEntity: CoreDataManagable {
         var resultType: CurrencyRateResultType = .isEmpty
         var retryCount = 0
         
-        guard let predicate = predicate as? String else { return [] }
+        guard var searchDate = predicate as? String else { return [] }
         
         while retryCount < 3 {
             // 검색 조건이 있을 때 동작
-            request.predicate = NSPredicate(format: "\(element.rateDate) == %@", predicate)
+            request.predicate = NSPredicate(format: "\(element.rateDate) == %@", searchDate)
             do {
                 result = try context.fetch(request)
                 resultType = checkResult(result)
                 
                 switch resultType {
                 case .isEmpty:
-                    print("데이터 생성 필요")
-                    // 데이터 생성 로직 추가 가능
+                    FireStoreManager.shared.generateCurrencyRate(date: searchDate)
+                    print("\(searchDate) 데이터 생성")
+                    Task {
+                        do {
+                            try await SyncManager.shared.syncCoreDataToFirestore()
+                            print("동기화 완료")
+                        } catch {
+                            print("\(searchDate)데이터 생성 후 데이터 동기화 실패")
+                        }
+                    }
                     retryCount += 1
                     continue
                     
                 case .noData:
-                    print("검색 조건 수정 필요")
                     // 검색 조건을 수정하거나 사용자에게 알림
+                    print("검색날짜 변경 전: \(searchDate)")
+                    searchDate = Date.getPreviousDate(from: searchDate) ?? searchDate
+                    print("검색날짜 변경 후: \(searchDate)")
                     retryCount += 1
                     continue
                     
@@ -97,10 +107,20 @@ extension CurrencyEntity: CoreDataManagable {
     /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
     static func update(data: CurrencyRate, entityID: UUID, context: NSManagedObjectContext) { }
     
-    /// (사용X)
-    ///
-    /// 환율정보 특성상 개발자가 저장할 일이 발생하지 않아 구현하지 않음
-    static func delete(entityID: UUID, context: NSManagedObjectContext) { }
+    
+    static func delete(entityID: UUID?, context: NSManagedObjectContext) {
+        let entityName = EntityKeys.Name.CurrencyEntity.rawValue
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        
+        do {
+            try context.execute(deleteRequest)
+            try context.save()
+            print("\(entityName)의 모든 데이터가 삭제되었습니다.")
+        } catch {
+            print("데이터 삭제 중 오류 발생: \(error.localizedDescription)")
+        }
+    }
     
     /// 새로운 환율정보를 생성하는 함수
     /// - Parameters:
