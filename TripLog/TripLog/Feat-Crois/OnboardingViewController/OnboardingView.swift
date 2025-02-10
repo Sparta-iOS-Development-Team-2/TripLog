@@ -40,6 +40,23 @@ final class OnboardingView: UIView {
         $0.backgroundColor = .clear
     }
     
+    private let infoTextView = UIView().then {
+        $0.backgroundColor = .CustomColors.Background.background
+        $0.layer.shadowColor = UIColor.systemBackground.cgColor
+        $0.layer.shadowOpacity = 0.25
+        $0.layer.shadowRadius = 10
+        $0.layer.shadowOffset = .init(width: 0, height: -2)
+    }
+    
+    private let infoLabel = UILabel().then {
+        $0.text = "test"
+        $0.font = .SCDream(size: .subtitle, weight: .regular)
+        $0.textColor = .CustomColors.Text.textPrimary
+        $0.numberOfLines = 3
+        $0.textAlignment = .center
+        $0.backgroundColor = .clear
+    }
+    
     fileprivate let activeButton = UIButton().then {
         $0.setTitle("시작하기", for: .normal)
         $0.setTitleColor(.white, for: .normal)
@@ -49,10 +66,19 @@ final class OnboardingView: UIView {
         $0.isHidden = true
     }
     
+    private lazy var pageControl = UIPageControl().then {
+        $0.currentPageIndicatorTintColor = .CustomColors.Accent.blue
+        $0.pageIndicatorTintColor = .CustomColors.Accent.blue.withAlphaComponent(0.5)
+        $0.backgroundColor = .clear
+        $0.currentPage = 0 // 초기값 세팅
+        $0.numberOfPages = images.count // 최대 페이지 수
+    }
+    
     // MARK: - Initializer
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(infoText: String) {
+        super.init(frame: .zero)
+        infoLabel.text = infoText
         setupUI()
     }
     
@@ -60,10 +86,23 @@ final class OnboardingView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        infoTextView.layer.shadowPath = .init(rect: infoTextView.bounds, transform: nil)
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        infoTextView.layer.shadowColor = UIColor.systemBackground.cgColor
+    }
+    
     /// 현재 페이지를 변경하는 메소드
     func changeCurrentPage() {
         UIView.transition(with: self, duration: 0.3, options: .transitionCrossDissolve) {
             self.imageView.image = self.images[self.currentPage]
+            self.pageControl.currentPage = self.currentPage
             self.activeButton.isHidden = self.currentPage == (self.images.count - 1) ? false : true
             self.layoutIfNeeded()
         }
@@ -101,24 +140,62 @@ private extension OnboardingView {
     
     func configureSelf() {
         backgroundColor = .CustomColors.Background.background
-        [imageView, activeButton].forEach { addSubview($0) }
+        [imageView, infoTextView, infoLabel, pageControl, activeButton].forEach { addSubview($0) }
     }
     
     func setupLayout() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first else { return }
+        let padding: CGFloat = window.safeAreaInsets.bottom == 0 ? 50 : 0
+        
         imageView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.top.equalToSuperview().inset(padding)
+        }
+        
+        infoTextView.snp.makeConstraints {
+            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.height.equalTo(360 - padding)
+        }
+        
+        infoLabel.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.top.equalTo(infoTextView).offset(32)
+            $0.height.equalTo(50)
+        }
+        
+        pageControl.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.top.equalTo(infoTextView).offset(8)
+            $0.height.equalTo(32)
         }
         
         activeButton.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(64)
-            $0.bottom.equalToSuperview().inset(100)
+            $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
         }
     }
     
     func addSwipeAction() {
         self.addGestureRecognizer(leftSwipeGesture)
         self.addGestureRecognizer(rightSwipeGesture)
+    }
+    
+    func infoLabelConfig(_ text: String) -> NSMutableAttributedString {
+        let fullText = text
+        let boldParts = ["수정", "삭제", "통화를", "날짜를", "선택"]
+        
+        let attributedString = NSMutableAttributedString(string: fullText)
+        
+        let boldFont = UIFont.SCDream(size: .subtitle, weight: .bold)
+        
+        boldParts.forEach { boldPart in
+            let range = (fullText as NSString).range(of: boldPart)
+            attributedString.addAttribute(.font, value: boldFont, range: range)
+        }
+        
+        return attributedString
     }
     
 }
