@@ -102,7 +102,8 @@ private extension ModalViewController {
                     return
                 }
                 
-                let cashBookData = CashBookEntity.Model(tripName: data.1.tripName,
+                let cashBookData = CashBookEntity.Model(id: data.1.id,
+                                                        tripName: data.1.tripName,
                                                         note: data.1.note,
                                                         budget: data.1.budget,
                                                         departure: data.1.departure,
@@ -130,6 +131,7 @@ private extension ModalViewController {
                                                              category: data.1.category,
                                                              country: data.1.country,
                                                              expenseDate: data.1.expenseDate,
+                                                             id: data.1.id,
                                                              note: data.1.note,
                                                              payment: data.1.payment)
                 
