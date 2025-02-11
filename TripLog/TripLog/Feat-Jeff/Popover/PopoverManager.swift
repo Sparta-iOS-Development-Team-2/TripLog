@@ -7,19 +7,12 @@
 
 import UIKit
 
-final class PopoverManager: NSObject {
+struct PopoverManager {
     
     private let title: String
     private let subTitle: String
     private let width: Int
     private let height : Int
-    
-    init(title: String, subTitle: String, width: Int, height: Int) {
-        self.title = title
-        self.subTitle = subTitle
-        self.width = width
-        self.height = height
-    }
     
     /// popover 사용는 메서드
     /// Parameters:

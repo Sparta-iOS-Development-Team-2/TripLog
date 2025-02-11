@@ -13,7 +13,7 @@ extension Formatter {
     static let rateDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd"
-        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.timeZone = TimeZone(identifier: "Ko_kr")
         return formatter
     }()
     
