@@ -64,7 +64,7 @@ final class ModalView: UIView {
     private var cashBookID: UUID?
     private var consumptionID: UUID?
     private var expenseDate: Date?
-    private var exchangeRate: CurrencyRate?
+    private var exchangeRate: [CurrencyEntity]?
     
     // MARK: - Initializer
     
@@ -199,12 +199,9 @@ private extension ModalView {
     ///   - amount: 기준 원화
     /// - Returns: 환율을 적용한 원화
     func exchangeRateCalculation(_ country: String, _ amount: Double) -> Double {
-        guard
-            let currency = exchangeRate?.filter({ $0.curUnit == country }).first,
-            let rate = Double(currency.dealBasR ?? "")
-        else { return 0 }
+        guard let currency = exchangeRate?.filter({ $0.currencyCode == country }).first else { return 0 }
         
-        let result = amount / rate
+        let result = amount / currency.baseRate
         return result
     }
     
