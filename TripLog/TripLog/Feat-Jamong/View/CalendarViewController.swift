@@ -244,10 +244,16 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     ///   - cell: 설정할 캘린더 커스텀 셀
     ///   - date: 지출금액을 계산할 날짜
     private func configureCellExpense(_ cell: CalendarCustomCell, for date: Date) {
-//        let cellDate = Calendar.current.date(byAdding: .day, value: 1, to: date) ?? date
         let totalExpense = calendarViewModel.totalExpense(date: date)
         if totalExpense > 0 {
-            cell.expenseLabel.text = "\(Int(totalExpense))"
+            let numberFormatter = NumberFormatter()
+            numberFormatter.numberStyle = .decimal
+            numberFormatter.minimumFractionDigits = 0
+            numberFormatter.maximumFractionDigits = 2
+            numberFormatter.usesGroupingSeparator = true
+            
+            let formattedAmount = numberFormatter.string(from: NSNumber(value: totalExpense)) ?? "0"
+            cell.expenseLabel.text = formattedAmount
             cell.expenseLabel.isHidden = false
         } else {
             cell.expenseLabel.text = nil

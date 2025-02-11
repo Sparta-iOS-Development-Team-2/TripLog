@@ -101,12 +101,19 @@ final class CalendarExpenseCell: UITableViewCell {
         
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
+        numberFormatter.minimumFractionDigits = 0
+        numberFormatter.maximumFractionDigits = 2
+        numberFormatter.usesGroupingSeparator = true
         // 변경 예정 model.country -> Symbol
-        foreignAmountLabel.text = "\(model.country) \(Int(model.amount).formatted())"
+        let formattedAmount = numberFormatter.string(from: NSNumber(value: model.amount)) ?? "0"
+        foreignAmountLabel.text = "\(model.country) \(formattedAmount)"
+        
         categoryLabel.text = "\(model.category) / \(model.payment ? "카드" : "현금")"
         
-        // 한화로 변경하는 로직이 필요함 한화 * 환율데이트 수정필요
-        wonAmountLabel.text = "\(Int(model.amount).formatted())원"
+        // calculatedAmount 들어오면 넣을 예정
+        let wonAmount = model.amount * 1000.0 
+        let formattedWonAmount = numberFormatter.string(from: NSNumber(value: wonAmount)) ?? "0"
+        wonAmountLabel.text = "\(formattedWonAmount)원"
     }
     
     /// 셀이 재사용될 때 모든 상태를 초기화
