@@ -20,13 +20,6 @@ final class CashBookListViewController: UIViewController {
     private let viewWillAppearSubject = PublishSubject<Void>()
     private let addButtonTapped = PublishRelay<Void>()
     
-    // 임시 버튼(삭제 예정)
-    private let testButton = UIButton().then {
-        $0.setTitle("버튼", for: .normal)
-        $0.backgroundColor = .gray
-        $0.addTarget(self, action: #selector(testButtonTapped(sender:)), for: .touchUpInside)
-    }
-    
     private let titleLabel = UILabel().then {
         $0.text = "나의 가계부"
         $0.font = UIFont.SCDream(size: .title, weight: .bold)
@@ -111,7 +104,6 @@ private extension CashBookListViewController {
             titleLabel,
             listCollectionView,
             addCellView,
-            testButton
         ].forEach { view.addSubview($0) }
         
         // 셀 추가 버튼 그림자 설정
@@ -140,11 +132,6 @@ private extension CashBookListViewController {
             $0.bottom.equalTo(safeArea.snp.bottom)
         }
         
-        testButton.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(50)
-            $0.height.width.equalTo(60)
-            $0.bottom.equalToSuperview().inset(100)
-        }
     }
     
     func bind() {
@@ -285,24 +272,6 @@ private extension CashBookListViewController {
             return section
         }
         return layout
-    }
-    
-    // 임시 버튼으로 popover 생성(삭제예정)
-    @objc func testButtonTapped(sender: UIButton) {
-        // 임시 데이터 값 계산
-        let todayDate = Date()
-        let past = "20250208"
-        guard let currentDateCurrency = Formatter.rateDateValue(past) else { return }
-        let recentRateDate = CalculateDate.testCalculateDate(last: currentDateCurrency)
-        
-        // popover 생성
-        PopoverManager.showPopover(on: self,
-                                   from: sender,
-                                   title: "현재의 환율은 \(recentRateDate) 환율입니다.",
-                                   subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
-                                   width: 170,
-                                   height: 60,
-                                   arrow: .down)
     }
     
 }
