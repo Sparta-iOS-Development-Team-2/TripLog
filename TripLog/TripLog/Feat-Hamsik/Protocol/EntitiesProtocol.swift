@@ -21,5 +21,5 @@ protocol CoreDataManagable: NSManagedObject {
     // 엔티티별 업데이트 로직
     static func update(data: Model, entityID: UUID, context: NSManagedObjectContext)
     // 엔티티별 삭제 로직
-    static func delete(entityID: UUID, context: NSManagedObjectContext)
+    static func delete(entityID: UUID?, context: NSManagedObjectContext)
 }

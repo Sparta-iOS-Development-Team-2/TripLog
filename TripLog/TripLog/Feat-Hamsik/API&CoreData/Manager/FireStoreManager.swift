@@ -20,12 +20,14 @@ class FireStoreManager {
     
     /// 환율정보 생성(API 요청)
     /// - Parameter date: API에 요청할 환율 날짜
-    func generateCurrencyRate(date: String) {
+    func generateCurrencyRate(date: String, closure: (() ->Void)? = nil ) {
         
         APIManager.shared.fetchCurrencyRatesWithAlamofire(dataType: APIInfo.exchangeRate, date: date) { result in
             switch result {
             case .success(let currencyRates):
                 self.saveCurrencyToFirestore(data: currencyRates, date: date)
+                // 비동기적 진행을 위한 클로져
+                closure?()
             case .failure(let error):
                 print("Alamofire 통신 실패: \(error.localizedDescription)")
             }
@@ -37,12 +39,11 @@ class FireStoreManager {
     ///   - data: 저장할 환율 정보
     ///   - date: 저장할 환율 날짜(= 문서이름)
     private func saveCurrencyToFirestore(data: CurrencyRate, date: String = "20250101") {
-        let db = Firestore.firestore()
-        let dbRef = db.collection("Currency")
+        let dbRef = db.collection(config.collectionName)
         do {
             let encodedData: Data = try JSONEncoder().encode(data)
             if let jsonString = String(data: encodedData, encoding: .utf8) {
-                let dataToStore: [String: Any] = ["CurrencyRate": jsonString]
+                let dataToStore: [String: Any] = [config.documentData : jsonString]
                 
                 dbRef.document(date).setData(dataToStore) { error in
                     if let error = error {
@@ -62,14 +63,13 @@ class FireStoreManager {
     ///   - date: 조회할 환율 날짜(= 문서이름)
     func getStoreCurrencyRate(date: String, completion: @escaping (CurrencyRate) -> Void) {
         Task {
-            let db = Firestore.firestore()
-            let docRef = db.collection("Currency").document(date)
+            let docRef = db.collection(config.collectionName).document(date)
             
             do {
                 // Firestore의 모든 문서 가져오기
                 let document = try await docRef.getDocument()
                 
-                if let data = document.data(), let currencyRate = data["CurrencyRate"] as? String {
+                if let data = document.data(), let currencyRate = data[config.documentData] as? String {
                     // JSON 문자열을 Data 타입으로 변환
                     guard let jsonData = currencyRate.data(using: .utf8) else {
                         print("JSON 문자열을 Data로 변환하는데 실패")
@@ -94,14 +94,14 @@ class FireStoreManager {
         
     }
     
-    func fetchAllData() async throws -> [CurrencyRateElement] {
-        let snapshot = try await Firestore.firestore().collection(config.collectionName).getDocuments()
-        print("snapShot count : \(snapshot.documents.count)")
+    func fetchAllData() async throws -> CurrencyRate {
+        let allDocuments = try await Firestore.firestore().collection(config.collectionName).getDocuments()
+        print("Firestore Document count : \(allDocuments.documents.count)")
         
-        var decodedRates: [CurrencyRateElement] = []
+        var decodedRates: CurrencyRate = []
         
-        for document in snapshot.documents {
-            if let data = document.data()["CurrencyRate"] as? String {
+        for document in allDocuments.documents {
+            if let data = document.data()[config.documentData] as? String {
                 // JSON 문자열을 Data로 변환
                 guard let jsonData = data.data(using: .utf8) else {
                     print("JSON 문자열을 Data로 변환 실패: \(document.documentID)")

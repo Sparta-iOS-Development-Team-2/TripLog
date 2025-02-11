@@ -153,9 +153,10 @@ extension MyCashBookEntity: CoreDataManagable {
     /// - Parameters:
     ///   - entityID: 삭제할 EntityID
     ///   - context: CoreData 인스턴스
-    static func delete(entityID: UUID, context: NSManagedObjectContext) {
+    static func delete(entityID: UUID?, context: NSManagedObjectContext) {
         let entityName = EntityKeys.Name.MyCashBookEntity.rawValue
         let element = MyCashBookElement()
+        guard let entityID = entityID else { return }
         
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
         fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)
