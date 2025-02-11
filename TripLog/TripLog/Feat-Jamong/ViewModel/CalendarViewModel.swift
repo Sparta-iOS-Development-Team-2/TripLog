@@ -38,16 +38,16 @@ class CalendarViewModel: ViewModelType {
     
     // 가계부 ID 저장
     let cashBookID: UUID
-    let balance: Int
+    private let balance: Int
     
     // 지출 데이터를 저장
     private let expenseRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
     
     // 선택 날짜의 지출 데이터를 저장
-    let selectedDateData = PublishRelay<([MockMyCashBookModel], Date)>()
+    private let selectedDateData = PublishRelay<([MockMyCashBookModel], Date)>()
     
     // 셀 데이트 저장
-    private var selecetedDate = Date()
+    var selectedDate = Date()
     
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
@@ -92,7 +92,7 @@ class CalendarViewModel: ViewModelType {
         input.addButtonTapped
             .withUnretained(self)
             .map { owner, _ -> Date in
-                owner.selecetedDate
+                owner.selectedDate
             }
             .asSignal(onErrorSignalWith: .empty())
             .emit { [weak self] date in
@@ -103,8 +103,7 @@ class CalendarViewModel: ViewModelType {
         input.didSelected
             .withUnretained(self)
             .map { owner, date -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
-//                let currentDate = Calendar.current.date(byAdding: .day, value: -1, to: date)
-                owner.selecetedDate = date
+                owner.selectedDate = date
                 return (date, owner.expensesForDate(date: date), owner.balance)
             }
             .asDriver(onErrorDriveWith: .empty())
@@ -116,7 +115,7 @@ class CalendarViewModel: ViewModelType {
         expenseRelay
             .withUnretained(self)
             .map { owner, _ -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
-                return (owner.selecetedDate, owner.expensesForDate(date: owner.selecetedDate), owner.balance)
+                return (owner.selectedDate, owner.expensesForDate(date: owner.selectedDate), owner.balance)
             }
             .asDriver(onErrorDriveWith: .empty())
             .drive{ [weak self] data in
@@ -139,41 +138,35 @@ class CalendarViewModel: ViewModelType {
             predicate: cashBookID
         )
         
-        // amount외 원화 객체 수정예정
-        let models = expenses.map { entity -> MockMyCashBookModel in
+        let models = expenses.compactMap { entity -> MockMyCashBookModel? in
+            guard let entityID = entity.cashBookID,
+                  entityID == self.cashBookID else { return nil }
+            
             return MockMyCashBookModel(
                 amount: entity.amount,
                 cashBookID: entity.cashBookID ?? self.cashBookID,
                 category: entity.category ?? "",
                 country: entity.country ?? "",
-                expenseDate: entity.expenseDate ?? self.selecetedDate,
+                expenseDate: entity.expenseDate ?? self.selectedDate,
+                id: entity.id ?? UUID(), // ID도 명시적으로 설정
                 note: entity.note ?? "",
                 payment: entity.payment
             )
         }
         
-        expenseRelay.accept(models)
-      
-    }
-    
-    /// 새로운 지출 데이터를 추가하는 메서드
-    /// - Parameter expense: 추가할 지출 데이터 모델
-    func addExpense(_ expense: MockMyCashBookModel) {
-        let newExpense = MockMyCashBookModel(
-            amount: expense.amount,
-            cashBookID: expense.cashBookID,
-            category: expense.category,
-            country: expense.country,
-            expenseDate: expense.expenseDate, // 모달에서 전달받은 날짜 사용
-            note: expense.note,
-            payment: expense.payment
-        )
-        
-        CoreDataManager.shared.save(
-            type: MyCashBookEntity.self,
-            data: newExpense
-        )
-        loadExpenseData()  // 데이터를 다시 로드하여 UI 업데이트
+        DispatchQueue.main.async { [weak self] in
+            self?.expenseRelay.accept(models)
+            
+            // 현재 선택된 날짜의 데이터도 업데이트
+            if let self = self {
+                let currentData = (
+                    self.selectedDate,
+                    self.expensesForDate(date: self.selectedDate),
+                    self.balance
+                )
+                self.expensesData.accept(currentData)
+            }
+        }
     }
     
     /// 기존 지출 데이터를 수정하는 메서드
@@ -184,6 +177,7 @@ class CalendarViewModel: ViewModelType {
             entityID: expense.id,
             data: expense
         )
+        debugPrint("수정 완료")
         loadExpenseData()
     }
     
@@ -194,6 +188,7 @@ class CalendarViewModel: ViewModelType {
             type: MyCashBookEntity.self,
             entityID: id
         )
+        debugPrint("삭제 완료")
         loadExpenseData()
     }
     

@@ -101,6 +101,8 @@ final class CalendarViewController: UIViewController {
     // MARK: - Setup
     /// UI 컴포넌트들의 초기 설정을 담당하는 메서드
     private func setupUI() {
+        expenseListView.tableView.delegate = self
+        
         configureBaseView()
         configureScrollView()
         configureCalendarContainer()
@@ -151,9 +153,6 @@ final class CalendarViewController: UIViewController {
     /// 지출 목록 뷰 설정
     private func configureExpenseListView() {
         contentStackView.addArrangedSubview(expenseListView)
-        expenseListView.snp.makeConstraints {
-            $0.height.equalTo(300)
-        }
     }
     
     // MARK: - Calendar Setup
@@ -303,5 +302,60 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     ///   - monthPosition: 선택된 날짜의 월 내 위치
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         self.selectedDate.accept(date)
+    }
+}
+
+extension CalendarViewController: UITableViewDelegate {
+    /// 스와이프로 삭제 기능 추가
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] (_, _, completion) in
+            guard let self = self else { return }
+            
+            let expenses = self.calendarViewModel.expensesForDate(date: self.calendarViewModel.selectedDate)
+            let expense = expenses[indexPath.row]
+            
+            let alert = AlertManager(
+                title: "경고",
+                message: "해당 지출내역을 삭제하시겠습니까?",
+                cancelTitle: "취소",
+                destructiveTitle: "삭제"
+            ) {
+                self.calendarViewModel.deleteExpense(id: expense.id)
+            }
+            
+            alert.showAlert(on: self, .alert)
+            completion(true)
+        }
+        
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
+    /// 셀 선택 시 수정 모달 표시
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let expenses = calendarViewModel.expensesForDate(date: calendarViewModel.selectedDate)
+        let expense = expenses[indexPath.row]
+        let originalID = expense.id  // 원본 ID 저장 (안하면.. 저장이안됌)
+        let currencyRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: expenses)
+        
+        ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: [])) // 환율 정보 추출 PR 머지되면 연결
+            .compactMap { $0 as? MockMyCashBookModel }
+            .map { updatedExpense in
+                MockMyCashBookModel(
+                    amount: updatedExpense.amount,
+                    cashBookID: updatedExpense.cashBookID,
+                    category: updatedExpense.category,
+                    country: updatedExpense.country,
+                    expenseDate: updatedExpense.expenseDate,
+                    id: originalID,
+                    note: updatedExpense.note,
+                    payment: updatedExpense.payment
+                )
+            }
+            .subscribe(onNext: { [weak self] updatedExpense in
+                self?.calendarViewModel.updateExpense(updatedExpense)
+            })
+            .disposed(by: disposeBag)
+        
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
