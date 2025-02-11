@@ -150,12 +150,14 @@ final class CalendarExpenseListHeaderView: UIView {
         }
     }
     
-    func configure(date: Date, expense: Int, balance: Int) {
+    func configure(date: Date, expense: Double, balance: Double) {
         let formatter = DateFormatter()
         formatter.dateFormat = "M월 d일 지출"
         
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
+        numberFormatter.minimumFractionDigits = 0
+        numberFormatter.maximumFractionDigits = 2
         numberFormatter.usesGroupingSeparator = true
         
         let formattedExpense = numberFormatter.string(from: NSNumber(value: expense)) ?? "0"

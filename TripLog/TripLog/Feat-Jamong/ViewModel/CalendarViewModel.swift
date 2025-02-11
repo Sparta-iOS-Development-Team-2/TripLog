@@ -29,7 +29,7 @@ class CalendarViewModel: ViewModelType {
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
-        let expenses: BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Int)>
+        let expenses: BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Double)>
         let addButtonTapped: PublishRelay<Date>
     }
     
@@ -52,7 +52,7 @@ class CalendarViewModel: ViewModelType {
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
     private let addButtonTapped = PublishRelay<Date>()
-    private let expensesData = BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Int)>(value: (Date(), [], 0))
+    private let expensesData = BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Double)>(value: (Date(), [], 0))
     
     
     // MARK: - Initalization
@@ -102,9 +102,10 @@ class CalendarViewModel: ViewModelType {
         
         input.didSelected
             .withUnretained(self)
-            .map { owner, date -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
+            .map { owner, date -> (date: Date, data: [MockMyCashBookModel], balance: Double) in
                 owner.selectedDate = date
-                return (date, owner.expensesForDate(date: date), owner.balance)
+                let remainingBudget = owner.calculateRemainingBudget(upTo: date)
+                return (date, owner.expensesForDate(date: date), remainingBudget)
             }
             .asDriver(onErrorDriveWith: .empty())
             .drive{ [weak self] data in
@@ -114,8 +115,9 @@ class CalendarViewModel: ViewModelType {
         
         expenseRelay
             .withUnretained(self)
-            .map { owner, _ -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
-                return (owner.selectedDate, owner.expensesForDate(date: owner.selectedDate), owner.balance)
+            .map { owner, _ -> (date: Date, data: [MockMyCashBookModel], balance: Double) in
+                let remainingBudget = owner.calculateRemainingBudget(upTo: owner.selectedDate)
+                return (owner.selectedDate, owner.expensesForDate(date: owner.selectedDate), remainingBudget)
             }
             .asDriver(onErrorDriveWith: .empty())
             .drive{ [weak self] data in
@@ -159,10 +161,11 @@ class CalendarViewModel: ViewModelType {
             
             // 현재 선택된 날짜의 데이터도 업데이트
             if let self = self {
+                let remainingBudget = self.calculateRemainingBudget(upTo: self.selectedDate)
                 let currentData = (
                     self.selectedDate,
                     self.expensesForDate(date: self.selectedDate),
-                    self.balance
+                    remainingBudget
                 )
                 self.expensesData.accept(currentData)
             }
@@ -222,5 +225,19 @@ class CalendarViewModel: ViewModelType {
     func totalExpense(date: Date) -> Double {
         let dailyExpenses = expensesForDate(date: date)
         return dailyExpenses.reduce(0) { $0 + $1.amount }
+    }
+    
+    /// 특정 날짜까지의 예산 잔액을 계산하는 메서드
+    /// - Parameter date: 계산할 기준 날짜
+    /// - Returns: 해당 날짜까지의 예산 잔액
+    func calculateRemainingBudget(upTo date: Date) -> Double {
+        // 해당 날짜까지의 모든 지출 필터링
+        let allExpenses = expenseRelay.value.filter { expense in
+            expense.expenseDate <= date
+        }
+        // 총 지출 계산
+        let totalExpense = Double(allExpenses.reduce(0.0) { $0 + $1.amount })
+        // 초기 예산에서 총 지출을 빼서 잔액 계산
+        return Double(balance) - totalExpense
     }
 }

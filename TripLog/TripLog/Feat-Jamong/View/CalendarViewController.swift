@@ -102,7 +102,6 @@ final class CalendarViewController: UIViewController {
     /// UI 컴포넌트들의 초기 설정을 담당하는 메서드
     private func setupUI() {
         expenseListView.tableView.delegate = self
-        
         configureBaseView()
         configureScrollView()
         configureCalendarContainer()
@@ -335,7 +334,6 @@ extension CalendarViewController: UITableViewDelegate {
         let expenses = calendarViewModel.expensesForDate(date: calendarViewModel.selectedDate)
         let expense = expenses[indexPath.row]
         let originalID = expense.id  // 원본 ID 저장 (안하면.. 저장이안됌)
-        let currencyRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: expenses)
         
         ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: [])) // 환율 정보 추출 PR 머지되면 연결
             .compactMap { $0 as? MockMyCashBookModel }
