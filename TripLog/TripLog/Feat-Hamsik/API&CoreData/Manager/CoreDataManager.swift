@@ -55,7 +55,7 @@ class CoreDataManager {
     /// - Parameters:
     ///   - type: 삭제할 Entity의 Type(예: CashBookEntity.self)
     ///   - entityID: 삭제할 Entity의 ID
-    func delete<T: CoreDataManagable>(type: T.Type, entityID: UUID) {
+    func delete<T: CoreDataManagable>(type: T.Type, entityID: UUID? = nil) {
         T.delete(entityID: entityID, context: context)
     }
 }
