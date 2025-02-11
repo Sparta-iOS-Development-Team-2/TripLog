@@ -153,9 +153,17 @@ final class CalendarExpenseListHeaderView: UIView {
     func configure(date: Date, expense: Int, balance: Int) {
         let formatter = DateFormatter()
         formatter.dateFormat = "M월 d일 지출"
+        
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.usesGroupingSeparator = true
+        
+        let formattedExpense = numberFormatter.string(from: NSNumber(value: expense)) ?? "0"
+        let formattedBalance = numberFormatter.string(from: NSNumber(value: balance)) ?? "0"
+        
         dateLabel.text = formatter.string(from: date)
-        expenseAmountLabel.text = "\(expense)원"
-        balanceAmountLabel.text = "\(balance.formatted())원"
+        expenseAmountLabel.text = "\(formattedExpense)원"
+        balanceAmountLabel.text = "\(formattedBalance)원"
     }
 }
 
