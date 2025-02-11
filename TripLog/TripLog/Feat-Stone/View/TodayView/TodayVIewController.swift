@@ -27,11 +27,16 @@ class TodayViewController: UIViewController {
     }
         
     // 도움말 버튼
+    // 도움말 버튼 (원형으로 만들기)
     private let helpButton = UIButton(type: .system).then {
         $0.setTitle("?", for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        $0.applyBackgroundColor()
+        $0.clipsToBounds = true
+        $0.applyFloatingButtonShadow()
+        $0.applyCornerRadius(20)
     }
-        
+
     // "오늘 사용 금액" 라벨
     private let totalLabel = UILabel().then {
         $0.text = "오늘 사용 금액"
@@ -132,6 +137,11 @@ class TodayViewController: UIViewController {
     
     // 🔹 UI 레이아웃 설정
     private func setupConstraints() {
+        
+        helpButton.snp.makeConstraints {
+            $0.width.height.equalTo(40) // 버튼 크기를 40x40으로 고정
+        }
+        
         topStackView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
             $0.leading.trailing.equalToSuperview().inset(16)
@@ -146,7 +156,7 @@ class TodayViewController: UIViewController {
         floatingButton.snp.makeConstraints {
             $0.width.height.equalTo(64)
             $0.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(32)
         }
     }
     
@@ -186,8 +196,8 @@ class TodayViewController: UIViewController {
                     date: "오늘",
                     title: expense.note,
                     category: expense.category,
-                    amount: "\(CurrencyFormatter.formattedCurrency(from: Int(expense.amount), currencyCode: expense.country))",
-                    exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4)))",
+                    amount: "\(CurrencyFormatter.formattedCurrency(from: expense.amount, currencyCode: expense.country))",
+                    exchangeRate: "\(NumberFormatter.formattedString(from: Double(expense.caculatedAmount))) 원",
                     payment: expense.payment
                 )
             }
@@ -204,14 +214,21 @@ class TodayViewController: UIViewController {
         // 🔹 **필터링된 데이터에서 총합 계산**
         totalExpensesByID
             .map { expenses -> String in
-                let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
-                let formattedTotal = "\(NumberFormatter.wonFormat(totalExchangeRate))"
+                let totalExchangeRate = expenses.map { Int($0.amount) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
+                let formattedTotal = NumberFormatter.formattedString(from: Double(totalExchangeRate)) + " 원"
                 print("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
+                
+                // ✅ 개별 expense에도 반영 (exchangeRate 업데이트)
+//                expenses.forEach { expense in
+//                    expense. = formattedTotal
+//                }
+                
                 return formattedTotal
             }
             .startWith("0 원") // ✅ 첫 화면 로딩 시 기본 값 설정
             .drive(formattedTotalRelay) // ✅ `formattedTotalRelay`에 값 전달
             .disposed(by: disposeBag)
+
 
         // ✅ `totalAmountLabel`에 바인딩하여 UI 반영
         formattedTotalRelay
@@ -255,6 +272,18 @@ class TodayViewController: UIViewController {
     }
                            
     @objc private func presentExpenseAddModal() {
+        
+        // 오늘 날짜를 "YYYYMMDD" 형식의 문자열로 변환
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        let todayString = dateFormatter.string(from: Date())
+
+        // CoreData에서 오늘 날짜에 해당하는 데이터 가져오기
+        let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
+        print("ddddddddddd\(exchangeRate)")
+//        print("DDDDDDDDD\(exchangeRate.baseRate)")
+
+        
         ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: self.cashBookID, date: Date(), exchangeRate: [])))
             .asSignal(onErrorSignalWith: .empty())
             .emit(onNext: { [weak self] data in
@@ -272,6 +301,7 @@ class TodayViewController: UIViewController {
                     self.viewModel.output.expenses
                         .drive(onNext: { fetchedExpenses in
                             print("📌 🔥 fetchTrigger 실행 후 expenses 업데이트됨: \(fetchedExpenses.count)개 항목")
+                            print("ee\(exchangeRate)")
                         })
                         .disposed(by: self.disposeBag)
 
@@ -317,11 +347,20 @@ class TodayViewController: UIViewController {
 
 }
 
-// 천 단위 숫자 포맷 변환
+// 🔹 천 단위 숫자 포맷 변환 (소수점 유지)
 extension NumberFormatter {
-    static func formattedString(from number: Int) -> String {
+    static func formattedString(from number: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
+
+        // ✅ 정수라면 소수점 제거, 소수점이 있으면 최대 2자리 표시
+        if number.truncatingRemainder(dividingBy: 1) == 0 {
+            formatter.maximumFractionDigits = 0  // 정수일 때 소수점 제거
+        } else {
+            formatter.minimumFractionDigits = 2  // 소수점이 있을 때 최소 2자리
+            formatter.maximumFractionDigits = 2  // 소수점 2자리까지 표시
+        }
+
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
 }

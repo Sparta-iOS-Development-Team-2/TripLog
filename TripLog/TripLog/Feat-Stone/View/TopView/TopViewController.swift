@@ -34,6 +34,7 @@ class TopViewController: UIViewController {
         self.viewModel = TopViewModel(cashBook: cashBook)
         self.todayViewController = TodayViewController(cashBookID: cashBook.id)
         self.calendarViewController = CalendarViewController(cashBook: cashBook.id)
+//        self.calendarViewController = CalendarViewController(cashBook: cashBook.id, date: cashBook.date)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -82,7 +83,7 @@ class TopViewController: UIViewController {
         tripSummaryView.configure(
             subtitle: cashBook.note,
             date: "\(cashBook.departure.formattedDate()) - \(cashBook.homecoming.formattedDate())",
-            budget: "\(NumberFormatter.formattedString(from: cashBook.budget))",
+            budget: "\(NumberFormatter.formattedString(from: Double(cashBook.budget)))",
             todayVC: todayViewController
         )
     }
