@@ -14,6 +14,8 @@ import RxCocoa
 /// 모달뷰에서 금액을 입력하는 공용 컴포넌츠
 final class ModalAmountView: UIView {
     
+    private let disposeBag = DisposeBag()
+    
     // MARK: - UI Components
     
     private let title = UILabel().then {
@@ -47,7 +49,7 @@ final class ModalAmountView: UIView {
         $0.rightView = UIView(frame: .init(x: 0, y: 0, width: 12, height: 12))
         $0.rightViewMode = .always
         $0.autocapitalizationType = .none
-        $0.keyboardType = .numberPad
+        $0.keyboardType = .decimalPad
     }
     
     // MARK: - Initializer
@@ -109,6 +111,7 @@ private extension ModalAmountView {
         configureSelf()
         setupLayout()
         configureMenuForButton()
+        bind()
     }
     
     func configureSelf() {
@@ -157,13 +160,28 @@ private extension ModalAmountView {
         }
     }
     
+    func bind() {
+        textField.rx.text.orEmpty
+            .map { self.filterInput($0) } // 입력값 필터링
+            .bind(to: textField.rx.text) // 필터링된 값 적용
+            .disposed(by: disposeBag)
+    }
+    
+    func filterInput(_ input: String) -> String {
+        let components = input.components(separatedBy: ".")
+        if components.count > 2 {
+            return components.dropLast().joined(separator: ".") // 마지막 `.` 제거
+        }
+        return input
+    }
+    
 }
 
 extension Reactive where Base: ModalAmountView {
     /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
     var amountViewIsBlank: Observable<Bool> {
         return base.textField.rx.text.orEmpty
-            .map { $0.isEmpty }
+            .map { Double($0) == nil }
             .distinctUntilChanged()
             .asObservable()
     }
