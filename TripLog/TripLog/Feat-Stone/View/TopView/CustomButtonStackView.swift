@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CustomButtonStackView: UIStackView {
+class TopCustomButtonStackView: UIStackView {
 
     private let todayExpenseButton = UIButton(type: .system)
     private let calendarButton = UIButton(type: .system)

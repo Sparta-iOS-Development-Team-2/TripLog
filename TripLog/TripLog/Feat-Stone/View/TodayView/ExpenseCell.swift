@@ -83,14 +83,14 @@ class ExpenseCell: UITableViewCell {
         }
 
         firstRowStackView.snp.makeConstraints {
-            $0.top.equalTo(dateLabel.snp.bottom)
+            $0.top.equalTo(dateLabel.snp.bottom).offset(8) // ✅ 여백 추가
             $0.leading.trailing.equalToSuperview().inset(16)
         }
 
         secondRowStackView.snp.makeConstraints {
-            $0.top.equalTo(firstRowStackView.snp.bottom)
+            $0.top.equalTo(firstRowStackView.snp.bottom).offset(8) // ✅ 여백 추가
             $0.leading.trailing.equalToSuperview().inset(16)
-            $0.bottom.equalToSuperview().offset(-16)
+            $0.bottom.equalToSuperview().offset(-16).priority(.low) // ✅ 충돌 방지
         }
     }
 

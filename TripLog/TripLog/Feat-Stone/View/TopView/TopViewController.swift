@@ -6,19 +6,20 @@ import RxCocoa
 import RxDataSources
 
 class TopViewController: UIViewController {
-
+    
     private let viewModel: TopViewModel
     private let disposeBag = DisposeBag()
-
+    
     private let todayViewController: TodayViewController
     private let calendarViewController: CalendarViewController
-
+    
     private lazy var switcherView: TripSwitcherView = {
         return TripSwitcherView(todayView: todayViewController.view, calendarView: calendarViewController.view)
     }()
-
-    private lazy var tripSummaryView = TripLogNewView(switcherView: switcherView)
-
+    
+    /// ✅ 여행 요약 정보를 포함하는 상단 뷰
+    private lazy var tripSummaryView = TripLogSummaryView(switcherView: switcherView)
+    
     private lazy var tableView = UITableView().then {
         $0.separatorStyle = .none
         $0.showsVerticalScrollIndicator = false
@@ -26,27 +27,25 @@ class TopViewController: UIViewController {
         $0.isScrollEnabled = false
         $0.alwaysBounceVertical = false
         $0.rowHeight = self.view.bounds.height
-//        $0.backgroundColor = UIColor.CustomColors.Background.detailBackground
-        $0.applyBackgroundColor()
+        $0.backgroundColor = UIColor.CustomColors.Background.detailBackground
     }
-
+    
     init(cashBook: MockCashBookModel) {
         self.viewModel = TopViewModel(cashBook: cashBook)
         self.todayViewController = TodayViewController(cashBookID: cashBook.id)
-        self.calendarViewController = CalendarViewController(cashBook: cashBook.id) // ✅ cashBook.id 전달
+        self.calendarViewController = CalendarViewController(cashBook: cashBook.id)
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: true)
-        navigationController?.navigationBar.isHidden = false
-    }
-
+            super.viewWillAppear(animated)
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            navigationController?.navigationBar.isHidden = false
+        }
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -55,69 +54,148 @@ class TopViewController: UIViewController {
         setupUI()
         setupTableView()
         setupTripSummary()
-        
         setupLayout()
     }
     
     private func setupLayout() {
         view.addSubview(tripSummaryView)
-
+        
         tripSummaryView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top) // ✅ safeArea의 상단 맞추기
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom) // ✅ safeArea의 하단까지 확장
+        }
+        
+        view.addSubview(tableView)
+        
+        tableView.snp.makeConstraints {
+            $0.top.equalTo(tripSummaryView.snp.bottom)
+            $0.leading.trailing.bottom.equalToSuperview()
         }
     }
-
+    
     private func setupUI() {
-        view.applyBackgroundColor()
-        
-        navigationController?.navigationBar.isHidden = false
-
+        guard let cashBook = viewModel.sections.value.first?.items.first else { return }
+        self.navigationItem.title = viewModel.sections.value.first?.items.first?.tripName ?? "여행"
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.SCDream(size: .title, weight: .bold)
         ]
-        self.navigationItem.title = viewModel.sections.value.first?.items.first?.tripName ?? "여행"
-    }
-
-    private func setupTableView() {
-        view.addSubview(tableView)
-
-        tableView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
-        tableView.tableHeaderView = tripSummaryView
-        
-//        DispatchQueue.main.asyncAfter(deadline: .now()+0.1){
-//            let initialTotalExpense = self.todayViewController.viewModel.totalExpenseRelay.value
-//        }
-    }
-
-    private func setupTripSummary() {
-        guard let cashBook = viewModel.sections.value.first?.items.first else { return }
-
         tripSummaryView.configure(
             subtitle: cashBook.note,
             date: "\(cashBook.departure.formattedDate()) - \(cashBook.homecoming.formattedDate())",
-            budget: "\(NumberFormatter.formattedString(from: cashBook.budget)) 원",
+            budget: "\(NumberFormatter.formattedString(from: cashBook.budget))",
             todayVC: todayViewController
         )
-
+    }
+    
+    private func setupTableView() {
+        tableView.tableHeaderView = tripSummaryView
+        
         let headerSize = tripSummaryView.systemLayoutSizeFitting(
             CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height)
         )
         tripSummaryView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: headerSize.height)
-
-        tableView.tableHeaderView = tripSummaryView
-        
+    }
+    
+    private func setupTripSummary() {
         bindFormattedTotal()
     }
     
     private func bindFormattedTotal() {
         todayViewController.formattedTotalRelay
-            .bind(to: tripSummaryView.progressView.expense) // ✅ `TopProgressView`에 값 전달
+            .bind(to: tripSummaryView.progressView.expense)
             .disposed(by: disposeBag)
+    }
+}
+
+/// 🔹 여행 요약 정보를 표시하는 뷰 (타이틀, 날짜, 예산, 진행 상태, 버튼 포함)
+final class TripLogSummaryView: UIView {
+    
+    private let disposeBag = DisposeBag()
+    
+    private let switcherView: TripSwitcherView
+    
+    /// 🔹 `titleDateView`, `progressView`, `buttonStackView`를 감싸는 컨테이너 뷰
+    private let tripSummaryContainerView = UIView()
+    
+    private let titleDateView = TitleDateView()
+    let progressView = TopProgressView()
+    private let buttonStackView = TopCustomButtonStackView()
+    
+    /// ✅ `TripSwitcherView`를 인자로 받아 초기화
+    init(switcherView: TripSwitcherView) {
+        self.switcherView = switcherView
+        super.init(frame: .zero)
+        setupLayout()
+        setupButtonActions()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    /// ✅ 여행 정보를 설정하는 메서드
+    func configure(subtitle: String, date: String, budget: String, todayVC: TodayViewController) {
+        titleDateView.configure(subtitle: subtitle, date: date)
+        bindToProgressView(todayVC: todayVC, budget: budget)
+    }
+    
+    /// ✅ ProgressView와 TodayViewController 연결
+    private func bindToProgressView(todayVC: TodayViewController, budget: String) {
+        progressView.setBudget(budget)
+        
+        todayVC.onTotalAmountUpdated = { [weak self] totalAmount in
+            self?.progressView.expense.accept(totalAmount)
+        }
+    }
+    
+    private func setupLayout() {
+        tripSummaryContainerView.backgroundColor = UIColor.CustomColors.Background.background
+        addSubview(tripSummaryContainerView)
+        addSubview(switcherView)
+        
+        /// ✅ tripSummaryContainerView 내부에 `titleDateView`, `progressView`, `buttonStackView` 추가
+        [titleDateView, progressView, buttonStackView].forEach { tripSummaryContainerView.addSubview($0) }
+        
+        /// ✅ `tripSummaryContainerView` 레이아웃 설정
+        tripSummaryContainerView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(4)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(buttonStackView.snp.bottom)
+        }
+        
+        titleDateView.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview().inset(16)
+        }
+        
+        progressView.snp.makeConstraints {
+            $0.top.equalTo(titleDateView.snp.bottom).offset(16)
+            $0.leading.trailing.equalToSuperview().inset(16)
+        }
+        
+        buttonStackView.snp.makeConstraints {
+            $0.top.equalTo(progressView.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview().inset(-1)
+            $0.height.equalTo(50)
+            $0.bottom.equalToSuperview()
+        }
+        
+        switcherView.snp.makeConstraints {
+            $0.top.equalTo(tripSummaryContainerView.snp.bottom)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+    }
+    
+    /// ✅ 버튼 클릭 시 `TripSwitcherView`의 뷰 변경
+    private func setupButtonActions() {
+        buttonStackView.setButtonActions(
+            todayAction: { [weak self] in
+                self?.switcherView.showTodayView()
+            },
+            calendarAction: { [weak self] in
+                self?.switcherView.showCalendarView()
+            }
+        )
     }
 }
 
@@ -125,16 +203,15 @@ extension String {
     /// `yyyyMMdd` 형식의 문자열을 `yyyy.MM.dd` 형식으로 변환
     func formattedDate() -> String {
         let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyyMMdd" // 기존 형식 (예: 20250220)
-        inputFormatter.locale = Locale(identifier: "ko_KR") // 한국 시간 기준
+        inputFormatter.dateFormat = "yyyyMMdd"
+        inputFormatter.locale = Locale(identifier: "ko_KR")
         
         let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "yyyy.MM.dd" // 변경할 형식
+        outputFormatter.dateFormat = "yyyy.MM.dd"
         
         if let date = inputFormatter.date(from: self) {
             return outputFormatter.string(from: date)
         }
-        return self // 변환 실패 시 원본 반환
+        return self
     }
 }
-

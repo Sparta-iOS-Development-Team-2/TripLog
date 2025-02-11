@@ -187,7 +187,7 @@ class TodayViewController: UIViewController {
                     title: expense.note,
                     category: expense.category,
                     amount: "\(CurrencyFormatter.formattedCurrency(from: Int(expense.amount), currencyCode: expense.country))",
-                    exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4))) 원",
+                    exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4)))",
                     payment: expense.payment
                 )
             }
@@ -205,7 +205,7 @@ class TodayViewController: UIViewController {
         totalExpensesByID
             .map { expenses -> String in
                 let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
-                let formattedTotal = "\(NumberFormatter.wonFormat(totalExchangeRate)) 원"
+                let formattedTotal = "\(NumberFormatter.wonFormat(totalExchangeRate))"
                 print("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
                 return formattedTotal
             }
