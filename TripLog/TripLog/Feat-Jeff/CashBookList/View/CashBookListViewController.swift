@@ -167,13 +167,14 @@ private extension CashBookListViewController {
             .disposed(by: disposeBag)
         
         output.showAddListModal
+            .flatMap {
+                return ModalViewManager.showModal(state: .createNewCashBook)
+                    .compactMap { $0 as? MockCashBookModel }
+            }
             .asSignal(onErrorSignalWith: .empty())
-            .withUnretained(self)
-            .emit(onNext: { owner, _ in
-                // TODO: 모달뷰 로직 추후 수정 요청(재훈)
-//                ModalViewManager.showModal(on: owner, state: .createNewCashBook)
-            })
-            .disposed(by: disposeBag)
+            .emit { data in
+                CoreDataManager.shared.save(type: CashBookEntity.self, data: data)
+            }.disposed(by: disposeBag)
         
         output.addCellViewHidden
             .drive(onNext: { [weak self] alpha in
@@ -258,14 +259,21 @@ private extension CashBookListViewController {
             
             // 셀 수정 기능
             configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
-                let editAction = UIContextualAction(style: .normal, title: "수정") { _, _, completion in
+                let editAction = UIContextualAction(style: .normal, title: "수정") { [self] _, _, completion in
                     
                     guard let data = try? self.dataSource.model(at: indexPath) as? MockCashBookModel else {
                         completion(false)
                         return
                     }
                     
-//                    ModalViewManager.showModal(on: self, state: .editCashBook(data: data))
+                    // CoreData에 수정한 데이터 업데이트
+                    ModalViewManager.showModal(state: .editCashBook(data: data))
+                        .compactMap { $0 as? MockCashBookModel }
+                        .asSignal(onErrorSignalWith: .empty())
+                        .emit { data in
+                            CoreDataManager.shared.update(type: CashBookEntity.self, entityID: data.id, data: data)
+                        }.disposed(by: disposeBag)
+                    
                     completion(true)
                 }
                 return UISwipeActionsConfiguration(actions: [editAction])
@@ -279,7 +287,6 @@ private extension CashBookListViewController {
         return layout
     }
     
-    
     // 임시 버튼으로 popover 생성(삭제예정)
     @objc func testButtonTapped(sender: UIButton) {
         // 임시 데이터 값 계산
@@ -287,7 +294,6 @@ private extension CashBookListViewController {
         let past = "20250208"
         guard let currentDateCurrency = Formatter.rateDateValue(past) else { return }
         let recentRateDate = CalculateDate.testCalculateDate(last: currentDateCurrency)
-        
         
         // popover 생성
         PopoverManager.showPopover(on: self,
@@ -298,6 +304,7 @@ private extension CashBookListViewController {
                                    height: 60,
                                    arrow: .down)
     }
+    
 }
 
 extension CashBookListViewController: UIPopoverPresentationControllerDelegate {

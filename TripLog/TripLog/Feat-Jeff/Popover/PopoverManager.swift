@@ -20,7 +20,7 @@ final class PopoverManager: NSObject {
         self.width = width
         self.height = height
     }
-   
+    
     /// popover 사용는 메서드
     /// Parameters:
     ///  - on : 사용할 해당 뷰컨트롤러

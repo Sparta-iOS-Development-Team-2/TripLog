@@ -128,7 +128,6 @@ private extension CustomTabBarController {
             .disposed(by: disposeBag)
         
         // 탭바의 추가하기 버튼 바인딩
-        // TODO: 데이터 임의 바인딩, 추후 수정 요청(재훈)
         customTabBar.tabBarAddButtonTapped
             .flatMap {
                 return ModalViewManager.showModal(state: .createNewCashBook)

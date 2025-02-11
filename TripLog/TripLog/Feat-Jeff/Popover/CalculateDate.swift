@@ -37,7 +37,7 @@ struct CalculateDate {
     /// 임시 날짜 계산 함수(삭제 예정)
     static func testCalculateDate(last: Date) -> String {
         let calendar = Calendar.current
-                
+        
         guard let calculateDate = calendar.dateComponents([.day], from: last, to: Date()).day
         else {
             return "Error"
