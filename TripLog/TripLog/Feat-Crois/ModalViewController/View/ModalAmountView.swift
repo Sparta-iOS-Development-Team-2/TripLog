@@ -179,7 +179,7 @@ private extension ModalAmountView {
 
 extension Reactive where Base: ModalAmountView {
     /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
-    var amountViewIsBlank: Observable<Bool> {
+    var amountViewIsEmpty: Observable<Bool> {
         return base.textField.rx.text.orEmpty
             .map { Double($0) == nil }
             .distinctUntilChanged()

@@ -85,7 +85,7 @@ private extension ModalViewController {
             cancelButtonTapped: self.modalView.rx.cancelButtonTapped,
             cashBookActiveButtonTapped: self.modalView.rx.cashBookActiveButtonTapped,
             consumptionActiveButtonTapped: self.modalView.rx.consumptionActiveButtonTapped,
-            sectionIsBlank: self.modalView.rx.checkBlankOfSections
+            sectionIsEmpty: self.modalView.rx.checkBlankOfSections
         )
         
         let output = viewModel.transform(input: input)
