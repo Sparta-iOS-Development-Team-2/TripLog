@@ -98,14 +98,16 @@ class TodayViewModel {
         deleteExpenseTrigger
             .subscribe(onNext: { [weak self] index in
                 guard let self = self else { return }
+
+                // ✅ 현재 데이터 배열에서 인덱스로 `UUID` 찾기
                 let currentExpenses = self.expensesRelay.value
-                guard index < currentExpenses.count else { return }
-                    
-                let targetExpense = currentExpenses[index]
-                        
-                // CoreData에서 삭제
+                guard index < currentExpenses.count else { return } // ✅ 유효한 인덱스인지 확인
+                
+                let targetExpense = currentExpenses[index] // ✅ 인덱스로 요소 가져오기
+
+                // ✅ CoreData에서 삭제
                 CoreDataManager.shared.delete(type: MyCashBookEntity.self, entityID: targetExpense.id)
-                        
+
                 // ✅ 최신 데이터 다시 불러오기
                 self.fetchTrigger.accept(targetExpense.cashBookID)
             })
