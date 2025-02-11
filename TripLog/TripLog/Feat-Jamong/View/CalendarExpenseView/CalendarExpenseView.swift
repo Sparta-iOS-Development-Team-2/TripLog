@@ -36,7 +36,7 @@ final class CalendarExpenseView: UIView {
         $0.textColor = UIColor.CustomColors.Text.textSecondary
         $0.textAlignment = .center
     }
-
+    
     // MARK: - Properties
     /// 현재 표시중인 지출 항목 배열
     private var expenses: [MockMyCashBookModel] = []
@@ -70,8 +70,9 @@ final class CalendarExpenseView: UIView {
         tableView.snp.makeConstraints {
             $0.top.equalTo(headerView.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-//            $0.height.equalTo(60).priority(.low)
-//            $0.height.equalTo(tableView.contentSize.height).priority(.high)
+            //            $0.height.equalTo(60).priority(.low)
+            //            $0.height.equalTo(tableView.contentSize.height).priority(.high)
+            $0.height.equalTo(0)
             $0.bottom.equalToSuperview()
         }
         
@@ -85,6 +86,10 @@ final class CalendarExpenseView: UIView {
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.isScrollEnabled = false  // 스크롤 비활성화
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 80
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 16, right: 0)  // 하단 여백 16 추가
     }
     
     // MARK: - Public Methods
@@ -98,9 +103,27 @@ final class CalendarExpenseView: UIView {
         let totalExpense = Int(expenses.reduce(0) { $0 + $1.amount })
         headerView.configure(date: date, expense: totalExpense, balance: balance)
         
-        // 데이터 유무에 따라 빈 상태 표시
         emptyStateLabel.isHidden = !expenses.isEmpty
         tableView.reloadData()
+        
+        // 최소 높이
+        let minimumHeight: CGFloat = 200
+        
+        if !expenses.isEmpty {
+            tableView.layoutIfNeeded()
+            let contentHeight = tableView.contentSize.height + tableView.contentInset.bottom
+            
+            // contentHeight가 minimumHeight보다 큰 경우에만 contentHeight 사용
+            let finalHeight = contentHeight > minimumHeight ? contentHeight : minimumHeight
+            
+            tableView.snp.updateConstraints {
+                $0.height.equalTo(finalHeight)
+            }
+        } else {
+            tableView.snp.updateConstraints {
+                $0.height.equalTo(minimumHeight)
+            }
+        }
     }
 }
 
