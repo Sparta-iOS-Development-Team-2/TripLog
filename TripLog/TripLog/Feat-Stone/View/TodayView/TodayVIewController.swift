@@ -91,9 +91,7 @@ class TodayViewController: UIViewController {
         setupViews()
         setupConstraints()
         bindViewModel()
-        
-//        tableView.delegate = self
-        
+                
         // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
         viewModel.input.fetchTrigger.accept(cashBookID)
         
@@ -195,9 +193,18 @@ class TodayViewController: UIViewController {
             }
             .disposed(by: disposeBag)
 
-        filteredExpenses
+        // 🔹 `cashBookID` 기준으로만 필터링 (총합 계산용)
+        let totalExpensesByID = viewModel.output.expenses
+            .map { [weak self] expenses -> [MockMyCashBookModel] in
+                guard let self = self else { return [] }
+                
+                return expenses.filter { $0.cashBookID == self.cashBookID } // 🔹 날짜 필터링 제거
+            }
+
+        // 🔹 **필터링된 데이터에서 총합 계산**
+        totalExpensesByID
             .map { expenses -> String in
-                let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +)
+                let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
                 let formattedTotal = "\(NumberFormatter.wonFormat(totalExchangeRate)) 원"
                 print("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
                 return formattedTotal
@@ -219,8 +226,6 @@ class TodayViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        
-        ///.emit(onNext: { [weak self] data in guard let self = self, let cashBookData = data as? MockMyCashBookModel else { return }
         // ✅ 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기
         tableView.rx.modelSelected(MockMyCashBookModel.self)
             .do(onNext: { selectedExpense in
