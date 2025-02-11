@@ -12,6 +12,7 @@ import CoreData
 struct MockMyCashBookModel {
     let amount: Double // 지출금액
     let cashBookID: UUID // 가계부 Entity ID
+    let caculatedAmount: Int // 계산값(원화)
     let category: String // 카테고리
     let country: String // 환율코드
     let expenseDate: Date // 지출일자
@@ -40,6 +41,7 @@ extension MyCashBookEntity: CoreDataManagable {
     
         let properties: [String: Any] = [
             element.amount : data.amount,
+            element.caculatedAmount : data.caculatedAmount,
             element.category : data.category,
             element.cashBookID : data.cashBookID,
             element.country : data.country,
@@ -114,6 +116,7 @@ extension MyCashBookEntity: CoreDataManagable {
         fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)
         let properties: [String: Any] = [
             element.amount : data.amount,
+            element.caculatedAmount : data.caculatedAmount,
             element.category : data.category,
             element.cashBookID : data.cashBookID,
             element.country : data.country,

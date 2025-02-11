@@ -103,6 +103,7 @@ class CalendarViewModel: ViewModelType {
             return MockMyCashBookModel(
                 amount: entity.amount,
                 cashBookID: entity.cashBookID ?? self.cashBookID,
+                caculatedAmount: 1234, // TODO: (#102)수정필요
                 category: entity.category ?? "",
                 country: entity.country ?? "",
                 expenseDate: entity.expenseDate ?? Date(),

@@ -22,6 +22,7 @@ struct CurrencyElement {
 
 struct MyCashBookElement {
     let amount = "amount"
+    let caculatedAmount = "caculatedAmount"
     let category = "category"
     let cashBookID = "cashBookID"
     let country = "country"
