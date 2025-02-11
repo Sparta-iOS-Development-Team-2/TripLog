@@ -30,11 +30,11 @@ class TodayViewController: UIViewController {
     // 도움말 버튼 (원형으로 만들기)
     private let helpButton = UIButton(type: .system).then {
         $0.setTitle("?", for: .normal)
-        $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         $0.applyBackgroundColor()
         $0.clipsToBounds = true
         $0.applyFloatingButtonShadow()
-        $0.applyCornerRadius(20)
+        $0.applyCornerRadius(12)
     }
 
     // "오늘 사용 금액" 라벨
@@ -139,7 +139,7 @@ class TodayViewController: UIViewController {
     private func setupConstraints() {
         
         helpButton.snp.makeConstraints {
-            $0.width.height.equalTo(40) // 버튼 크기를 40x40으로 고정
+            $0.width.height.equalTo(24) // 버튼 크기를 40x40으로 고정
         }
         
         topStackView.snp.makeConstraints {
