@@ -131,6 +131,7 @@ private extension CashBookListViewController {
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(safeArea.snp.bottom)
         }
+        
     }
     
     func bind() {
@@ -153,13 +154,14 @@ private extension CashBookListViewController {
             .disposed(by: disposeBag)
         
         output.showAddListModal
+            .flatMap {
+                return ModalViewManager.showModal(state: .createNewCashBook)
+                    .compactMap { $0 as? MockCashBookModel }
+            }
             .asSignal(onErrorSignalWith: .empty())
-            .withUnretained(self)
-            .emit(onNext: { owner, _ in
-                // TODO: 모달뷰 로직 추후 수정 요청(재훈)
-//                ModalViewManager.showModal(on: owner, state: .createNewCashBook)
-            })
-            .disposed(by: disposeBag)
+            .emit { data in
+                CoreDataManager.shared.save(type: CashBookEntity.self, data: data)
+            }.disposed(by: disposeBag)
         
         output.addCellViewHidden
             .drive(onNext: { [weak self] alpha in
@@ -244,14 +246,21 @@ private extension CashBookListViewController {
             
             // 셀 수정 기능
             configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
-                let editAction = UIContextualAction(style: .normal, title: "수정") { _, _, completion in
+                let editAction = UIContextualAction(style: .normal, title: "수정") { [self] _, _, completion in
                     
                     guard let data = try? self.dataSource.model(at: indexPath) as? MockCashBookModel else {
                         completion(false)
                         return
                     }
                     
-//                    ModalViewManager.showModal(on: self, state: .editCashBook(data: data))
+                    // CoreData에 수정한 데이터 업데이트
+                    ModalViewManager.showModal(state: .editCashBook(data: data))
+                        .compactMap { $0 as? MockCashBookModel }
+                        .asSignal(onErrorSignalWith: .empty())
+                        .emit { data in
+                            CoreDataManager.shared.update(type: CashBookEntity.self, entityID: data.id, data: data)
+                        }.disposed(by: disposeBag)
+                    
                     completion(true)
                 }
                 return UISwipeActionsConfiguration(actions: [editAction])
@@ -265,4 +274,13 @@ private extension CashBookListViewController {
         return layout
     }
     
+}
+
+extension CashBookListViewController: UIPopoverPresentationControllerDelegate {
+    /// 아이폰에서 popover기능을 사용하기 위한 메서드
+    /// 기본적으로 이 기능은 iPad에서 사용되면 popover기능으로 동작하지만
+    /// 아이폰에선 default가 fullScreen으로 동작하기에 구현해줘야한다.
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
+    }
 }

@@ -122,6 +122,15 @@ extension UIView {
         layer.shadowOffset = CGSize(width: 0, height: 1)
         layer.masksToBounds = false
     }
+    
+    /// Popover View Shadow
+    func applyPopoverViewShadow() {
+        layer.shadowColor = UIColor.CustomColors.Text.textPrimary.cgColor
+        layer.shadowOpacity = 0.2
+        layer.shadowRadius = 8
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.masksToBounds = false
+    }
 }
 
 // MARK: - UIView Border Extension
@@ -224,5 +233,11 @@ extension UIView {
         applyCornerRadius(32)
         applyViewShadow()
         applyFloatingButtonStroke()
+    }
+    
+    /// popover custom Style
+    func applyPopoverButtonStyle() {
+        applyPopoverViewShadow()
+        applyBackgroundColor()
     }
 }
