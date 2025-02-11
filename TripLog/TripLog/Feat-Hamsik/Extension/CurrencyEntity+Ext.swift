@@ -46,9 +46,7 @@ extension CurrencyEntity: CoreDataManagable {
         var result = [CurrencyEntity]()
         var resultType: CurrencyRateResultType = .isEmpty
         var retryCount = 0
-        
-        request.fetchLimit = 1
-        
+                
         guard var searchDate = predicate as? String else { return [] }
         
         while retryCount < 15 {
