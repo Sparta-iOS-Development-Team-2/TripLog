@@ -10,6 +10,8 @@ import RxCocoa
 
 class TopViewModel {
     let sections = BehaviorRelay<[CashBookSection]>(value: []) // ✅ RxDataSources 바인딩용 데이터
+    
+    
     private let disposeBag = DisposeBag()
     
     let cashBook: MockCashBookModel

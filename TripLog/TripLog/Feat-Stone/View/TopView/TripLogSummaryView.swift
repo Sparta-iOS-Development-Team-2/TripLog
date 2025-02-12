@@ -62,13 +62,15 @@ final class TripLogSummaryView: UIView {
         
         /// ✅ `tripSummaryContainerView` 레이아웃 설정
         tripSummaryContainerView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(4)
+            $0.top.equalToSuperview()
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalTo(buttonStackView.snp.bottom)
         }
         
         titleDateView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview().inset(16)
+            $0.top.equalToSuperview().offset(8)
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(43)
         }
         
         progressView.snp.makeConstraints {

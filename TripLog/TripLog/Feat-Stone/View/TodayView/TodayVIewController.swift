@@ -193,7 +193,7 @@ class TodayViewController: UIViewController {
         filteredExpenses
             .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
                 cell.configure(
-                    date: "오늘",
+                    date: self.getTodayDate(),
                     title: expense.note,
                     category: expense.category,
                     amount: "\(CurrencyFormatter.formattedCurrency(from: expense.amount, currencyCode: expense.country))",
@@ -275,11 +275,9 @@ class TodayViewController: UIViewController {
 
         // CoreData에서 오늘 날짜에 해당하는 데이터 가져오기
         let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
-        print("ddddddddddd\(exchangeRate)")
-//        print("DDDDDDDDD\(exchangeRate.baseRate)")
 
         
-        ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: self.cashBookID, date: Date(), exchangeRate: [])))
+        ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: self.cashBookID, date: Date(), exchangeRate: exchangeRate)))
             .asSignal(onErrorSignalWith: .empty())
             .emit(onNext: { [weak self] data in
                 guard let self = self,
@@ -308,7 +306,10 @@ class TodayViewController: UIViewController {
     }
 
     private func presentExpenseEditModal(data: MockMyCashBookModel) {
-        ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: []))
+        let todayDate = Date.formattedDateString(from: Date())
+        let exchagedRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayDate)
+        
+        ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: exchagedRate))
             .asSignal(onErrorSignalWith: .empty())
             .emit(onNext: { [weak self] updatedData in
                 guard let self = self,
@@ -336,10 +337,13 @@ class TodayViewController: UIViewController {
             })
             .disposed(by: disposeBag)
     }
-
-
-
-
+    
+    func getTodayDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy.MM.dd"  // 날짜 포맷 설정
+        dateFormatter.locale = Locale(identifier: "ko_KR") // 한국 로케일 적용 (필요시 변경 가능)
+        return dateFormatter.string(from: Date()) // 현재 날짜 반환
+    }
 }
 
 // 🔹 천 단위 숫자 포맷 변환 (소수점 유지)

@@ -23,6 +23,10 @@ class TopViewController: UIViewController {
     private let contentContainerView = UIView()
     
     private var balance: Int = 0
+    
+    private var cashBook: MockCashBookModel? {
+        return viewModel.sections.value.first?.items.first
+    }
 
     init(cashBook: MockCashBookModel) {
         self.viewModel = TopViewModel(cashBook: cashBook)
@@ -72,7 +76,7 @@ class TopViewController: UIViewController {
             $0.edges.equalToSuperview() // 컨테이너 뷰 크기와 동일하게 설정
         }
         
-        guard let cashBook = viewModel.sections.value.first?.items.first else { return }
+        guard let cashBook = cashBook else { return }
         self.navigationItem.title = cashBook.tripName
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.SCDream(size: .title, weight: .bold)
