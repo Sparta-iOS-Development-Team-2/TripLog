@@ -203,7 +203,9 @@ private extension ModalView {
         
         var result: Double = 0
         
-        if currency.currencyCode == Currency.JPY.rawValue || currency.currencyCode == Currency.IDR.rawValue {
+        if currency.currencyCode == String(Currency.JPY.rawValue.prefix(3)) ||
+            currency.currencyCode == String(Currency.IDR.rawValue.prefix(3))
+        {
             result = amount * (currency.baseRate / 10)
         } else {
             result = amount * currency.baseRate
