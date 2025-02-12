@@ -14,6 +14,8 @@ import RxCocoa
 /// 모달뷰에서 금액을 입력하는 공용 컴포넌츠
 final class ModalAmountView: UIView {
     
+    private let disposeBag = DisposeBag()
+    
     // MARK: - UI Components
     
     private let title = UILabel().then {
@@ -47,7 +49,7 @@ final class ModalAmountView: UIView {
         $0.rightView = UIView(frame: .init(x: 0, y: 0, width: 12, height: 12))
         $0.rightViewMode = .always
         $0.autocapitalizationType = .none
-        $0.keyboardType = .numberPad
+        $0.keyboardType = .decimalPad
     }
     
     // MARK: - Initializer
@@ -75,7 +77,7 @@ final class ModalAmountView: UIView {
     ///   - amout: 금액(빈 값일 수도 있음)
     ///   - currency: 통화
     func configureAmoutView(amout: Double?, country: String) {
-        self.textField.text = "\(amout ?? 0)"
+        self.textField.text = amout?.formattedWithFormatter
         
         let currency = Currency.allCurrencies.filter { String($0.prefix(3)) == country }.first
         self.currencyButton.setTitle(currency ?? "", for: .normal)
@@ -109,6 +111,7 @@ private extension ModalAmountView {
         configureSelf()
         setupLayout()
         configureMenuForButton()
+        bind()
     }
     
     func configureSelf() {
@@ -157,13 +160,55 @@ private extension ModalAmountView {
         }
     }
     
+    func bind() {
+        textField.rx.text.orEmpty
+            .map { self.filterInput($0) } // 입력값 필터링
+            .map { self.formatInput($0) } // 입력값 포맷팅
+            .bind(to: textField.rx.text) // 필터링된 값 적용
+            .disposed(by: disposeBag)
+    }
+    
+    /// 소수점을 1개만 입력할 수 있도록 필터링 하는 메소드
+    /// - Parameter input: 필터링할 텍스트
+    /// - Returns: 필터링된 텍스트
+    func filterInput(_ input: String) -> String {
+        let components = input.components(separatedBy: ".")
+        if components.count > 2 {
+            return components.dropLast().joined(separator: ".") // 마지막 `.` 제거
+        } else {
+            return input
+        }
+    }
+    
+    /// 소수점 이후로 2자리 수 까지만 입력할 수 있도록 포매팅하는 메소드
+    /// - Parameter input: 포매팅할 텍스트
+    /// - Returns: 포매팅된 텍스트
+    func formatInput(_ input: String) -> String {
+        if input.contains(".") {
+            let components = input.split(separator: ".")
+            
+            if components.count > 1 {
+                let integerPart = String(components.first ?? "")
+                let decimalPart = String(components.last ?? "").prefix(2)
+                
+                return "\(integerPart).\(decimalPart)"
+            } else {
+                guard input.first != "." else { return String(input.prefix(3)) }
+                return input
+            }
+            
+        } else {
+            return input
+        }
+    }
+    
 }
 
 extension Reactive where Base: ModalAmountView {
     /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
-    var amountViewIsBlank: Observable<Bool> {
+    var amountViewIsEmpty: Observable<Bool> {
         return base.textField.rx.text.orEmpty
-            .map { $0.isEmpty }
+            .map { Double($0) == nil }
             .distinctUntilChanged()
             .asObservable()
     }

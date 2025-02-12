@@ -85,7 +85,7 @@ private extension ModalViewController {
             cancelButtonTapped: self.modalView.rx.cancelButtonTapped,
             cashBookActiveButtonTapped: self.modalView.rx.cashBookActiveButtonTapped,
             consumptionActiveButtonTapped: self.modalView.rx.consumptionActiveButtonTapped,
-            sectionIsBlank: self.modalView.rx.checkBlankOfSections
+            sectionIsEmpty: self.modalView.rx.checkBlankOfSections
         )
         
         let output = viewModel.transform(input: input)
@@ -97,7 +97,7 @@ private extension ModalViewController {
                 
                 guard !data.0 else {
                     guard let vc = AppHelpers.getTopViewController() else { return }
-                    let alert = AlertManager(title: "알림", message: "모든 입력을 채워주세요!!", cancelTitle: "확인")
+                    let alert = AlertManager(title: "알림", message: "모든 내용을 정확히 입력해주세요", cancelTitle: "확인")
                     alert.showAlert(on: vc, .alert)
                     return
                 }
@@ -121,7 +121,7 @@ private extension ModalViewController {
                 
                 guard !data.0 else {
                     guard let vc = AppHelpers.getTopViewController() else { return }
-                    let alert = AlertManager(title: "알림", message: "모든 입력을 채워주세요!!", cancelTitle: "확인")
+                    let alert = AlertManager(title: "알림", message: "모든 내용을 정확히 입력해주세요", cancelTitle: "확인")
                     alert.showAlert(on: vc, .alert)
                     return
                 }
