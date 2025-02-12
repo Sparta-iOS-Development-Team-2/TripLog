@@ -199,9 +199,16 @@ private extension ModalView {
     ///   - amount: 기준 원화
     /// - Returns: 환율을 적용한 원화
     func exchangeRateCalculation(_ country: String, _ amount: Double) -> Double {
-        guard let currency = exchangeRate?.filter({ $0.currencyCode == country }).first else { return 0 }
+        guard let currency = exchangeRate?.filter({ $0.currencyCode?.prefix(3) ?? "" == country }).first else { return 0 }
         
-        let result = amount / currency.baseRate
+        var result: Double = 0
+        
+        if currency.currencyCode == Currency.JPY.rawValue || currency.currencyCode == Currency.IDR.rawValue {
+            result = amount * (currency.baseRate / 10)
+        } else {
+            result = amount * currency.baseRate
+        }
+        
         return result
     }
     
@@ -293,7 +300,7 @@ private extension ModalView {
                 firstSection.configureSegment(to: data.payment)
                 secondSection.configureTextField(text: data.note)
                 thirdSection.configureTextField(text: data.category)
-                forthSection.configureAmoutView(amout: data.amount, country: data.country)
+                forthSection.configureAmountView(amount: data.amount, country: data.country)
                 
                 self.cashBookID = data.cashBookID
                 self.consumptionID = data.id
