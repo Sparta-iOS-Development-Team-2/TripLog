@@ -15,7 +15,7 @@ class ExpenseCell: UITableViewCell {
     }
 
     private let titleLabel = UILabel().then {
-        $0.font = UIFont.SCDream(size: .headline, weight: .medium)
+        $0.font = UIFont.SCDream(size: .display, weight: .medium)
     }
 
     private let categoryLabel = UILabel().then {
@@ -24,12 +24,12 @@ class ExpenseCell: UITableViewCell {
     }
 
     private let amountLabel = UILabel().then {
-        $0.font = UIFont.SCDream(size: .display, weight: .medium)
+        $0.font = UIFont.SCDream(size: .display, weight: .bold)
         $0.textAlignment = .right
     }
 
     private let exchangeRateLabel = UILabel().then {
-        $0.font = UIFont.SCDream(size: .body, weight: .bold)
+        $0.font = UIFont.SCDream(size: .body, weight: .medium)
         $0.textColor = UIColor.Personal.normal
         $0.textAlignment = .right
     }
@@ -83,7 +83,7 @@ class ExpenseCell: UITableViewCell {
         }
 
         firstRowStackView.snp.makeConstraints {
-            $0.top.equalTo(dateLabel.snp.bottom).offset(8) // ✅ 여백 추가
+            $0.top.equalTo(dateLabel.snp.bottom).offset(16) // ✅ 여백 추가
             $0.leading.trailing.equalToSuperview().inset(16)
         }
 

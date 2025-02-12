@@ -24,6 +24,7 @@ class TodayViewController: UIViewController {
     private let headerTitleLabel = UILabel().then {
         $0.text = "지출 내역"
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
+        $0.textColor = UIColor(named: "textPrimary")
     }
         
     // 도움말 버튼
@@ -57,7 +58,7 @@ class TodayViewController: UIViewController {
         $0.separatorStyle = .none
         $0.backgroundColor = .clear
         $0.showsVerticalScrollIndicator = false
-        $0.rowHeight = 108
+        $0.rowHeight = 124
         $0.clipsToBounds = true
         $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
         $0.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -151,6 +152,7 @@ class TodayViewController: UIViewController {
             $0.top.equalTo(topStackView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(8)
             $0.bottom.equalToSuperview()
+            
         }
         
         floatingButton.snp.makeConstraints {
