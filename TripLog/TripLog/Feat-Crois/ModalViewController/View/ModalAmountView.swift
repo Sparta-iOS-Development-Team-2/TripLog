@@ -1,5 +1,5 @@
 //
-//  ModalAmoutView.swift
+//  ModalAmountView.swift
 //  TripLog
 //
 //  Created by 장상경 on 1/21/25.
@@ -74,10 +74,10 @@ final class ModalAmountView: UIView {
     
     /// 금액 입력 뷰를 세팅하는 메소드
     /// - Parameters:
-    ///   - amout: 금액(빈 값일 수도 있음)
+    ///   - amount: 금액(빈 값일 수도 있음)
     ///   - currency: 통화
-    func configureAmoutView(amout: Double?, country: String) {
-        self.textField.text = amout?.formattedWithFormatter
+    func configureAmountView(amount: Double?, country: String) {
+        self.textField.text = amount?.formattedWithFormatter
         
         let currency = Currency.allCurrencies.filter { String($0.prefix(3)) == country }.first
         self.currencyButton.setTitle(currency ?? "", for: .normal)
