@@ -29,7 +29,7 @@ class CalendarViewModel: ViewModelType {
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
-        let expenses: BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Double)>
+        let expenses: BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Int)>
         let addButtonTapped: PublishRelay<Date>
     }
     
@@ -52,7 +52,7 @@ class CalendarViewModel: ViewModelType {
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
     private let addButtonTapped = PublishRelay<Date>()
-    private let expensesData = BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Double)>(value: (Date(), [], 0))
+    private let expensesData = BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Int)>(value: (Date(), [], 0))
     
     
     // MARK: - Initalization
@@ -102,7 +102,7 @@ class CalendarViewModel: ViewModelType {
         
         input.didSelected
             .withUnretained(self)
-            .map { owner, date -> (date: Date, data: [MockMyCashBookModel], balance: Double) in
+            .map { owner, date -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
                 owner.selectedDate = date
                 let remainingBudget = owner.calculateRemainingBudget(upTo: date)
                 return (date, owner.expensesForDate(date: date), remainingBudget)
@@ -115,7 +115,7 @@ class CalendarViewModel: ViewModelType {
         
         expenseRelay
             .withUnretained(self)
-            .map { owner, _ -> (date: Date, data: [MockMyCashBookModel], balance: Double) in
+            .map { owner, _ -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
                 let remainingBudget = owner.calculateRemainingBudget(upTo: owner.selectedDate)
                 return (owner.selectedDate, owner.expensesForDate(date: owner.selectedDate), remainingBudget)
             }
@@ -147,7 +147,7 @@ class CalendarViewModel: ViewModelType {
             return MockMyCashBookModel(
                 amount: entity.amount,
                 cashBookID: entity.cashBookID ?? self.cashBookID,
-                caculatedAmount: 1234, // TODO: (#102)수정필요
+                caculatedAmount: entity.caculatedAmount,
                 category: entity.category ?? "",
                 country: entity.country ?? "",
                 expenseDate: entity.expenseDate ?? self.selectedDate,
@@ -220,25 +220,25 @@ class CalendarViewModel: ViewModelType {
         }
     }
     
-    /// 선택된 날짜의 총 지출 금액을 계산하는 메서드 (amount -> 원화 객체로 수정예정)
+    /// 선택된 날짜의 총 지출 금액을 계산하는 메서드
     /// - Parameter date: 총 지출 금액을 계산하는 날짜
     /// - Returns: 해당 날짜의 총 지출 금액
-    func totalExpense(date: Date) -> Double {
+    func totalExpense(date: Date) -> Int {
         let dailyExpenses = expensesForDate(date: date)
-        return dailyExpenses.reduce(0) { $0 + $1.amount }
+        return dailyExpenses.reduce(0) { $0 + Int(round($1.caculatedAmount)) }
     }
     
     /// 특정 날짜까지의 예산 잔액을 계산하는 메서드
     /// - Parameter date: 계산할 기준 날짜
     /// - Returns: 해당 날짜까지의 예산 잔액
-    func calculateRemainingBudget(upTo date: Date) -> Double {
+    func calculateRemainingBudget(upTo date: Date) -> Int {
         // 해당 날짜까지의 모든 지출 필터링
         let allExpenses = expenseRelay.value.filter { expense in
             expense.expenseDate <= date
         }
         // 총 지출 계산
-        let totalExpense = Double(allExpenses.reduce(0.0) { $0 + $1.amount })
+        let totalExpense = Int(allExpenses.reduce(0) { $0 + Int(round($1.caculatedAmount)) })
         // 초기 예산에서 총 지출을 빼서 잔액 계산
-        return Double(balance) - totalExpense
+        return balance - totalExpense
     }
 }

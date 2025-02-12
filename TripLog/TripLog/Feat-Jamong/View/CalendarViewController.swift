@@ -177,11 +177,16 @@ final class CalendarViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
-        // addButton에 date는 셀에 받아온 데이트를 넣어야할듯
         output.addButtonTapped
             .withUnretained(self)
             .flatMap { owner, date in
-                ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.calendarViewModel.cashBookID, date: date, exchangeRate: [])))
+                
+                let rates = CoreDataManager.shared.fetch(
+                    type: CurrencyEntity.self,
+                    predicate: Date.formattedDateString(from: date)
+                )
+                
+                return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.calendarViewModel.cashBookID, date: date, exchangeRate: rates)))
                     .compactMap {
                         $0 as? MockMyCashBookModel
                     }
@@ -333,22 +338,10 @@ extension CalendarViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let expenses = calendarViewModel.expensesForDate(date: calendarViewModel.selectedDate)
         let expense = expenses[indexPath.row]
-        let originalID = expense.id  // 원본 ID 저장 (안하면.. 저장이안됌)
+        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date.formattedDateString(from: expense.expenseDate))
         
-        ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: [])) // 환율 정보 추출 PR 머지되면 연결
+        ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: rates))
             .compactMap { $0 as? MockMyCashBookModel }
-            .map { updatedExpense in
-                MockMyCashBookModel(
-                    amount: updatedExpense.amount,
-                    cashBookID: updatedExpense.cashBookID,
-                    category: updatedExpense.category,
-                    country: updatedExpense.country,
-                    expenseDate: updatedExpense.expenseDate,
-                    id: originalID,
-                    note: updatedExpense.note,
-                    payment: updatedExpense.payment
-                )
-            }
             .subscribe(onNext: { [weak self] updatedExpense in
                 self?.calendarViewModel.updateExpense(updatedExpense)
             })
