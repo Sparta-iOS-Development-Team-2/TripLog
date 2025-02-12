@@ -11,7 +11,9 @@ class TopViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     private let todayViewController: TodayViewController
-    private let calendarViewController: CalendarViewController
+    private var calendarViewController: CalendarViewController
+    
+    private var balance: Int = 0
     
     private lazy var switcherView: TripSwitcherView = {
         return TripSwitcherView(todayView: todayViewController.view, calendarView: calendarViewController.view)
@@ -33,9 +35,9 @@ class TopViewController: UIViewController {
     init(cashBook: MockCashBookModel) {
         self.viewModel = TopViewModel(cashBook: cashBook)
         self.todayViewController = TodayViewController(cashBookID: cashBook.id)
-        self.calendarViewController = CalendarViewController(cashBook: cashBook.id)
-//        self.calendarViewController = CalendarViewController(cashBook: cashBook.id, date: cashBook.date)
+        self.calendarViewController = CalendarViewController(cashBook: cashBook.id, balance: balance)
         super.init(nibName: nil, bundle: nil)
+        bindBalance()
     }
     
     required init?(coder: NSCoder) {
@@ -43,10 +45,10 @@ class TopViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            navigationController?.setNavigationBarHidden(false, animated: true)
-            navigationController?.navigationBar.isHidden = false
-        }
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isHidden = false
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -54,7 +56,7 @@ class TopViewController: UIViewController {
         
         setupUI()
         setupTableView()
-        setupTripSummary()
+        bindFormattedTotal()
         setupLayout()
     }
     
@@ -63,20 +65,20 @@ class TopViewController: UIViewController {
         
         tripSummaryView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-            $0.leading.trailing.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
         }
         
         view.addSubview(tableView)
         
         tableView.snp.makeConstraints {
             $0.top.equalTo(tripSummaryView.snp.bottom)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
     
     private func setupUI() {
         guard let cashBook = viewModel.sections.value.first?.items.first else { return }
-        self.navigationItem.title = viewModel.sections.value.first?.items.first?.tripName ?? "여행"
+        self.navigationItem.title = cashBook.tripName
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.SCDream(size: .title, weight: .bold)
         ]
@@ -97,15 +99,25 @@ class TopViewController: UIViewController {
         tripSummaryView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: headerSize.height)
     }
     
-    private func setupTripSummary() {
-        bindFormattedTotal()
-    }
+//    private func setupTripSummary() {
+//        bindFormattedTotal()
+//    }
     
     private func bindFormattedTotal() {
         todayViewController.formattedTotalRelay
             .bind(to: tripSummaryView.progressView.expense)
             .disposed(by: disposeBag)
     }
+    
+    private func bindBalance() {
+        tripSummaryView.progressView.balanceRelay
+            .subscribe(onNext: { [weak self] balance in
+                guard let self = self else { return }
+                self.balance = balance // ✅ balance 업데이트
+                self.calendarViewController = CalendarViewController(cashBook: self.viewModel.cashBook.id, balance: balance)
+            })
+            .disposed(by: disposeBag)
+        }
 }
 
 /// 🔹 여행 요약 정보를 표시하는 뷰 (타이틀, 날짜, 예산, 진행 상태, 버튼 포함)
@@ -165,7 +177,7 @@ final class TripLogSummaryView: UIView {
         }
         
         titleDateView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview().inset(16)
+            $0.top.leading.trailing.equalToSuperview().inset(8)
         }
         
         progressView.snp.makeConstraints {
@@ -197,22 +209,5 @@ final class TripLogSummaryView: UIView {
                 self?.switcherView.showCalendarView()
             }
         )
-    }
-}
-
-extension String {
-    /// `yyyyMMdd` 형식의 문자열을 `yyyy.MM.dd` 형식으로 변환
-    func formattedDate() -> String {
-        let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyyMMdd"
-        inputFormatter.locale = Locale(identifier: "ko_KR")
-        
-        let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "yyyy.MM.dd"
-        
-        if let date = inputFormatter.date(from: self) {
-            return outputFormatter.string(from: date)
-        }
-        return self
     }
 }

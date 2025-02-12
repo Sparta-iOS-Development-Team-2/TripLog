@@ -214,14 +214,9 @@ class TodayViewController: UIViewController {
         // 🔹 **필터링된 데이터에서 총합 계산**
         totalExpensesByID
             .map { expenses -> String in
-                let totalExchangeRate = expenses.map { Int($0.amount) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
+                let totalExchangeRate = expenses.map { Int($0.caculatedAmount) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
                 let formattedTotal = NumberFormatter.formattedString(from: Double(totalExchangeRate)) + " 원"
                 print("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
-                
-                // ✅ 개별 expense에도 반영 (exchangeRate 업데이트)
-//                expenses.forEach { expense in
-//                    expense. = formattedTotal
-//                }
                 
                 return formattedTotal
             }

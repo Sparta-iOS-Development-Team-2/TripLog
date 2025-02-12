@@ -83,7 +83,7 @@ class ExpenseCell: UITableViewCell {
         }
 
         firstRowStackView.snp.makeConstraints {
-            $0.top.equalTo(dateLabel.snp.bottom).offset(8) // ✅ 여백 추가
+            $0.top.equalTo(dateLabel.snp.bottom).offset(4) // ✅ 여백 추가
             $0.leading.trailing.equalToSuperview().inset(16)
         }
 

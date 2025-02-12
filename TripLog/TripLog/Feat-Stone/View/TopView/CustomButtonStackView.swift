@@ -63,9 +63,8 @@ class TopCustomButtonStackView: UIStackView {
     
     private func setupLayout() {
         axis = .horizontal
-        spacing = -1
+        spacing = -0.5
         distribution = .fillEqually
-//        alignment = .center
     }
 
     // 버튼 스타일 업데이트

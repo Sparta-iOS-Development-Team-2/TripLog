@@ -8,7 +8,9 @@ class TopProgressView: UIView {
     
     private let disposeBag = DisposeBag()
     
-    let progressBar = CustomProgressView()
+    private let progressBar = CustomProgressView()
+    
+    let balanceRelay = PublishRelay<Int>()
     
     private let expenseLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .caption, weight: .medium)
@@ -59,6 +61,7 @@ class TopProgressView: UIView {
 
                 // ✅ 3. 잔액 계산 및 출력
                 let balance = self.budgetAmount - expenseAmount
+                self.balanceRelay.accept(balance)
                 print("✅ budgetAmount: \(self.budgetAmount), balance 계산 값: \(balance)")
 
                 // ✅ 4. 포맷된 잔액 확인
@@ -74,10 +77,10 @@ class TopProgressView: UIView {
                 self.balanceLabel.textColor = (balance < 0) ? .red : UIColor.Personal.normal
 
                 // ✅ 6. Progress Bar 값 확인
-                let progressValue = (self.budgetAmount > 0) ? Float(expenseAmount) / Float(self.budgetAmount) : 0.0
+                let progressValue: CGFloat = (self.budgetAmount > 0) ? CGFloat(expenseAmount) / CGFloat(self.budgetAmount) : 0.0
                 print("✅ Progress Bar Value: \(progressValue)")
 
-                self.progressBar.updateProgress(CGFloat(progressValue)) // ✅ 프로그레스 업데이트
+                self.progressBar.updateProgress(progressValue) // ✅ 프로그레스 업데이트
             })
             .disposed(by: disposeBag)
     }

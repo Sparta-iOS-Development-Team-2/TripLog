@@ -18,6 +18,11 @@ final class CustomProgressView: UIView {
         $0.numberOfLines = 1
         $0.backgroundColor = .clear
     }
+    
+    private let progressGradientColors: [UIColor] = [
+        UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0),
+        UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0)
+    ]
 
     private var gradientLayer: CAGradientLayer?
     
@@ -44,6 +49,7 @@ final class CustomProgressView: UIView {
 
         // ✅ Gradient Layer 크기 업데이트
         gradientLayer?.frame = progress.bounds
+        progress.applyGradient(colors: progressGradientColors)
     }
 
     private var progressValue: CGFloat = 0.0 // ✅ 초기값을 0으로 설정
@@ -57,9 +63,6 @@ final class CustomProgressView: UIView {
 
         print("🔹 Progress bar width update: \(newWidth), View width: \(self.bounds.width)")
 
-        // ✅ 기존 애니메이션 정리
-        progress.layer.removeAllAnimations()
-
         // ✅ Progress Label 업데이트
         progressLabel.text = "\(Int(progressValue * 100))%"
         progress.alpha = progressValue == 0 ? 0 : 1
@@ -68,9 +71,6 @@ final class CustomProgressView: UIView {
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveLinear, animations: {
             self.progress.snp.updateConstraints {
                 $0.width.equalTo(newWidth)
-            }
-            self.progressLabel.snp.updateConstraints {
-                $0.trailing.equalTo(self.progress.snp.trailing).offset(-5) // ✅ progress 바의 끝에 위치
             }
             self.layoutIfNeeded()
         }, completion: { _ in
@@ -100,37 +100,19 @@ final class CustomProgressView: UIView {
         }
 
         // ✅ 그라데이션 레이어 초기화
-        setupGradientLayer()
+//        setupGradientLayer()
     }
 
-    /// ✅ 그라데이션 레이어 설정
-    private func setupGradientLayer() {
-        let gradient = CAGradientLayer()
-        gradient.colors = [
-            UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0).cgColor,
-            UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0).cgColor
-        ]
-        gradient.startPoint = CGPoint(x: 0, y: 0.5)
-        gradient.endPoint = CGPoint(x: 1, y: 0.5)
-        gradient.cornerRadius = (self.bounds.height - 2) / 2
-        gradientLayer = gradient
-        progress.layer.insertSublayer(gradient, at: 0)
-    }
+//    /// ✅ 그라데이션 레이어 설정
+//    private func setupGradientLayer() {
+//        let gradient = CAGradientLayer()
+//        gradient.colors = [progressGradientColors]
+//        progress.applyGradient(colors: progressGradientColors)
+//    }
 
     /// ✅ 그라데이션 애니메이션 적용
     private func applyGradientAnimation() {
-        let animation = CABasicAnimation(keyPath: "colors")
-        animation.fromValue = [
-            UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0).cgColor,
-            UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0).cgColor
-        ]
-        animation.toValue = [
-            UIColor(red: 59/256, green: 190/256, blue: 246/256, alpha: 1.0).cgColor,
-            UIColor(red: 0/256, green: 122/256, blue: 1.0, alpha: 1.0).cgColor
-        ]
-        animation.duration = 1.5
-        animation.autoreverses = true
-        animation.repeatCount = .infinity
-        gradientLayer?.add(animation, forKey: "gradientAnimation")
+//        let gradientColors = [progressGradientColors]
+        progress.applyGradientAnimation(colors: progressGradientColors) // ✅ UIView의 applyGradientAnimation() 사용
     }
 }
