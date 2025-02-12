@@ -225,7 +225,7 @@ class CalendarViewModel: ViewModelType {
     /// - Returns: 해당 날짜의 총 지출 금액
     func totalExpense(date: Date) -> Double {
         let dailyExpenses = expensesForDate(date: date)
-        return dailyExpenses.reduce(0) { $0 + $1.amount }
+        return dailyExpenses.reduce(0) { $0 + $1.caculatedAmount }
     }
     
     /// 특정 날짜까지의 예산 잔액을 계산하는 메서드
@@ -237,7 +237,7 @@ class CalendarViewModel: ViewModelType {
             expense.expenseDate <= date
         }
         // 총 지출 계산
-        let totalExpense = Double(allExpenses.reduce(0.0) { $0 + $1.amount })
+        let totalExpense = Double(allExpenses.reduce(0.0) { $0 + $1.caculatedAmount })
         // 초기 예산에서 총 지출을 빼서 잔액 계산
         return Double(balance) - totalExpense
     }

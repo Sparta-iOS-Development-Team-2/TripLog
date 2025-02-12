@@ -70,8 +70,6 @@ final class CalendarExpenseView: UIView {
         tableView.snp.makeConstraints {
             $0.top.equalTo(headerView.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            //            $0.height.equalTo(60).priority(.low)
-            //            $0.height.equalTo(tableView.contentSize.height).priority(.high)
             $0.height.equalTo(0)
             $0.bottom.equalToSuperview()
         }
@@ -100,7 +98,7 @@ final class CalendarExpenseView: UIView {
     ///   - balance: 현재 잔액
     func configure(date: Date, expenses: [MockMyCashBookModel], balance: Double) {
         self.expenses = expenses
-        let totalExpense = Double(expenses.reduce(0) { $0 + $1.amount })
+        let totalExpense = Double(expenses.reduce(0) { $0 + $1.caculatedAmount })
         headerView.configure(date: date, expense: totalExpense, balance: balance)
         
         emptyStateLabel.isHidden = !expenses.isEmpty
