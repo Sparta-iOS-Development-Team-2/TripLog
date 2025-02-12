@@ -166,6 +166,20 @@ class TodayViewController: UIViewController {
         totalExpense.accept(TotalExpense)
     }
     
+    private func updateEmptyState(isEmpty: Bool) {
+        if isEmpty {
+            let emptyLabel = UILabel().then {
+                $0.text = "지출 내역이 없습니다"
+                $0.font = .SCDream(size: .body, weight: .medium)
+                $0.textColor = UIColor.CustomColors.Text.textSecondary
+                $0.textAlignment = .center
+            }
+            tableView.backgroundView = emptyLabel
+        } else {
+            tableView.backgroundView = nil
+        }
+    }
+
     private func bindViewModel() {
         
         // 🔹 동일한 `cashBookID`, 날짜를 가진 항목만 표시하도록 필터링
@@ -234,6 +248,9 @@ class TodayViewController: UIViewController {
         filteredExpenses
             .drive(onNext: { [weak self] expenses in
                 guard let self = self else { return }
+                
+                self.updateEmptyState(isEmpty: expenses.isEmpty)
+                
                 self.tableView.reloadData() // ✅ 셀이 변경될 때 프로그레스 바 반영
             })
             .disposed(by: disposeBag)
