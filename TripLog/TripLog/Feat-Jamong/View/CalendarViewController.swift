@@ -21,6 +21,7 @@ final class CalendarViewController: UIViewController {
     /// 전체 컨텐츠를 스크롤 가능하게 하는 스크롤 뷰
     private lazy var scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false
+        $0.showsHorizontalScrollIndicator = false
         $0.alwaysBounceVertical = true
         $0.contentInset.bottom = 100
     }
@@ -28,15 +29,13 @@ final class CalendarViewController: UIViewController {
     /// 수직으로 뷰들을 쌓는 스택 뷰
     private lazy var contentStackView = UIStackView().then {
         $0.axis = .vertical
-        $0.spacing = 20
-        $0.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 16, right: 16)
-        $0.isLayoutMarginsRelativeArrangement = true
+        $0.spacing = 8
+        $0.distribution = .equalSpacing
     }
     
     /// 캘린더와 헤더를 담는 컨테이너 뷰
     private lazy var calendarContainerView = UIView().then {
         $0.applyViewStyle()
-        $0.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10)
     }
     
     /// 캘린더 뷰
@@ -53,7 +52,6 @@ final class CalendarViewController: UIViewController {
     /// 지출 목록을 표시하는 뷰
     private lazy var expenseListView = CalendarExpenseView().then {
         $0.applyViewStyle()
-        $0.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10)
     }
     
     private let calendarViewModel : CalendarViewModel
@@ -74,6 +72,7 @@ final class CalendarViewController: UIViewController {
     // MARK: - Properties
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
     private let selectedDate = PublishRelay<Date>()
+    fileprivate let updateTotalAmount = PublishRelay<String>()
     private let disposeBag = DisposeBag()
     
     // MARK: - View Lifecycle
@@ -98,14 +97,17 @@ final class CalendarViewController: UIViewController {
         expenseListView.backgroundColor = UIColor.CustomColors.Background.background
     }
     
+    func reloadCalendarView() {
+        calendarViewModel.loadExpenseData()
+    }
+    
     // MARK: - Setup
     /// UI 컴포넌트들의 초기 설정을 담당하는 메서드
     private func setupUI() {
         expenseListView.tableView.delegate = self
         configureBaseView()
-        configureScrollView()
         configureCalendarContainer()
-        configureExpenseListView()
+        configureScrollView()
     }
     
     /// 기본 뷰 설정
@@ -118,40 +120,51 @@ final class CalendarViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints {
             $0.edges.equalTo(view.safeAreaLayoutGuide)
+            $0.width.equalToSuperview()
         }
         
         scrollView.addSubview(contentStackView)
         contentStackView.snp.makeConstraints {
-            $0.edges.equalTo(scrollView.contentLayoutGuide)
-            $0.width.equalTo(scrollView.frameLayoutGuide)
+            $0.verticalEdges.equalToSuperview().inset(16)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(view.bounds.width - 32)
         }
     }
     
     /// 캘린더 컨테이너 설정
     private func configureCalendarContainer() {
-        contentStackView.addArrangedSubview(calendarContainerView)
-        calendarContainerView.snp.makeConstraints {
-            $0.leading.trailing.top.equalToSuperview().offset(16)
-        }
-        
         [customHeaderView, calendarView].forEach { calendarContainerView.addSubview($0) }
         
         customHeaderView.snp.makeConstraints {
-            $0.top.equalTo(calendarContainerView.layoutMarginsGuide)
-            $0.leading.trailing.equalTo(calendarContainerView.layoutMarginsGuide)
+            $0.top.equalTo(calendarContainerView)
+            $0.leading.trailing.equalTo(calendarContainerView)
+            $0.height.equalTo(60)
         }
         
         calendarView.snp.makeConstraints {
             $0.top.equalTo(customHeaderView.snp.bottom)
-            $0.leading.trailing.equalTo(calendarContainerView.layoutMarginsGuide)
-            $0.bottom.equalTo(calendarContainerView.layoutMarginsGuide)
-            $0.height.equalTo(calendarView.snp.width)
+            $0.leading.trailing.equalTo(calendarContainerView)
+            $0.bottom.equalTo(calendarContainerView)
+        }
+        
+        contentStackView.addArrangedSubview(calendarContainerView)
+        contentStackView.addArrangedSubview(expenseListView)
+        calendarContainerView.snp.makeConstraints {
+            $0.leading.trailing.top.equalToSuperview()
+            $0.height.equalTo(400)
+        }
+        
+        expenseListView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
     
-    /// 지출 목록 뷰 설정
-    private func configureExpenseListView() {
-        contentStackView.addArrangedSubview(expenseListView)
+    private func getTotalAmount() -> Int {
+        let data = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: calendarViewModel.cashBookID)
+        let totalExpense = data.reduce(0) { $0 + Int(round($1.caculatedAmount))}
+        
+        return totalExpense
     }
     
     // MARK: - Calendar Setup
@@ -205,6 +218,7 @@ final class CalendarViewController: UIViewController {
             .drive { owner, data in
                 owner.calendarView.calendar.reloadData()
                 owner.expenseListView.configure(date: data.date, expenses: data.data, balance: data.balance)
+                owner.updateTotalAmount.accept("\(owner.getTotalAmount())")
             }
             .disposed(by: disposeBag)
     }
@@ -348,5 +362,11 @@ extension CalendarViewController: UITableViewDelegate {
             .disposed(by: disposeBag)
         
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+extension Reactive where Base: CalendarViewController {
+    var updateTotalAmount: PublishRelay<String> {
+        return base.updateTotalAmount
     }
 }

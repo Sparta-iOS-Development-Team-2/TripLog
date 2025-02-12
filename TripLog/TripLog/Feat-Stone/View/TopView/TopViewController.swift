@@ -10,8 +10,8 @@ class TopViewController: UIViewController {
     private let viewModel: TopViewModel
     private let disposeBag = DisposeBag()
     
-    private let todayViewController: TodayViewController
-    private let calendarViewController: CalendarViewController
+    fileprivate let todayViewController: TodayViewController
+    fileprivate let calendarViewController: CalendarViewController
     
     private lazy var switcherView: TripSwitcherView = {
         return TripSwitcherView(todayView: todayViewController.view, calendarView: calendarViewController.view)
@@ -19,19 +19,14 @@ class TopViewController: UIViewController {
     
     /// ✅ 여행 요약 정보를 포함하는 상단 뷰 (별도 파일로 분리됨)
     private lazy var tripSummaryView = TripLogSummaryView(switcherView: switcherView)
-    
-    private let contentContainerView = UIView()
-    
-    private var balance: Int = 0
-    
-    private var cashBook: MockCashBookModel? {
-        return viewModel.sections.value.first?.items.first
-    }
+            
+    private var cashBook: MockCashBookModel
 
     init(cashBook: MockCashBookModel) {
+        self.cashBook = cashBook
         self.viewModel = TopViewModel(cashBook: cashBook)
         self.todayViewController = TodayViewController(cashBookID: cashBook.id)
-        self.calendarViewController = CalendarViewController(cashBook: cashBook.id, balance: balance)
+        self.calendarViewController = CalendarViewController(cashBook: cashBook.id, balance: cashBook.budget)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -56,31 +51,21 @@ class TopViewController: UIViewController {
     
     private func setupLayout() {
         view.addSubview(tripSummaryView)
-        view.addSubview(contentContainerView)
         
         tripSummaryView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.top.equalTo(view.safeAreaLayoutGuide)
             $0.leading.trailing.equalToSuperview()
-        }
-        
-        contentContainerView.snp.makeConstraints {
-            $0.top.equalTo(tripSummaryView.snp.bottom)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
     
     private func setupUI() {
-        contentContainerView.addSubview(switcherView)
         
-        switcherView.snp.makeConstraints {
-            $0.edges.equalToSuperview() // 컨테이너 뷰 크기와 동일하게 설정
-        }
-        
-        guard let cashBook = cashBook else { return }
         self.navigationItem.title = cashBook.tripName
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.SCDream(size: .title, weight: .bold)
         ]
+        
         tripSummaryView.configure(
             subtitle: cashBook.note,
             date: "\(cashBook.departure.formattedDate()) - \(cashBook.homecoming.formattedDate())",
@@ -92,9 +77,20 @@ class TopViewController: UIViewController {
     /// ✅ 오늘 지출 업데이트 바인딩
     private func bindFormattedTotal() {
         todayViewController.formattedTotalRelay
+            .distinctUntilChanged()
             .subscribe(onNext: { [weak self] totalAmount in
                 print("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
                 self?.tripSummaryView.progressView.expense.accept(totalAmount)
+                self?.calendarViewController.reloadCalendarView()
+            })
+            .disposed(by: disposeBag)
+        
+        calendarViewController.rx.updateTotalAmount
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] totalAmount in
+                print("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
+                self?.tripSummaryView.progressView.expense.accept(totalAmount)
+                self?.todayViewController.updateTodayConsumption()
             })
             .disposed(by: disposeBag)
     }

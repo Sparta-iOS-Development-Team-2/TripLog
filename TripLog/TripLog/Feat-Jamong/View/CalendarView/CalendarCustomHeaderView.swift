@@ -53,11 +53,6 @@ class CalendarCustomHeaderView: UIView {
         // 서브뷰 추가
         [previousButton, titleLabel, nextButton].forEach { addSubview($0) }
         
-        // 뷰 자체 높이 설정
-        snp.makeConstraints {
-            $0.height.equalTo(80)
-        }
-        
         // 이전 달 버튼 제약 조건
         previousButton.snp.makeConstraints {
             $0.left.centerY.equalToSuperview()

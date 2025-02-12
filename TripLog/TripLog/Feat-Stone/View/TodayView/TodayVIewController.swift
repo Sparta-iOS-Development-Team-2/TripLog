@@ -80,7 +80,7 @@ class TodayViewController: UIViewController {
 
     init(cashBookID: UUID) {
         self.cashBookID = cashBookID
-        self.viewModel = TodayViewModel()
+        self.viewModel = TodayViewModel(cashBookID: cashBookID)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -106,6 +106,13 @@ class TodayViewController: UIViewController {
             .disposed(by: disposeBag)
         
         updateExpense()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        floatingButton.layer.shadowPath = floatingButton.shadowPath()
+        helpButton.layer.shadowPath = helpButton.shadowPath()
     }
     
     // 🔹 UI 요소 추가
@@ -213,7 +220,7 @@ class TodayViewController: UIViewController {
                     title: expense.note,
                     category: expense.category,
                     amount: "\(CurrencyFormatter.formattedCurrency(from: expense.amount, currencyCode: expense.country))",
-                    exchangeRate: "\(NumberFormatter.formattedString(from: Double(expense.caculatedAmount))) 원",
+                    exchangeRate: "\(NumberFormatter.formattedString(from: expense.caculatedAmount.rounded())) 원",
                     payment: expense.payment
                 )
             }
@@ -242,7 +249,12 @@ class TodayViewController: UIViewController {
 
 
         // ✅ `totalAmountLabel`에 바인딩하여 UI 반영
-        formattedTotalRelay
+        filteredExpenses
+            .map { expense -> String in
+                let todayTotalExpense = Int(expense.reduce(0) { $0 + $1.caculatedAmount })
+                return NumberFormatter.wonFormat(todayTotalExpense)
+            }
+            .asObservable()
             .bind(to: totalAmountLabel.rx.text)
             .disposed(by: disposeBag)
         
@@ -283,6 +295,21 @@ class TodayViewController: UIViewController {
                 print("-----------\(totalExpense)")
             })
             .disposed(by: disposeBag)
+        
+        helpButton.rx.tap
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, _ in
+                let recentRateDate = CalculateDate.calculateDate()
+                PopoverManager.showPopover(on: owner,
+                                           from: owner.helpButton,
+                                           title: "현재의 환율은 \(recentRateDate) 환율입니다.",
+                                           subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
+                                           width: 170,
+                                           height: 60,
+                                           arrow: .down)
+                
+            }.disposed(by: disposeBag)
     }
                            
     @objc private func presentExpenseAddModal() {
@@ -363,6 +390,10 @@ class TodayViewController: UIViewController {
         dateFormatter.locale = Locale(identifier: "ko_KR") // 한국 로케일 적용 (필요시 변경 가능)
         return dateFormatter.string(from: Date()) // 현재 날짜 반환
     }
+    
+    func updateTodayConsumption() {
+        viewModel.input.fetchTrigger.accept(cashBookID)
+    }
 }
 
 // 🔹 천 단위 숫자 포맷 변환 (소수점 유지)
@@ -398,24 +429,16 @@ extension TodayViewController: UITableViewDelegate {
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
             guard let self = self else { return }
 
-            let alertController = UIAlertController(
-                title: "삭제 확인",
-                message: "정말로 삭제하시겠습니까?",
-                preferredStyle: .alert
-            )
-
-            let cancelAction = UIAlertAction(title: "취소", style: .cancel) { _ in
-                completionHandler(false)
-            }
-
-            let confirmAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
+            let alert = AlertManager(title: "삭제 확인",
+                                     message: "정말로 삭제하시겠습니까?",
+                                     cancelTitle: "취소",
+                                     destructiveTitle: "삭제")
+            {
                 self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
                 completionHandler(true)
             }
-
-            alertController.addAction(cancelAction)
-            alertController.addAction(confirmAction)
-            self.present(alertController, animated: true)
+            
+            alert.showAlert(on: self, .alert)
         }
 
         deleteAction.image = deleteImage // ✅ "삭제" 버튼을 이미지로 설정
@@ -475,5 +498,12 @@ extension UIView {
         return renderer.image { rendererContext in
             layer.render(in: rendererContext.cgContext)
         }
+    }
+}
+
+// 사용하는 뷰컨트롤러에 추가를 해주셔야 popover기능을 아이폰에서 정상적으로 사용 가능합니다.
+extension TodayViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
     }
 }

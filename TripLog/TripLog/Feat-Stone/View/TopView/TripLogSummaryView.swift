@@ -19,7 +19,9 @@ final class TripLogSummaryView: UIView {
     private let switcherView: TripSwitcherView
     
     /// 🔹 `titleDateView`, `progressView`, `buttonStackView`를 감싸는 컨테이너 뷰
-    private let tripSummaryContainerView = UIView()
+    private let tripSummaryContainerView = UIView().then {
+        $0.backgroundColor = UIColor.CustomColors.Background.background
+    }
     
     private let titleDateView = TitleDateView()
     let progressView = TopProgressView()
@@ -53,36 +55,35 @@ final class TripLogSummaryView: UIView {
     }
     
     private func setupLayout() {
-        tripSummaryContainerView.backgroundColor = UIColor.CustomColors.Background.background
-        addSubview(tripSummaryContainerView)
-        addSubview(switcherView)
-        
         /// ✅ tripSummaryContainerView 내부에 `titleDateView`, `progressView`, `buttonStackView` 추가
         [titleDateView, progressView, buttonStackView].forEach { tripSummaryContainerView.addSubview($0) }
-        
-        /// ✅ `tripSummaryContainerView` 레이아웃 설정
-        tripSummaryContainerView.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(buttonStackView.snp.bottom)
-        }
         
         titleDateView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(8)
             $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(43)
+            $0.height.equalTo(44)
         }
         
         progressView.snp.makeConstraints {
             $0.top.equalTo(titleDateView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(64)
         }
         
         buttonStackView.snp.makeConstraints {
             $0.top.equalTo(progressView.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(-1)
-            $0.height.equalTo(50)
             $0.bottom.equalToSuperview()
+        }
+
+        addSubview(tripSummaryContainerView)
+        addSubview(switcherView)
+        
+        /// ✅ `tripSummaryContainerView` 레이아웃 설정
+        tripSummaryContainerView.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
+            $0.height.equalTo(190)
         }
         
         switcherView.snp.makeConstraints {
@@ -90,6 +91,7 @@ final class TripLogSummaryView: UIView {
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
+    
     }
     
     /// ✅ 버튼 클릭 시 `TripSwitcherView`의 뷰 변경

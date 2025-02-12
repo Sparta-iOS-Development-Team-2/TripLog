@@ -45,6 +45,7 @@ class TitleDateView: UIView {
         subtitleLabel.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.trailing.equalToSuperview()
+            $0.height.equalTo(18)
         }
 
         dateLabel.snp.makeConstraints {
