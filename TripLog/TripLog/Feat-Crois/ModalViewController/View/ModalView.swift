@@ -206,7 +206,7 @@ private extension ModalView {
         if String(currency.currencyCode?.prefix(3) ?? "") == String(Currency.JPY.rawValue.prefix(3)) ||
             String(currency.currencyCode?.prefix(3) ?? "") == String(Currency.IDR.rawValue.prefix(3))
         {
-            result = amount * (currency.baseRate / 10)
+            result = amount * (currency.baseRate / 100)
         } else {
             result = amount * currency.baseRate
         }
