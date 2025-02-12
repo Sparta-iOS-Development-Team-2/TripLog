@@ -64,7 +64,7 @@ final class TripLogSummaryView: UIView {
         tripSummaryContainerView.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(buttonStackView.snp.bottom)
+            $0.height.equalTo(190)
         }
         
         titleDateView.snp.makeConstraints {
@@ -76,6 +76,7 @@ final class TripLogSummaryView: UIView {
         progressView.snp.makeConstraints {
             $0.top.equalTo(titleDateView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(64)
         }
         
         buttonStackView.snp.makeConstraints {

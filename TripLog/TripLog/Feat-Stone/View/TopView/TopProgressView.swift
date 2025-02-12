@@ -91,22 +91,24 @@ class TopProgressView: UIView {
 
         expenseLabel.snp.makeConstraints {
             $0.top.leading.equalToSuperview()
+            $0.height.equalTo(18)
         }
 
         budgetLabel.snp.makeConstraints {
             $0.top.trailing.equalToSuperview()
+            $0.height.equalTo(18)
         }
 
         progressBar.snp.makeConstraints {
             $0.top.equalTo(expenseLabel.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(16).priority(.required)
+            $0.height.equalTo(16)
         }
 
         balanceLabel.snp.makeConstraints {
-            $0.top.equalTo(progressBar.snp.bottom).offset(8)
+            $0.top.equalTo(progressBar.snp.bottom)
             $0.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview().priority(.low)
+            $0.height.equalTo(24)
         }
     }
 }

@@ -19,9 +19,7 @@ class TopViewController: UIViewController {
     
     /// ✅ 여행 요약 정보를 포함하는 상단 뷰 (별도 파일로 분리됨)
     private lazy var tripSummaryView = TripLogSummaryView(switcherView: switcherView)
-    
-    private let contentContainerView = UIView()
-    
+        
     private var balance: Int = 0
     
     private var cashBook: MockCashBookModel? {
@@ -56,25 +54,15 @@ class TopViewController: UIViewController {
     
     private func setupLayout() {
         view.addSubview(tripSummaryView)
-        view.addSubview(contentContainerView)
         
         tripSummaryView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             $0.leading.trailing.equalToSuperview()
-        }
-        
-        contentContainerView.snp.makeConstraints {
-            $0.top.equalTo(tripSummaryView.snp.bottom)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
     
     private func setupUI() {
-        contentContainerView.addSubview(switcherView)
-        
-        switcherView.snp.makeConstraints {
-            $0.edges.equalToSuperview() // 컨테이너 뷰 크기와 동일하게 설정
-        }
         
         guard let cashBook = cashBook else { return }
         self.navigationItem.title = cashBook.tripName
