@@ -14,7 +14,9 @@ struct CalculateDate {
     static func calculateDate() -> String {
         let calendar = Calendar.current
         
-        guard let fetchRateDate = CoreDataManager.shared.fetch(type: CurrencyEntity.self).first,
+        let todayDate = Date.formattedDateString(from: Date())
+        
+        guard let fetchRateDate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayDate).first,
               let rateDate = fetchRateDate.rateDate,
               let currencyDate = Formatter.rateDateValue(rateDate)
         else {

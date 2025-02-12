@@ -52,17 +52,16 @@ class TodayViewModel {
     private let deleteExpenseTrigger = PublishRelay<Int>()
     private let showAddExpenseModalTrigger = PublishRelay<Void>()
 
-    init() {
+    init(cashBookID: UUID) {
         // ✅ 특정 cashBookID의 데이터 가져오기
         fetchTrigger
             .flatMapLatest { cashBookID -> Observable<[MockMyCashBookModel]> in
-                let predicate = NSPredicate(format: "cashBookID == %@", cashBookID as CVarArg)
-                let entities = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: predicate)
+                let entities = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: cashBookID)
                 
                 let convertedData = entities.map { entity in
                     MockMyCashBookModel(
                         amount: entity.amount,
-                        cashBookID: entity.cashBookID ?? UUID(),
+                        cashBookID: entity.cashBookID ?? cashBookID,
                         caculatedAmount: entity.caculatedAmount,
                         category: entity.category ?? "기타",
                         country: entity.country ?? "USD",
@@ -104,7 +103,7 @@ class TodayViewModel {
                 let currentExpenses = self.expensesRelay.value
                 guard index < currentExpenses.count else { return } // ✅ 유효한 인덱스인지 확인
                 
-                let targetExpense = currentExpenses[index] // ✅ 인덱스로 요소 가져오기
+                let targetExpense = currentExpenses.filter { Calendar.current.isDate($0.expenseDate, inSameDayAs: Date()) }[index] // ✅ 인덱스로 요소 가져오기
 
                 // ✅ CoreData에서 삭제
                 CoreDataManager.shared.delete(type: MyCashBookEntity.self, entityID: targetExpense.id)
