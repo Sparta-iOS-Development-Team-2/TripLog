@@ -127,7 +127,7 @@ private extension ModalTextField {
 
 extension Reactive where Base: ModalTextField {
     /// 텍스트필드의 입력란이 비었는지 검사하고 이벤트를 방출하는 옵저버블
-    var textFieldIsBlank: Observable<Bool> {
+    var textFieldIsEmpty: Observable<Bool> {
         return base.textField.rx.text.orEmpty
             .map { $0.count <= 0 }
             .distinctUntilChanged()

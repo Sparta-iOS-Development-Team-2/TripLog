@@ -22,17 +22,17 @@ final class ModalView: UIView {
     fileprivate let cashBookActiveButtonTapped = PublishRelay<ModalCashBookData>()
     fileprivate let consumptionActiveButtonTapped = PublishRelay<ModalConsumptionData>()
     
-    private let firstTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
-    private let secondTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
-    private let thirdTextFieldIsBlank = BehaviorSubject<Bool>(value: true)
-    private let dateIsBlank = BehaviorSubject<Bool>(value: false)
+    private let firstTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
+    private let secondTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
+    private let thirdTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
+    private let dateIsEmpty = BehaviorSubject<Bool>(value: false)
     
-    fileprivate lazy var allSectionIsBlank: Observable<Bool> = {
+    fileprivate lazy var allSectionIsEmpty: Observable<Bool> = {
         return Observable
-            .combineLatest(firstTextFieldIsBlank,
-                           secondTextFieldIsBlank,
-                           thirdTextFieldIsBlank,
-                           dateIsBlank
+            .combineLatest(firstTextFieldIsEmpty,
+                           secondTextFieldIsEmpty,
+                           thirdTextFieldIsEmpty,
+                           dateIsEmpty
             )
             .map { $0 || $1 || $2 || $3 }
             .distinctUntilChanged()
@@ -64,7 +64,7 @@ final class ModalView: UIView {
     private var cashBookID: UUID?
     private var consumptionID: UUID?
     private var expenseDate: Date?
-    private var exchangeRate: CurrencyRate?
+    private var exchangeRate: [CurrencyEntity]?
     
     // MARK: - Initializer
     
@@ -199,12 +199,9 @@ private extension ModalView {
     ///   - amount: 기준 원화
     /// - Returns: 환율을 적용한 원화
     func exchangeRateCalculation(_ country: String, _ amount: Double) -> Double {
-        guard
-            let currency = exchangeRate?.filter({ $0.curUnit == country }).first,
-            let rate = Double(currency.dealBasR ?? "")
-        else { return 0 }
+        guard let currency = exchangeRate?.filter({ $0.currencyCode == country }).first else { return 0 }
         
-        let result = amount / rate
+        let result = amount / currency.baseRate
         return result
     }
     
@@ -217,20 +214,20 @@ private extension ModalView {
                let thirdSection = self.thirdSection as? ModalTextField,
                let forthSection = self.forthSection as? ModalDateView
             {
-                firstSection.rx.textFieldIsBlank
-                    .bind(to: firstTextFieldIsBlank)
+                firstSection.rx.textFieldIsEmpty
+                    .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                secondSection.rx.textFieldIsBlank
-                    .bind(to: secondTextFieldIsBlank)
+                secondSection.rx.textFieldIsEmpty
+                    .bind(to: secondTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.textFieldIsBlank
-                    .bind(to: thirdTextFieldIsBlank)
+                thirdSection.rx.textFieldIsEmpty
+                    .bind(to: thirdTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                forthSection.rx.dateIsBlank
-                    .bind(to: dateIsBlank)
+                forthSection.rx.dateIsEmpty
+                    .bind(to: dateIsEmpty)
                     .disposed(by: disposeBag)
             }
             
@@ -247,20 +244,20 @@ private extension ModalView {
                 
                 self.cashBookID = data.id
                 
-                firstSection.rx.textFieldIsBlank
-                    .bind(to: firstTextFieldIsBlank)
+                firstSection.rx.textFieldIsEmpty
+                    .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                secondSection.rx.textFieldIsBlank
-                    .bind(to: secondTextFieldIsBlank)
+                secondSection.rx.textFieldIsEmpty
+                    .bind(to: secondTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.textFieldIsBlank
-                    .bind(to: thirdTextFieldIsBlank)
+                thirdSection.rx.textFieldIsEmpty
+                    .bind(to: thirdTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                forthSection.rx.dateIsBlank
-                    .bind(to: dateIsBlank)
+                forthSection.rx.dateIsEmpty
+                    .bind(to: dateIsEmpty)
                     .disposed(by: disposeBag)
             }
             
@@ -274,16 +271,16 @@ private extension ModalView {
                 self.expenseDate = data.date
                 self.exchangeRate = data.exchangeRate
                 
-                secondSection.rx.textFieldIsBlank
-                    .bind(to: firstTextFieldIsBlank)
+                secondSection.rx.textFieldIsEmpty
+                    .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.textFieldIsBlank
-                    .bind(to: secondTextFieldIsBlank)
+                thirdSection.rx.textFieldIsEmpty
+                    .bind(to: secondTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                forthSection.rx.amountViewIsBlank
-                    .bind(to: thirdTextFieldIsBlank)
+                forthSection.rx.amountViewIsEmpty
+                    .bind(to: thirdTextFieldIsEmpty)
                     .disposed(by: disposeBag)
             }
             
@@ -303,16 +300,16 @@ private extension ModalView {
                 self.expenseDate = data.expenseDate
                 self.exchangeRate = rate
                 
-                secondSection.rx.textFieldIsBlank
-                    .bind(to: firstTextFieldIsBlank)
+                secondSection.rx.textFieldIsEmpty
+                    .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.textFieldIsBlank
-                    .bind(to: secondTextFieldIsBlank)
+                thirdSection.rx.textFieldIsEmpty
+                    .bind(to: secondTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                forthSection.rx.amountViewIsBlank
-                    .bind(to: thirdTextFieldIsBlank)
+                forthSection.rx.amountViewIsEmpty
+                    .bind(to: thirdTextFieldIsEmpty)
                     .disposed(by: disposeBag)
             }
         }
@@ -434,6 +431,6 @@ extension Reactive where Base: ModalView {
     
     /// 빈 값인 섹션이 있는지 검사하고 이벤트를 방출하는 옵저버블
     var checkBlankOfSections: Observable<Bool> {
-        return base.allSectionIsBlank
+        return base.allSectionIsEmpty
     }
 }
