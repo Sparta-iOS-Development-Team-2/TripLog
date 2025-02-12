@@ -13,19 +13,31 @@ class TodayViewController: UIViewController {
     private let topStackView = UIStackView()
     
     var onTotalAmountUpdated: ((String)->Void)?
+    
+    let totalExpense = BehaviorRelay<Int>(value: 0)
+    let formattedTotalRelay = BehaviorRelay<String>(value: "0 원") // ✅ Rx로 관리
+
+    // ✅ TripLogTopView에 반영할 총 지출 금액 Relay (클로저 방식)
+    var onTotalExpenseUpdated: ((Int) -> Void)?
 
     // "지출 내역" 헤더 레이블
     private let headerTitleLabel = UILabel().then {
         $0.text = "지출 내역"
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
+        $0.textColor = UIColor(named: "textPrimary")
     }
         
     // 도움말 버튼
+    // 도움말 버튼 (원형으로 만들기)
     private let helpButton = UIButton(type: .system).then {
         $0.setTitle("?", for: .normal)
-        $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        $0.applyBackgroundColor()
+        $0.clipsToBounds = true
+        $0.applyFloatingButtonShadow()
+        $0.applyCornerRadius(12)
     }
-        
+
     // "오늘 사용 금액" 라벨
     private let totalLabel = UILabel().then {
         $0.text = "오늘 사용 금액"
@@ -46,10 +58,12 @@ class TodayViewController: UIViewController {
         $0.separatorStyle = .none
         $0.backgroundColor = .clear
         $0.showsVerticalScrollIndicator = false
-        $0.rowHeight = 108
+        $0.rowHeight = 124
         $0.clipsToBounds = true
         $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
         $0.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        $0.allowsSelection = true
+        $0.allowsMultipleSelection = false
     }
     
     private let floatingButton = UIButton(type: .system).then {
@@ -83,9 +97,15 @@ class TodayViewController: UIViewController {
         setupViews()
         setupConstraints()
         bindViewModel()
-        
+                
         // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
         viewModel.input.fetchTrigger.accept(cashBookID)
+        
+        // ✅ Rx 방식으로 delegate 설정
+        tableView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
+        
+        updateExpense()
     }
     
     // 🔹 UI 요소 추가
@@ -118,6 +138,11 @@ class TodayViewController: UIViewController {
     
     // 🔹 UI 레이아웃 설정
     private func setupConstraints() {
+        
+        helpButton.snp.makeConstraints {
+            $0.width.height.equalTo(24) // 버튼 크기를 40x40으로 고정
+        }
+        
         topStackView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
             $0.leading.trailing.equalToSuperview().inset(16)
@@ -127,86 +152,122 @@ class TodayViewController: UIViewController {
             $0.top.equalTo(topStackView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(8)
             $0.bottom.equalToSuperview()
+            
         }
         
         floatingButton.snp.makeConstraints {
             $0.width.height.equalTo(64)
             $0.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(120)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(32)
         }
     }
     
+    private func updateExpense() {
+
+        let TotalExpense = totalExpense.value
+        totalExpense.accept(TotalExpense)
+    }
+    
+    private func updateEmptyState(isEmpty: Bool) {
+        if isEmpty {
+            let emptyLabel = UILabel().then {
+                $0.text = "지출 내역이 없습니다"
+                $0.font = .SCDream(size: .body, weight: .medium)
+                $0.textColor = UIColor.CustomColors.Text.textSecondary
+                $0.textAlignment = .center
+            }
+            tableView.backgroundView = emptyLabel
+        } else {
+            tableView.backgroundView = nil
+        }
+    }
+
     private func bindViewModel() {
         
-        // 🔹 동일한 `cashBookID`를 가진 항목만 표시하도록 필터링
-            let filteredExpenses = viewModel.output.expenses
-                .map { [weak self] expenses -> [MockMyCashBookModel] in
-                    guard let self = self else { return [] }
-                    return expenses.filter { $0.cashBookID == self.cashBookID }
+        // 🔹 동일한 `cashBookID`, 날짜를 가진 항목만 표시하도록 필터링
+        let filteredExpenses = viewModel.output.expenses
+            .map { [weak self] expenses -> [MockMyCashBookModel] in
+                guard let self = self else { return [] }
+                
+                let today = Calendar.current.startOfDay(for: Date()) // 🔹 오늘 날짜 (시간 제거)
+                
+                return expenses.filter {
+                    $0.cashBookID == self.cashBookID &&
+                    Calendar.current.isDate($0.expenseDate, inSameDayAs: today) // 🔹 오늘 날짜와 같은 데이터만 필터링
                 }
-//                .share(replay: 1) // ✅ 여러 곳에서 사용되므로 공유
-
-            // 🔹 **콘솔 출력 (디버깅용)**
-            filteredExpenses
-                .drive(onNext: { expenses in
-                    print("📌 expenses 데이터 확인:", expenses) // ✅ 콘솔에 데이터 출력
-                })
-                .disposed(by: disposeBag)
-
-            // 🔹 테이블 뷰 바인딩 (필터링 적용)
-            filteredExpenses
-                .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
-                    cell.configure(
-                        date: "오늘",
-                        title: expense.note,
-                        category: expense.category,
-                        amount: "$ \(NumberFormatter.formattedString(from: Int(expense.amount)))",
-                        exchangeRate: "\(NumberFormatter.formattedString(from: Int(expense.amount * 1.4))) 원",
-                        payment: expense.payment
-                    )
-                }
-                .disposed(by: disposeBag)
-
-            // 🔹 **총 지출 금액을 `exchangeRate`의 합으로 반영 (필터링된 데이터만 적용)**
-            filteredExpenses
-                .map { expenses in
-                    let totalExchangeRate = expenses.map { Int($0.amount * 1.4) }.reduce(0, +)
-                    return "\(NumberFormatter.formattedString(from: totalExchangeRate)) 원"
-                }
-                .drive(onNext: { [weak self] totalAmount in
-                    self?.totalAmountLabel.text = totalAmount // ✅ totalAmountLabel 업데이트
-                    self?.onTotalAmountUpdated?(totalAmount) // ✅ **값 변경 시 클로저 실행 (TopViewController에 전달)**
-                })
-                .disposed(by: disposeBag)
-        
-            filteredExpenses
-                .drive(onNext: { [weak self] _ in
-                    guard let self = self else { return }
-                    self.tableView.reloadData() // ✅ 셀이 변경될 때 프로그레스 바 반영
-                })
-                .disposed(by: disposeBag)
-            
-        
-        
-        // ✅ 테이블 뷰 셀 선택 이벤트 감지 및 모달 띄우기
-        tableView.rx.modelSelected(MockMyCashBookModel.self)
-            .do(onNext: { selectedExpense in
-                print("📌 선택된 셀 데이터 확인: \(selectedExpense)") // ✅ 선택 이벤트 로그 추가
-            })
-            .flatMapLatest { [weak self] selectedExpense -> Observable<Void> in
-                guard let self = self else {
-                    print("📌 self가 nil입니다.") // ✅ 메모리 해제 문제 확인
-                    return .empty()
-                }
-                // TODO: 모달뷰 로직 추후 수정 요청(석준)
-                return ModalViewManager.showModal(state: .editConsumption(data: selectedExpense, exchangeRate: [])).map { $0 }
             }
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                print("📌 수정 모달 닫힘 후 데이터 새로고침") // ✅ 모달 닫힌 후 이벤트 확인
-                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+
+
+        // 🔹 **콘솔 출력 (디버깅용)**
+        filteredExpenses
+            .drive(onNext: { expenses in
+                print("📌 expenses 데이터 확인:", expenses) // ✅ 콘솔에 데이터 출력
             })
             .disposed(by: disposeBag)
+
+        // 🔹 테이블 뷰 바인딩 (필터링 적용)
+        filteredExpenses
+            .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
+                cell.configure(
+                    date: self.getTodayDate(),
+                    title: expense.note,
+                    category: expense.category,
+                    amount: "\(CurrencyFormatter.formattedCurrency(from: expense.amount, currencyCode: expense.country))",
+                    exchangeRate: "\(NumberFormatter.formattedString(from: Double(expense.caculatedAmount))) 원",
+                    payment: expense.payment
+                )
+            }
+            .disposed(by: disposeBag)
+
+        // 🔹 `cashBookID` 기준으로만 필터링 (총합 계산용)
+        let totalExpensesByID = viewModel.output.expenses
+            .map { [weak self] expenses -> [MockMyCashBookModel] in
+                guard let self = self else { return [] }
+                
+                return expenses.filter { $0.cashBookID == self.cashBookID } // 🔹 날짜 필터링 제거
+            }
+
+        // 🔹 **필터링된 데이터에서 총합 계산**
+        totalExpensesByID
+            .map { expenses -> String in
+                let totalExchangeRate = expenses.map { Int($0.caculatedAmount) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
+                let formattedTotal = NumberFormatter.formattedString(from: Double(totalExchangeRate)) + " 원"
+                print("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
+                
+                return formattedTotal
+            }
+            .startWith("0 원") // ✅ 첫 화면 로딩 시 기본 값 설정
+            .drive(formattedTotalRelay) // ✅ `formattedTotalRelay`에 값 전달
+            .disposed(by: disposeBag)
+
+
+        // ✅ `totalAmountLabel`에 바인딩하여 UI 반영
+        formattedTotalRelay
+            .bind(to: totalAmountLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        
+        filteredExpenses
+            .drive(onNext: { [weak self] expenses in
+                guard let self = self else { return }
+                
+                self.updateEmptyState(isEmpty: expenses.isEmpty)
+                
+                self.tableView.reloadData() // ✅ 셀이 변경될 때 프로그레스 바 반영
+            })
+            .disposed(by: disposeBag)
+                
+        tableView.rx.modelSelected(MockMyCashBookModel.self)
+            .subscribe(onNext: { [weak self] selectedExpense in
+                guard let self = self else { return }
+
+                print("📌 선택된 셀 데이터 확인: \(selectedExpense)")
+
+                // ✅ 선택된 데이터를 이용하여 편집 모달 띄우기
+                self.presentExpenseEditModal(data: selectedExpense)
+            })
+            .disposed(by: disposeBag)
+
         
         // 🔹 모달 표시 바인딩 (RxSwift 적용)
         floatingButton.rx.tap
@@ -215,109 +276,204 @@ class TodayViewController: UIViewController {
                 self.presentExpenseAddModal()
             })
             .disposed(by: disposeBag)
+        // ✅ `totalExpenseRelay` 값 변경될 때 `onTotalExpenseUpdated` 실행
+        viewModel.totalExpenseRelay
+            .subscribe(onNext: { [weak self] totalExpense in
+                self?.onTotalExpenseUpdated?(totalExpense) // ✅ 값 변경 시 클로저 실행
+                print("-----------\(totalExpense)")
+            })
+            .disposed(by: disposeBag)
     }
                            
     @objc private func presentExpenseAddModal() {
-        // TODO: 모달뷰 로직 추후 수정 요청(석준)
-//        ModalViewManager.showModal(on: self, state: .createNewConsumption(cashBookID: self.cashBookID, date: Date()))
-//            .subscribe(onNext: { [weak self] in
-//                guard let self = self else { return }
-//                print("📌 사용된 cashBookID: \(self.cashBookID)")
-//                print("📌 저장된 날짜: \(Date())")
-//
-//                // ✅ 모달 닫힌 후 데이터 새로고침
-//                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
-//            })
-//            .disposed(by: disposeBag)
+        
+        // 오늘 날짜를 "YYYYMMDD" 형식의 문자열로 변환
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        let todayString = dateFormatter.string(from: Date())
+
+        // CoreData에서 오늘 날짜에 해당하는 데이터 가져오기
+        let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
+
+        
+        ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: self.cashBookID, date: Date(), exchangeRate: exchangeRate)))
+            .asSignal(onErrorSignalWith: .empty())
+            .emit(onNext: { [weak self] data in
+                guard let self = self,
+                let cashBookData = data as? MockMyCashBookModel else { return }
+                debugPrint("📌 모달뷰 닫힘 후 데이터 갱신 시작")
+                
+                CoreDataManager.shared.save(type: MyCashBookEntity.self, data: cashBookData)
+                
+                // ✅ fetchTrigger 실행하여 데이터 갱신 요청
+                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+
+                // ✅ fetchTrigger 실행 후 1초 뒤 `expenses`를 다시 구독하여 값 확인
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self.viewModel.output.expenses
+                        .drive(onNext: { fetchedExpenses in
+                            print("📌 🔥 fetchTrigger 실행 후 expenses 업데이트됨: \(fetchedExpenses.count)개 항목")
+                            print("ee\(exchangeRate)")
+                        })
+                        .disposed(by: self.disposeBag)
+
+                    // ✅ 테이블 뷰 강제 갱신 (UI 반영 확인용)
+                    self.tableView.reloadData()
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+
+    private func presentExpenseEditModal(data: MockMyCashBookModel) {
+        let todayDate = Date.formattedDateString(from: Date())
+        let exchagedRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayDate)
+        
+        ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: exchagedRate))
+            .asSignal(onErrorSignalWith: .empty())
+            .emit(onNext: { [weak self] updatedData in
+                guard let self = self,
+                      let updatedExpense = updatedData as? MockMyCashBookModel else { return }
+
+                debugPrint("📌 모달뷰 닫힘 후 수정된 데이터: \(updatedExpense)")
+
+                // ✅ CoreData에서 기존 데이터를 업데이트
+                CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: updatedExpense.id, data: updatedExpense)
+
+                // ✅ fetchTrigger 실행하여 데이터 갱신 요청
+                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
+
+                // ✅ 데이터 갱신 후 UI 업데이트 (비동기 처리)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self.viewModel.output.expenses
+                        .drive(onNext: { fetchedExpenses in
+                            print("📌 🔥 fetchTrigger 실행 후 expenses 업데이트됨: \(fetchedExpenses.count)개 항목")
+                        })
+                        .disposed(by: self.disposeBag)
+
+                    // ✅ 테이블 뷰 강제 갱신 (UI 반영 확인용)
+                    self.tableView.reloadData()
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
-    private func presentExpenseEditModal(data: MockMyCashBookModel) {
-        // TODO: 모달뷰 로직 추후 수정 요청(석준)
-//        ModalViewManager.showModal(on: self, state: .editConsumption(data: data))
-//            .subscribe(onNext: { [weak self] in
-//                guard let self = self else { return }
-//                print("📌 수정된 내역: \(data)")
-//                
-//                // ✅ 모달 닫힌 후 데이터 새로고침
-//                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
-//            })
-//            .disposed(by: disposeBag)
+    func getTodayDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy.MM.dd"  // 날짜 포맷 설정
+        dateFormatter.locale = Locale(identifier: "ko_KR") // 한국 로케일 적용 (필요시 변경 가능)
+        return dateFormatter.string(from: Date()) // 현재 날짜 반환
     }
-
 }
 
-// 천 단위 숫자 포맷 변환
+// 🔹 천 단위 숫자 포맷 변환 (소수점 유지)
 extension NumberFormatter {
-    static func formattedString(from number: Int) -> String {
+    static func formattedString(from number: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
+
+        // ✅ 정수라면 소수점 제거, 소수점이 있으면 최대 2자리 표시
+        if number.truncatingRemainder(dividingBy: 1) == 0 {
+            formatter.maximumFractionDigits = 0  // 정수일 때 소수점 제거
+        } else {
+            formatter.minimumFractionDigits = 2  // 소수점이 있을 때 최소 2자리
+            formatter.maximumFractionDigits = 2  // 소수점 2자리까지 표시
+        }
+
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
 }
 
 extension TodayViewController: UITableViewDelegate {
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        tableView.delegate = self
-    }
-
-    // 기본 삭제 기능 비활성화
-    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        return false // 기본 삭제 버튼 비활성화
-    }
-
+    
     // 기본 삭제 기능을 완전히 비활성화
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         // 기본 삭제 기능 비활성화 (아무 동작도 하지 않음)
     }
 
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        // 삭제 버튼 컨테이너 뷰 생성
-        let deleteView = UIView(frame: CGRect(x: 0, y: 0, width: 70, height: 40)).then {
-            $0.backgroundColor = .red
-            $0.layer.cornerRadius = 8
-        }
+        
+        // ✅ "삭제" 버튼을 위한 UIView를 UIImage로 변환
+        let deleteImage = createDeleteButtonImage()
 
-        let deleteButton = UIButton(type: .system).then {
-            $0.setTitle("삭제", for: .normal)
-            $0.setTitleColor(.white, for: .normal)
-            $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
-        }
-
-        deleteView.addSubview(deleteButton)
-        deleteButton.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-            make.width.equalTo(50) // 버튼의 좌우 크기 조절
-            make.height.equalTo(30) // 버튼의 높이 조절
-        }
-
-        let customDeleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] _, _, completionHandler in
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
             guard let self = self else { return }
-            
-            // ✅ Rx 방식으로 삭제 요청을 전달
-            self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
-            
-            completionHandler(true)
+
+            let alertController = UIAlertController(
+                title: "삭제 확인",
+                message: "정말로 삭제하시겠습니까?",
+                preferredStyle: .alert
+            )
+
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel) { _ in
+                completionHandler(false)
+            }
+
+            let confirmAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
+                self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
+                completionHandler(true)
+            }
+
+            alertController.addAction(cancelAction)
+            alertController.addAction(confirmAction)
+            self.present(alertController, animated: true)
         }
 
+        deleteAction.image = deleteImage // ✅ "삭제" 버튼을 이미지로 설정
+        deleteAction.backgroundColor = UIColor.CustomColors.Background.detailBackground
 
-        // 기본 배경 제거 후, 커스텀 뷰 적용
-        customDeleteAction.backgroundColor = UIColor.CustomColors.Background.background
-       // customDeleteAction.image = deleteView.asImage() // UIView를 UIImage로 변환하여 버튼 크기 반영
-
-        let configuration = UISwipeActionsConfiguration(actions: [customDeleteAction])
-        configuration.performsFirstActionWithFullSwipe = false // 전체 스와이프 방지
-
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        configuration.performsFirstActionWithFullSwipe = false
+        
         return configuration
+    }
+
+    /// ✅ "삭제" 버튼을 이미지로 생성하는 메서드 (cornerRadius 적용)
+    private func createDeleteButtonImage() -> UIImage? {
+        let size = CGSize(width: 70, height: 108) // ✅ 버튼 크기 설정
+        let cornerRadius: CGFloat = 16 // ✅ 원하는 radius 값 설정
+        let renderer = UIGraphicsImageRenderer(size: size)
+
+        return renderer.image { context in
+            let rect = CGRect(origin: .zero, size: size)
+            
+            // ✅ 둥근 모서리를 적용한 경로 생성
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius)
+            
+            // ✅ 클리핑 적용 (둥근 모서리 적용을 위해 필요)
+            context.cgContext.addPath(path.cgPath)
+            context.cgContext.clip()
+            
+            // ✅ 배경 색 적용
+            UIColor.red.setFill()
+            context.fill(rect)
+
+            // ✅ 텍스트 속성 설정
+            let text = "삭제"
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 16, weight: .bold),
+                .foregroundColor: UIColor.white
+            ]
+
+            // ✅ 텍스트 위치 조정 후 그리기
+            let textSize = text.size(withAttributes: attributes)
+            let textRect = CGRect(
+                x: (size.width - textSize.width) / 2,
+                y: (size.height - textSize.height) / 2,
+                width: textSize.width,
+                height: textSize.height
+            )
+            text.draw(in: textRect, withAttributes: attributes)
+        }
     }
 
 }
 
-@available(iOS 17.0, *)
-#Preview("TodayViewController") {
-    // ✅ `context` 제거 후 `cashBookID`만 전달하도록 수정
-    let sampleCashBookID = UUID()
-    let viewController = TodayViewController(cashBookID: sampleCashBookID)
-
-    return UINavigationController(rootViewController: viewController)
+// ✅ UIView를 UIImage로 변환하는 확장 함수
+extension UIView {
+    func asImage() -> UIImage {
+        let renderer = UIGraphicsImageRenderer(bounds: bounds)
+        return renderer.image { rendererContext in
+            layer.render(in: rendererContext.cgContext)
+        }
+    }
 }

@@ -24,10 +24,11 @@ class TodayViewModel {
     private let expensesRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
     private let totalAmountRelay = BehaviorRelay<String>(value: "0 원")
     private let showAddExpenseModalRelay = PublishRelay<Void>()
+    let totalExpenseRelay = BehaviorRelay<Int>(value: 0)
     
     private let disposeBag = DisposeBag()
     
-    // ✅ Input과 Output을 늦게 초기화하기 위해 `lazy` 사용
+    // ✅ Input과 Output을 늦게 초기화하기 위해 lazy 사용
     lazy var input: Input = {
         return Input(
             fetchTrigger: fetchTrigger,
@@ -62,7 +63,7 @@ class TodayViewModel {
                     MockMyCashBookModel(
                         amount: entity.amount,
                         cashBookID: entity.cashBookID ?? UUID(),
-                        caculatedAmount: 1234, // TODO: (#102)수정필요
+                        caculatedAmount: Int(entity.caculatedAmount),
                         category: entity.category ?? "기타",
                         country: entity.country ?? "USD",
                         expenseDate: entity.expenseDate ?? Date(),
@@ -80,10 +81,9 @@ class TodayViewModel {
         // ✅ 총 사용 금액 계산
         expensesRelay
             .map { expenses in
-                let total = expenses.reduce(0) { $0 + $1.amount }
-                return "\(Int(total)) 원"
+                expenses.reduce(0) { $0 + Int($1.amount) } // ✅ `Int` 값 반환
             }
-            .bind(to: totalAmountRelay)
+            .bind(to: totalExpenseRelay) // ✅ `Int` 타입으로 바인딩 성공
             .disposed(by: disposeBag)
         
         // ✅ 지출 추가 처리 (저장 후 자동으로 fetchTrigger 실행)
@@ -99,14 +99,16 @@ class TodayViewModel {
         deleteExpenseTrigger
             .subscribe(onNext: { [weak self] index in
                 guard let self = self else { return }
+
+                // ✅ 현재 데이터 배열에서 인덱스로 `UUID` 찾기
                 let currentExpenses = self.expensesRelay.value
-                guard index < currentExpenses.count else { return }
-                    
-                let targetExpense = currentExpenses[index]
-                        
-                // CoreData에서 삭제
+                guard index < currentExpenses.count else { return } // ✅ 유효한 인덱스인지 확인
+                
+                let targetExpense = currentExpenses[index] // ✅ 인덱스로 요소 가져오기
+
+                // ✅ CoreData에서 삭제
                 CoreDataManager.shared.delete(type: MyCashBookEntity.self, entityID: targetExpense.id)
-                        
+
                 // ✅ 최신 데이터 다시 불러오기
                 self.fetchTrigger.accept(targetExpense.cashBookID)
             })
