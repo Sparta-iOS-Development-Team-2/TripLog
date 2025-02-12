@@ -21,6 +21,7 @@ final class CalendarView: UIView {
         // 기본 설정
         $0.allowsMultipleSelection = false
         $0.locale = Locale(identifier: "ko_KR")
+        $0.formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         $0.placeholderType = .fillHeadTail
         $0.scrollEnabled = false
         

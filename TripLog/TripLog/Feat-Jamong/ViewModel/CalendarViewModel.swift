@@ -23,12 +23,13 @@ class CalendarViewModel: ViewModelType {
     struct Input {
         let previousButtonTapped: Observable<Void>
         let nextButtonTapped: Observable<Void>
-        let addButtonTapped: Observable<Date>
+        let addButtonTapped: Observable<Void>
+        let didSelected: PublishRelay<Date>
     }
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
-        let expenses: BehaviorRelay<[MockMyCashBookModel]>
+        let expenses: BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Double)>
         let addButtonTapped: PublishRelay<Date>
     }
     
@@ -36,19 +37,28 @@ class CalendarViewModel: ViewModelType {
     let disposeBag = DisposeBag()
     
     // 가계부 ID 저장
-    private let cashBookID: UUID
+    let cashBookID: UUID
+    private let balance: Int
     
     // 지출 데이터를 저장
     private let expenseRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
     
+    // 선택 날짜의 지출 데이터를 저장
+    private let selectedDateData = PublishRelay<([MockMyCashBookModel], Date)>()
+    
+    // 셀 데이트 저장
+    var selectedDate = Date()
+    
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
     private let addButtonTapped = PublishRelay<Date>()
+    private let expensesData = BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Double)>(value: (Date(), [], 0))
     
     
     // MARK: - Initalization
-    init(cashBookID: UUID) {
+    init(cashBookID: UUID, balance: Int) {
         self.cashBookID = cashBookID
+        self.balance = balance
         loadExpenseData()
     }
     
@@ -80,17 +90,49 @@ class CalendarViewModel: ViewModelType {
             .disposed(by: disposeBag)
       
         input.addButtonTapped
-            .asSignal(onErrorJustReturn: Date())
-            .emit(to: addButtonTapped)
+            .withUnretained(self)
+            .map { owner, _ -> Date in
+                owner.selectedDate
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { [weak self] date in
+                self?.addButtonTapped.accept(date)
+            }.disposed(by: disposeBag)
+            
+        
+        input.didSelected
+            .withUnretained(self)
+            .map { owner, date -> (date: Date, data: [MockMyCashBookModel], balance: Double) in
+                owner.selectedDate = date
+                let remainingBudget = owner.calculateRemainingBudget(upTo: date)
+                return (date, owner.expensesForDate(date: date), remainingBudget)
+            }
+            .asDriver(onErrorDriveWith: .empty())
+            .drive{ [weak self] data in
+                self?.expensesData.accept(data)
+            }
+            .disposed(by: disposeBag)
+        
+        expenseRelay
+            .withUnretained(self)
+            .map { owner, _ -> (date: Date, data: [MockMyCashBookModel], balance: Double) in
+                let remainingBudget = owner.calculateRemainingBudget(upTo: owner.selectedDate)
+                return (owner.selectedDate, owner.expensesForDate(date: owner.selectedDate), remainingBudget)
+            }
+            .asDriver(onErrorDriveWith: .empty())
+            .drive{ [weak self] data in
+                self?.expensesData.accept(data)
+            }
             .disposed(by: disposeBag)
         
         return Output(
             updatedDate: self.currentPageRelay,
-            expenses: expenseRelay,
+            expenses: expensesData,
             addButtonTapped: self.addButtonTapped
         )
     }
     
+    // MARK: - CoreData Methods
     /// Coredata에서 지출 데이터를 로드하여 expenseData에 저장하는 메서드
     func loadExpenseData() {
         let expenses = CoreDataManager.shared.fetch(
@@ -98,22 +140,60 @@ class CalendarViewModel: ViewModelType {
             predicate: cashBookID
         )
         
-        // amount외 원화 객체 수정예정
-        let models = expenses.map { entity -> MockMyCashBookModel in
+        let models = expenses.compactMap { entity -> MockMyCashBookModel? in
+            guard let entityID = entity.cashBookID,
+                  entityID == self.cashBookID else { return nil }
+            
             return MockMyCashBookModel(
                 amount: entity.amount,
                 cashBookID: entity.cashBookID ?? self.cashBookID,
                 caculatedAmount: 1234, // TODO: (#102)수정필요
                 category: entity.category ?? "",
                 country: entity.country ?? "",
-                expenseDate: entity.expenseDate ?? Date(),
+                expenseDate: entity.expenseDate ?? self.selectedDate,
+                id: entity.id ?? UUID(), // ID도 명시적으로 설정
                 note: entity.note ?? "",
                 payment: entity.payment
             )
         }
         
-        expenseRelay.accept(models)
-      
+        DispatchQueue.main.async { [weak self] in
+            self?.expenseRelay.accept(models)
+            
+            // 현재 선택된 날짜의 데이터도 업데이트
+            if let self = self {
+                let remainingBudget = self.calculateRemainingBudget(upTo: self.selectedDate)
+                let currentData = (
+                    self.selectedDate,
+                    self.expensesForDate(date: self.selectedDate),
+                    remainingBudget
+                )
+                self.expensesData.accept(currentData)
+            }
+        }
+    }
+    
+    /// 기존 지출 데이터를 수정하는 메서드
+    /// - Parameter expense: 수정할 지출 데이터 모델
+    func updateExpense(_ expense: MockMyCashBookModel) {
+        CoreDataManager.shared.update(
+            type: MyCashBookEntity.self,
+            entityID: expense.id,
+            data: expense
+        )
+        debugPrint("수정 완료")
+        loadExpenseData()
+    }
+    
+    /// 지출 데이터를 삭제하는 메서드
+    /// - Parameter id: 삭제할 지출 데이터의 ID
+    func deleteExpense(id: UUID) {
+        CoreDataManager.shared.delete(
+            type: MyCashBookEntity.self,
+            entityID: id
+        )
+        debugPrint("삭제 완료")
+        loadExpenseData()
     }
     
     // MARK: - Helper Methods
@@ -134,7 +214,7 @@ class CalendarViewModel: ViewModelType {
     /// 지정된 날짜에 해당하는 지출내역을 가져오는 메서드 
     /// - Parameter date: 조회하는 날짜
     /// - Returns: 해당 날짜의 지출 내역 배열
-    func expensesForDate(_ date: Date) -> [MockMyCashBookModel] {
+    func expensesForDate(date: Date) -> [MockMyCashBookModel] {
         return expenseRelay.value.filter { expense in
             Calendar.current.isDate(expense.expenseDate, inSameDayAs: date)
         }
@@ -143,8 +223,22 @@ class CalendarViewModel: ViewModelType {
     /// 선택된 날짜의 총 지출 금액을 계산하는 메서드 (amount -> 원화 객체로 수정예정)
     /// - Parameter date: 총 지출 금액을 계산하는 날짜
     /// - Returns: 해당 날짜의 총 지출 금액
-    func totalExpense(for date: Date) -> Double {
-        let dailyExpenses = expensesForDate(date)
+    func totalExpense(date: Date) -> Double {
+        let dailyExpenses = expensesForDate(date: date)
         return dailyExpenses.reduce(0) { $0 + $1.amount }
+    }
+    
+    /// 특정 날짜까지의 예산 잔액을 계산하는 메서드
+    /// - Parameter date: 계산할 기준 날짜
+    /// - Returns: 해당 날짜까지의 예산 잔액
+    func calculateRemainingBudget(upTo date: Date) -> Double {
+        // 해당 날짜까지의 모든 지출 필터링
+        let allExpenses = expenseRelay.value.filter { expense in
+            expense.expenseDate <= date
+        }
+        // 총 지출 계산
+        let totalExpense = Double(allExpenses.reduce(0.0) { $0 + $1.amount })
+        // 초기 예산에서 총 지출을 빼서 잔액 계산
+        return Double(balance) - totalExpense
     }
 }

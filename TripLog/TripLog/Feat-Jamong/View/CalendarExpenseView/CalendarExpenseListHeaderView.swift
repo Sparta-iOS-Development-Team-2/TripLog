@@ -15,6 +15,7 @@ import SnapKit
 /// - 날짜, 총 지출액, 잔액 표시
 /// - 지출 추가 버튼 포함
 final class CalendarExpenseListHeaderView: UIView {
+        
     // MARK: - UI Components
     /// 날짜와 추가 버튼을 담는 스택뷰
     private let topStackView = UIStackView().then {
@@ -149,27 +150,27 @@ final class CalendarExpenseListHeaderView: UIView {
         }
     }
     
-    func configure(date: Date, expense: Int, balance: Int) {
+    func configure(date: Date, expense: Double, balance: Double) {
         let formatter = DateFormatter()
         formatter.dateFormat = "M월 d일 지출"
-        dateLabel.text = formatter.string(from: date)
         
-        expenseAmountLabel.text = "\(expense)원"
-        balanceAmountLabel.text = "\(balance.formatted())원"
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.minimumFractionDigits = 0
+        numberFormatter.maximumFractionDigits = 2
+        numberFormatter.usesGroupingSeparator = true
+        
+        let formattedExpense = numberFormatter.string(from: NSNumber(value: expense)) ?? "0"
+        let formattedBalance = numberFormatter.string(from: NSNumber(value: balance)) ?? "0"
+        
+        dateLabel.text = formatter.string(from: date)
+        expenseAmountLabel.text = "\(formattedExpense)원"
+        balanceAmountLabel.text = "\(formattedBalance)원"
     }
 }
 
 extension Reactive where Base: CalendarExpenseListHeaderView {
-    var addButtonTapped: Observable<Date> {
-        base.addButton.rx.tap
-            .withUnretained(base)
-            .map { owner, _ -> Date in
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyyMMdd"
-                
-                guard let date = formatter.date(from: owner.dateLabel.text ?? "") else { return Date() }
-                return date
-            }
-            .asObservable()
+    var addButtonTapped: Observable<Void> {
+        base.addButton.rx.tap.asObservable()
     }
 }
