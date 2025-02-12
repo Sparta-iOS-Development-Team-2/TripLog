@@ -11,9 +11,7 @@ class TopViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     private let todayViewController: TodayViewController
-    private var calendarViewController: CalendarViewController
-    
-    private var balance: Int = 0
+    private let calendarViewController: CalendarViewController
     
     private lazy var switcherView: TripSwitcherView = {
         return TripSwitcherView(todayView: todayViewController.view, calendarView: calendarViewController.view)
@@ -22,22 +20,15 @@ class TopViewController: UIViewController {
     /// ✅ 여행 요약 정보를 포함하는 상단 뷰
     private lazy var tripSummaryView = TripLogSummaryView(switcherView: switcherView)
     
-    private lazy var tableView = UITableView().then {
-        $0.separatorStyle = .none
-        $0.showsVerticalScrollIndicator = false
-        $0.showsHorizontalScrollIndicator = false
-        $0.isScrollEnabled = false
-        $0.alwaysBounceVertical = false
-        $0.rowHeight = self.view.bounds.height
-        $0.backgroundColor = UIColor.CustomColors.Background.detailBackground
-    }
+    private let contentContainerView = UIView()
     
+    private var balance: Int = 0
+
     init(cashBook: MockCashBookModel) {
         self.viewModel = TopViewModel(cashBook: cashBook)
         self.todayViewController = TodayViewController(cashBookID: cashBook.id)
         self.calendarViewController = CalendarViewController(cashBook: cashBook.id, balance: balance)
         super.init(nibName: nil, bundle: nil)
-        bindBalance()
     }
     
     required init?(coder: NSCoder) {
@@ -46,6 +37,7 @@ class TopViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+//        navigationController?.setNavigationBarHidden(false, animated: true)
         navigationController?.navigationBar.isHidden = false
     }
     
@@ -55,30 +47,34 @@ class TopViewController: UIViewController {
         view.applyBackgroundColor()
         
         setupUI()
-        setupTableView()
         bindFormattedTotal()
         setupLayout()
     }
     
     private func setupLayout() {
         view.addSubview(tripSummaryView)
+        view.addSubview(contentContainerView)
         
         tripSummaryView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-            $0.horizontalEdges.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
         }
         
-        view.addSubview(tableView)
-        
-        tableView.snp.makeConstraints {
+        contentContainerView.snp.makeConstraints {
             $0.top.equalTo(tripSummaryView.snp.bottom)
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.leading.trailing.bottom.equalToSuperview()
         }
     }
     
     private func setupUI() {
+        contentContainerView.addSubview(switcherView)
+        
+        switcherView.snp.makeConstraints {
+            $0.edges.equalToSuperview() // 컨테이너 뷰 크기와 동일하게 설정
+        }
+        
         guard let cashBook = viewModel.sections.value.first?.items.first else { return }
-        self.navigationItem.title = cashBook.tripName
+        self.navigationItem.title = viewModel.sections.value.first?.items.first?.tripName ?? "여행"
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.SCDream(size: .title, weight: .bold)
         ]
@@ -89,35 +85,14 @@ class TopViewController: UIViewController {
             todayVC: todayViewController
         )
     }
-    
-    private func setupTableView() {
-        tableView.tableHeaderView = tripSummaryView
-        
-        let headerSize = tripSummaryView.systemLayoutSizeFitting(
-            CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height)
-        )
-        tripSummaryView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: headerSize.height)
-    }
-    
-//    private func setupTripSummary() {
-//        bindFormattedTotal()
-//    }
-    
     private func bindFormattedTotal() {
         todayViewController.formattedTotalRelay
-            .bind(to: tripSummaryView.progressView.expense)
-            .disposed(by: disposeBag)
-    }
-    
-    private func bindBalance() {
-        tripSummaryView.progressView.balanceRelay
-            .subscribe(onNext: { [weak self] balance in
-                guard let self = self else { return }
-                self.balance = balance // ✅ balance 업데이트
-                self.calendarViewController = CalendarViewController(cashBook: self.viewModel.cashBook.id, balance: balance)
+            .subscribe(onNext: { [weak self] totalAmount in
+                print("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
+                self?.tripSummaryView.progressView.expense.accept(totalAmount)
             })
             .disposed(by: disposeBag)
-        }
+    }
 }
 
 /// 🔹 여행 요약 정보를 표시하는 뷰 (타이틀, 날짜, 예산, 진행 상태, 버튼 포함)
@@ -177,7 +152,7 @@ final class TripLogSummaryView: UIView {
         }
         
         titleDateView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview().inset(8)
+            $0.top.leading.trailing.equalToSuperview().inset(16)
         }
         
         progressView.snp.makeConstraints {
