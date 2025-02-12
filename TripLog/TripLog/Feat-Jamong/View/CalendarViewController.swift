@@ -183,7 +183,7 @@ final class CalendarViewController: UIViewController {
                 
                 let rates = CoreDataManager.shared.fetch(
                     type: CurrencyEntity.self,
-                    predicate: nil
+                    predicate: Date.formattedDateString(from: date)
                 )
                 
                 return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.calendarViewModel.cashBookID, date: date, exchangeRate: rates)))
@@ -338,15 +338,12 @@ extension CalendarViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let expenses = calendarViewModel.expensesForDate(date: calendarViewModel.selectedDate)
         let expense = expenses[indexPath.row]
-        let originalID = expense.id
-        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: nil)
+        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date.formattedDateString(from: expense.expenseDate))
         
         ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: rates))
             .compactMap { $0 as? MockMyCashBookModel }
             .subscribe(onNext: { [weak self] updatedExpense in
-                var modifiedExpense = updatedExpense
-                modifiedExpense.id = originalID  // ID 업데이트
-                self?.calendarViewModel.updateExpense(modifiedExpense)
+                self?.calendarViewModel.updateExpense(updatedExpense)
             })
             .disposed(by: disposeBag)
         

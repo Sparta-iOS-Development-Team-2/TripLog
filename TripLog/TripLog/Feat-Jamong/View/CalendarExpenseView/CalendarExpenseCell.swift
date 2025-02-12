@@ -110,8 +110,8 @@ final class CalendarExpenseCell: UITableViewCell {
         
         categoryLabel.text = "\(model.category) / \(model.payment ? "카드" : "현금")"
         
-        // calculatedAmount 들어오면 넣을 예정
-        let formattedWonAmount = numberFormatter.string(from: NSNumber(value: Int(model.caculatedAmount))) ?? "0"
+        let roundedAmount = Int(round(model.caculatedAmount))
+        let formattedWonAmount = numberFormatter.string(from: NSNumber(value: roundedAmount)) ?? "0"
         wonAmountLabel.text = "\(formattedWonAmount)원"
     }
     

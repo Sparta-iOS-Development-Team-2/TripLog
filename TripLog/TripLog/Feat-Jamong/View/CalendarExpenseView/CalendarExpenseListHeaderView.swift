@@ -150,7 +150,7 @@ final class CalendarExpenseListHeaderView: UIView {
         }
     }
     
-    func configure(date: Date, expense: Double, balance: Double) {
+    func configure(date: Date, expense: Int, balance: Int) {
         let formatter = DateFormatter()
         formatter.dateFormat = "M월 d일 지출"
         
