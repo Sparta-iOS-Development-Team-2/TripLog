@@ -128,7 +128,7 @@ private extension ModalViewController {
                 
                 let consumptionData = MyCashBookEntity.Model(amount: data.1.amount,
                                                              cashBookID: data.1.cashBookID,
-                                                             caculatedAmount: 1234, // TODO: (#102)수정필요
+                                                             caculatedAmount: data.1.exchangeRate,
                                                              category: data.1.category,
                                                              country: data.1.country,
                                                              expenseDate: data.1.expenseDate,

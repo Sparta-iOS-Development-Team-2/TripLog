@@ -63,7 +63,7 @@ class TodayViewModel {
                     MockMyCashBookModel(
                         amount: entity.amount,
                         cashBookID: entity.cashBookID ?? UUID(),
-                        caculatedAmount: Int(entity.caculatedAmount),
+                        caculatedAmount: entity.caculatedAmount,
                         category: entity.category ?? "기타",
                         country: entity.country ?? "USD",
                         expenseDate: entity.expenseDate ?? Date(),
