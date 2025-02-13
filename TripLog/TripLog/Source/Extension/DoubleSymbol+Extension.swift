@@ -10,11 +10,29 @@ import Foundation
 extension Double {
     /// 통화 코드에 따른 통화 기호 매핑
     private static let currencyCodeToSymbol: [String: String] = [
-        "AED": "﷼", "AUD": "A$", "BHD": "﷼", "BND": "B$", "CAD": "C$",
-        "CHF": "SFr", "CNH": "¥", "DKK": "kr", "EUR": "€", "GBP": "£",
-        "HKD": "HK$", "IDR": "Rp", "JPY": "¥", "KRW": "₩", "KWD": "﷼",
-        "MYR": "RM", "NOK": "kr", "NZD": "NZ$", "SAR": "﷼", "SEK": "kr",
-        "SGD": "S$", "THB": "฿", "USD": "$"
+        "AED": "﷼",
+        "AUD": "A$",
+        "BHD": "﷼",
+        "BND": "B$",
+        "CAD": "C$",
+        "CHF": "SFr",
+        "CNH": "¥",
+        "DKK": "kr",
+        "EUR": "€",
+        "GBP": "£",
+        "HKD": "HK$",
+        "IDR": "Rp",
+        "JPY": "¥",
+        "KRW": "₩",
+        "KWD": "﷼",
+        "MYR": "RM",
+        "NOK": "kr",
+        "NZD": "NZ$",
+        "SAR": "﷼",
+        "SEK": "kr",
+        "SGD": "S$",
+        "THB": "฿",
+        "USD": "$"
     ]
     
     /// 💰 **모든 통화 기호가 앞에 오고, 소수점 대신 쉼표(`,`)를 사용**
