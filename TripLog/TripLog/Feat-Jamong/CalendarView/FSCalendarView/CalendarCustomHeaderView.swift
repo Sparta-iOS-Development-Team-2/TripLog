@@ -16,7 +16,7 @@ import SnapKit
 /// - 현재 표시된 년월을 보여주는 타이틀
 /// - 이전/다음 달로 이동할 수 있는 네비게이션 버튼
 /// - RxSwift를 사용한 버튼 이벤트 처리
-class CalendarCustomHeaderView: UIView {
+final class CalendarCustomHeaderView: UIView {
     // MARK: - UI Components
     /// 현재 표시된 년월을 나타내는 레이블
     private let titleLabel = UILabel().then {

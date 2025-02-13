@@ -13,7 +13,7 @@ import SnapKit
 /// FSCalendar의 커스텀 셀
 /// - 날짜와 해당 날짜의 지출 금액을 표시하는 셀
 /// - 선택 상태에 따른 UI 변경 처리
-class CalendarCustomCell: FSCalendarCell {
+final class CalendarCustomCell: FSCalendarCell {
     // MARK: - UI Components
     /// 일자 라벨
     public let dateLabel = UILabel().then {

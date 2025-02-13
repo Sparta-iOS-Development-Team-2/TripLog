@@ -18,7 +18,7 @@ import FSCalendar
 // 4. 캘린더뷰 - 지출목록의 Date에 따른 데이터 연결해주는 로직
 // 5. 지출목록의 추가하고 삭제할때 바인딩하는 로직
 
-class CalendarViewModel: ViewModelType {
+final class CalendarViewModel: ViewModelType {
     // MARK: - Input & Output
     struct Input {
         let previousButtonTapped: Observable<Void>
