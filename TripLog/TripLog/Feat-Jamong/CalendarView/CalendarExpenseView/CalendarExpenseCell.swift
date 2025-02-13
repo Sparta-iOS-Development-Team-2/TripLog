@@ -104,9 +104,7 @@ final class CalendarExpenseCell: UITableViewCell {
         numberFormatter.minimumFractionDigits = 0
         numberFormatter.maximumFractionDigits = 2
         numberFormatter.usesGroupingSeparator = true
-        // 변경 예정 model.country -> Symbol
-//        let formattedAmount = numberFormatter.string(from: NSNumber(value: model.amount)) ?? "0"
-        let currencySymbol = CurrencyFormatter.formattedCurrency(from: model.amount, currencyCode: model.country)
+        let currencySymbol = model.amount.formattedCurrency(currencyCode: model.country)
         foreignAmountLabel.text = "\(currencySymbol)"
         
         categoryLabel.text = "\(model.category) / \(model.payment ? "카드" : "현금")"
