@@ -4,7 +4,7 @@ import Then
 import RxSwift
 import RxCocoa
 
-class TodayViewController: UIViewController {
+final class TodayViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
     let viewModel: TodayViewModel
@@ -219,7 +219,7 @@ class TodayViewController: UIViewController {
                     date: self.getTodayDate(),
                     title: expense.note,
                     category: expense.category,
-                    amount: "\(CurrencyFormatter.formattedCurrency(from: expense.amount, currencyCode: expense.country))",
+                    amount: "\(expense.amount.formattedCurrency(currencyCode: expense.country))",
                     exchangeRate: "\(NumberFormatter.formattedString(from: expense.caculatedAmount.rounded())) 원",
                     payment: expense.payment
                 )

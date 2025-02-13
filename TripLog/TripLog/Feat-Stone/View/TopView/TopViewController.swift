@@ -5,7 +5,7 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-class TopViewController: UIViewController {
+final class TopViewController: UIViewController {
     
     private let viewModel: TopViewModel
     private let disposeBag = DisposeBag()
