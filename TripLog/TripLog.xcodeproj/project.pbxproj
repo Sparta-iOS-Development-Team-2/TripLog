@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA2EFDCA2D5D99A600FD357A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2EFDC92D5D99A600FD357A /* PrivacyInfo.xcprivacy */; };
 		AA3030332D44B9CA0057DB35 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AA3030322D44B9CA0057DB35 /* Lottie */; };
 		AAC9B0962D3A721C006892A7 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0952D3A721C006892A7 /* SnapKit */; };
 		AAC9B0992D3A722B006892A7 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0982D3A722B006892A7 /* Alamofire */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA2EFDC92D5D99A600FD357A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AAC9B05D2D3A7070006892A7 /* TripLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TripLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC9B0762D3A7073006892A7 /* TripLogTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC9B0802D3A7073006892A7 /* TripLogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,6 +115,7 @@
 		AAC9B0542D3A7070006892A7 = {
 			isa = PBXGroup;
 			children = (
+				AA2EFDC92D5D99A600FD357A /* PrivacyInfo.xcprivacy */,
 				AAC9B05F2D3A7070006892A7 /* TripLog */,
 				AAC9B0792D3A7073006892A7 /* TripLogTests */,
 				AAC9B0832D3A7073006892A7 /* TripLogUITests */,
@@ -272,6 +275,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2EFDCA2D5D99A600FD357A /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
