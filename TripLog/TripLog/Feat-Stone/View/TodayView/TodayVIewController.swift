@@ -300,7 +300,7 @@ final class TodayViewController: UIViewController {
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, _ in
-                let recentRateDate = CalculateDate.calculateDate()
+                let recentRateDate = Date.caculateDate()
                 PopoverManager.showPopover(on: owner,
                                            from: owner.helpButton,
                                            title: "현재의 환율은 \(recentRateDate) 환율입니다.",
