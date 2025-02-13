@@ -2,7 +2,7 @@ import UIKit
 import SnapKit
 import Then
 
-class ExpenseCell: UITableViewCell {
+final class ExpenseCell: UITableViewCell {
     static let identifier = "ExpenseCell"
 
     private let containerView = UIView().then {

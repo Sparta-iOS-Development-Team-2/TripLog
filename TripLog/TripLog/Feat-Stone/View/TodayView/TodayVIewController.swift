@@ -4,7 +4,7 @@ import Then
 import RxSwift
 import RxCocoa
 
-class TodayViewController: UIViewController {
+final class TodayViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
     let viewModel: TodayViewModel

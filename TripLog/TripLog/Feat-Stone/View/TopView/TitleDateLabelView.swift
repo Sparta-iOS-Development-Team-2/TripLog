@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-class TitleDateView: UIView {
+final class TitleDateView: UIView {
 
     private let subtitleLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)

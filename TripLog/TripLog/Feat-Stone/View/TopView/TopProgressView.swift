@@ -4,7 +4,7 @@ import Then
 import RxSwift
 import RxCocoa
 
-class TopProgressView: UIView {
+final class TopProgressView: UIView {
     
     private let disposeBag = DisposeBag()
     
