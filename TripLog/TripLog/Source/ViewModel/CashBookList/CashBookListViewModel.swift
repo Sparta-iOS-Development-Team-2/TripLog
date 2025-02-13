@@ -88,7 +88,7 @@ final class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsCont
             // 최신 데이터 반영
             try fetchedResultsController.performFetch()
         } catch {
-            print("패치 실패: \(error)")
+            debugPrint("패치 실패: \(error)")
         }
         updateData()
     }

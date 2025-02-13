@@ -51,9 +51,9 @@ extension UIFont {
     
     static func printAll() {
         familyNames.sorted().forEach { familyName in
-            print("*** \(familyName) ***")
+            debugPrint("*** \(familyName) ***")
             fontNames(forFamilyName: familyName).sorted().forEach { fontName in
-                print("\(fontName)")
+                debugPrint("\(fontName)")
             }
         }
     }

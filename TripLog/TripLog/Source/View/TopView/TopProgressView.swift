@@ -53,24 +53,24 @@ final class TopProgressView: UIView {
                 guard let self = self else { return }
                 
                 // ✅ 1. Rx 스트림에서 받은 원본 데이터 확인
-                print("🔹 expenseText (원본): \(expenseText)")
+                debugPrint("🔹 expenseText (원본): \(expenseText)")
 
                 // ✅ 2. 숫자 값으로 변환된 지출 금액 확인
                 let expenseAmount = Int(expenseText.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0
-                print("✅ expenseAmount (숫자 변환 후): \(expenseAmount)")
+                debugPrint("✅ expenseAmount (숫자 변환 후): \(expenseAmount)")
 
                 // ✅ 3. 잔액 계산 및 출력
                 let balance = self.budgetAmount - expenseAmount
                 self.balanceRelay.accept(balance)
-                print("✅ budgetAmount: \(self.budgetAmount), balance 계산 값: \(balance)")
+                debugPrint("✅ budgetAmount: \(self.budgetAmount), balance 계산 값: \(balance)")
 
                 // ✅ 4. 포맷된 잔액 확인
                 let formattedBalance = NumberFormatter.wonFormat(balance)
-                print("✅ formattedBalance: \(formattedBalance)")
+                debugPrint("✅ formattedBalance: \(formattedBalance)")
 
                 // ✅ 5. UI 업데이트 전 출력
                 let formattedExpense = NumberFormatter.wonFormat(expenseAmount)
-                print("✅ formattedExpense: \(formattedExpense)")
+                debugPrint("✅ formattedExpense: \(formattedExpense)")
                 
                 self.expenseLabel.text = "지출: \(formattedExpense)"
                 self.balanceLabel.text = "잔액: \(formattedBalance)"
@@ -78,7 +78,7 @@ final class TopProgressView: UIView {
 
                 // ✅ 6. Progress Bar 값 확인
                 let progressValue: CGFloat = (self.budgetAmount > 0) ? CGFloat(expenseAmount) / CGFloat(self.budgetAmount) : 0.0
-                print("✅ Progress Bar Value: \(progressValue)")
+                debugPrint("✅ Progress Bar Value: \(progressValue)")
 
                 self.progressBar.updateProgress(progressValue) // ✅ 프로그레스 업데이트
             })

@@ -37,7 +37,7 @@ final class CustomProgressView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        print("🔹 layoutSubviews() 호출됨, bounds.width:", bounds.width)
+        debugPrint("🔹 layoutSubviews() 호출됨, bounds.width:", bounds.width)
 
         let newWidth = bounds.width * progressValue
         if newWidth != progress.frame.width { // ✅ 기존 값과 비교 후 변경 시만 업데이트
@@ -61,7 +61,7 @@ final class CustomProgressView: UIView {
 
         let newWidth = self.bounds.width * progressValue
 
-        print("🔹 Progress bar width update: \(newWidth), View width: \(self.bounds.width)")
+        debugPrint("🔹 Progress bar width update: \(newWidth), View width: \(self.bounds.width)")
 
         // ✅ Progress Label 업데이트
         progressLabel.text = "\(Int(progressValue * 100))%"

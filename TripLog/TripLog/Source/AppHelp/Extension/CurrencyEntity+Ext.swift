@@ -28,9 +28,9 @@ extension CurrencyEntity: CoreDataManagable {
             }
             do {
                 try context.save()
-                print("환율 저장 완료")
+                debugPrint("환율 저장 완료")
             } catch {
-                print("환율 저장 실패: \(error)")
+                debugPrint("환율 저장 실패: \(error)")
             }
         }
     }
@@ -62,12 +62,12 @@ extension CurrencyEntity: CoreDataManagable {
                     retryCount += 1
                     FireStoreManager.shared.generateCurrencyRate(date: searchDate) {
                         Task {
-                            print("\(searchDate) 데이터 생성")
+                            debugPrint("\(searchDate) 데이터 생성")
                             do {
                                 try await SyncManager.shared.syncCoreDataToFirestore()
-                                print("동기화 완료") // 동기화 완료가 좀 느리게 동작함
+                                debugPrint("동기화 완료") // 동기화 완료가 좀 느리게 동작함
                             } catch {
-                                print("\(searchDate)데이터 생성 후 데이터 동기화 실패")
+                                debugPrint("\(searchDate)데이터 생성 후 데이터 동기화 실패")
                             }
                         }
                     }
@@ -77,18 +77,18 @@ extension CurrencyEntity: CoreDataManagable {
                 case .noData:
                     retryCount += 1
                     // 검색 조건을 수정하거나 사용자에게 알림
-                    print("검색날짜 변경 전: \(searchDate)")
+                    debugPrint("검색날짜 변경 전: \(searchDate)")
                     searchDate = Date.getPreviousDate(from: searchDate) ?? searchDate
-                    print("검색날짜 변경 후: ->\(searchDate)")
+                    debugPrint("검색날짜 변경 후: ->\(searchDate)")
                     continue
                     
                     // 정상 데이터 확인
                 case .success:
-                    print("정상 값 찾음: \(searchDate)")
+                    debugPrint("정상 값 찾음: \(searchDate)")
                     return result // 반복문 종료
                 }
             } catch {
-                print("오류 발생: \(error)")
+                debugPrint("오류 발생: \(error)")
                 return []
             }
         }
@@ -119,9 +119,9 @@ extension CurrencyEntity: CoreDataManagable {
         do {
             try context.execute(deleteRequest)
             try context.save()
-            print("\(entityName)의 모든 데이터가 삭제되었습니다.")
+            debugPrint("\(entityName)의 모든 데이터가 삭제되었습니다.")
         } catch {
-            print("데이터 삭제 중 오류 발생: \(error.localizedDescription)")
+            debugPrint("데이터 삭제 중 오류 발생: \(error.localizedDescription)")
         }
     }
     
@@ -142,7 +142,7 @@ extension CurrencyEntity: CoreDataManagable {
         ///   - context: CoreData 인스턴스
         func saveToCoreData(_ currencyRates: CurrencyRate, date: String, context: NSManagedObjectContext) {
             let element = CurrencyElement()
-            print("dataCount: \(currencyRates.count)")
+            debugPrint("dataCount: \(currencyRates.count)")
             guard let entity = NSEntityDescription.entity(
                 forEntityName: EntityKeys.Name.CurrencyEntity.rawValue, in: context
             ) else { return }
@@ -156,9 +156,9 @@ extension CurrencyEntity: CoreDataManagable {
                 }
                 do {
                     try context.save()
-                    print("환율 저장 완료")
+                    debugPrint("환율 저장 완료")
                 } catch {
-                    print("환율 저장 실패: \(error)")
+                    debugPrint("환율 저장 실패: \(error)")
                 }
             }
         }

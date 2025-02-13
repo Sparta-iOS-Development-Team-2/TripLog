@@ -74,7 +74,6 @@ final class CashBookListViewController: UIViewController {
         bind()
     }
     
-    // 추후 구현 예정
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         viewWillAppearSubject.onNext(())

@@ -77,11 +77,11 @@ private extension SettingTableCellModel {
         guard let view = AppHelpers.getTopViewController() else { return }
         let alert = AlertManager(
             title: "문의하기",
-            message: "이메일: triplog@gmail.com\n구글폼 문의는 아래 버튼을 눌러주세요!",
+            message: "이메일: jeffap324@gmail.com\n구글폼 문의는 아래 버튼을 눌러주세요!",
             cancelTitle: "취소",
             activeTitle: "구글폼 문의") {
                 debugPrint("구글폼 이동")
-                guard let url = URL(string: "https://forms.gle/wWMNkRJEfULDjLhr7") else { return }
+                guard let url = URL(string: "https://forms.gle/SFcJYmnhJrssd58G9") else { return }
                 if #available(iOS 10.0, *) {
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
                 } else {
@@ -93,10 +93,8 @@ private extension SettingTableCellModel {
     }
     
     /// 앱스토어 링크로 이동하는 메소드
-    ///
-    /// 앱 출시 후 구현 가능
     static func moveAppstore() {
-        let url = "앱스토어 링크"
+        let url = "itms-apps://apps.apple.com/app/id6741835898"
         if let url = URL(string: url), UIApplication.shared.canOpenURL(url) {
             if #available(iOS 10.0, *) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)

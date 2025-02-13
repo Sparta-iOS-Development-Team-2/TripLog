@@ -53,7 +53,7 @@ class MainViewController: UIViewController {
             do {
                 try await SyncManager.shared.syncCoreDataToFirestore()
             } catch {
-                print(error)
+                debugPrint(error)
             }
         }
     }

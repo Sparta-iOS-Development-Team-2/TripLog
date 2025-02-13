@@ -79,7 +79,7 @@ final class TopViewController: UIViewController {
         todayViewController.formattedTotalRelay
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] totalAmount in
-                print("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
+                debugPrint("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
                 self?.tripSummaryView.progressView.expense.accept(totalAmount)
                 self?.calendarViewController.reloadCalendarView()
             })
@@ -88,7 +88,7 @@ final class TopViewController: UIViewController {
         calendarViewController.rx.updateTotalAmount
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] totalAmount in
-                print("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
+                debugPrint("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
                 self?.tripSummaryView.progressView.expense.accept(totalAmount)
                 self?.todayViewController.updateTodayConsumption()
             })

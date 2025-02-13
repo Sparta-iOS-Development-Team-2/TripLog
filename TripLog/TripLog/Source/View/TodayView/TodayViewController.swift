@@ -231,7 +231,7 @@ final class TodayViewController: UIViewController {
             .map { expenses -> String in
                 let totalExchangeRate = expenses.map { Int($0.caculatedAmount) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
                 let formattedTotal = NumberFormatter.formattedString(from: Double(totalExchangeRate)) + " 원"
-                print("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
+                debugPrint("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
                 
                 return formattedTotal
             }
@@ -295,7 +295,7 @@ final class TodayViewController: UIViewController {
         viewModel.totalExpenseRelay
             .subscribe(onNext: { [weak self] totalExpense in
                 self?.onTotalExpenseUpdated?(totalExpense) // ✅ 값 변경 시 클로저 실행
-                print("-----------\(totalExpense)")
+                debugPrint("-----------\(totalExpense)")
             })
             .disposed(by: disposeBag)
         

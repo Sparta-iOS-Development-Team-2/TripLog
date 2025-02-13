@@ -57,9 +57,9 @@ extension CashBookEntity: CoreDataManagable {
             
             do {
                 try context.save()
-                print("저장 성공: \(data.note)")
+                debugPrint("저장 성공: \(data.note)")
             } catch {
-                print("데이터 저장 실패: \(error)")
+                debugPrint("데이터 저장 실패: \(error)")
             }
         }
     }
@@ -79,10 +79,10 @@ extension CashBookEntity: CoreDataManagable {
             // 검색 조건이 없을 때 동작
             do {
                 let result = try context.fetch(request)
-                print("모든 CashBookEntity fetch 성공: \(result.count)")
+                debugPrint("모든 CashBookEntity fetch 성공: \(result.count)")
                 return result
             } catch {
-                print("CashBookEntity Fetch 실패: \(error)")
+                debugPrint("CashBookEntity Fetch 실패: \(error)")
                 return []
             }
         }
@@ -92,11 +92,11 @@ extension CashBookEntity: CoreDataManagable {
         do {
             let result = try context.fetch(request)
             for item in result {
-                print("검색 결과: \n이름: \(item.value(forKey: element.tripName) ?? "")")
+                debugPrint("검색 결과: \n이름: \(item.value(forKey: element.tripName) ?? "")")
             }
             return result
         } catch {
-            print("데이터 읽기 실패: \(error)")
+            debugPrint("데이터 읽기 실패: \(error)")
             return []
         }
     }
@@ -131,16 +131,16 @@ extension CashBookEntity: CoreDataManagable {
                 
                 do {
                     try context.save()
-                    print("업데이트 성공: \(data.note)")
+                    debugPrint("업데이트 성공: \(data.note)")
                 } catch {
-                    print("데이터 저장 실패: \(error)")
+                    debugPrint("데이터 저장 실패: \(error)")
                 }
             } else {
-                print("해당 UUID를 가진 엔티티를 찾을 수 없습니다.")
+                debugPrint("해당 UUID를 가진 엔티티를 찾을 수 없습니다.")
             }
             
         } catch {
-            print("업데이트 중 오류 발생: \(error.localizedDescription)")
+            debugPrint("업데이트 중 오류 발생: \(error.localizedDescription)")
         }
     }
     

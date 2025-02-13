@@ -58,9 +58,9 @@ extension MyCashBookEntity: CoreDataManagable {
 
             do {
                 try context.save()
-                print("저장 성공: \(data.note)")
+                debugPrint("저장 성공: \(data.note)")
             } catch {
-                print("데이터 저장 실패: \(error)")
+                debugPrint("데이터 저장 실패: \(error)")
             }
         }
         
@@ -80,10 +80,10 @@ extension MyCashBookEntity: CoreDataManagable {
             // 검색 조건이 없을 때 동작
             do {
                 let result = try context.fetch(request)
-                print("모든 MyCashBookEntity fetch 성공")
+                debugPrint("모든 MyCashBookEntity fetch 성공")
                 return result
             } catch {
-                print("MyCashBookEntity Fetch 실패: \(error)")
+                debugPrint("MyCashBookEntity Fetch 실패: \(error)")
                 return []
             }
         }
@@ -93,11 +93,11 @@ extension MyCashBookEntity: CoreDataManagable {
         do {
             let result = try context.fetch(request)
             for item in result {
-                print("검색 결과: \n이름: \(item.value(forKey: element.cashBookID) ?? "")")
+                debugPrint("검색 결과: \n이름: \(item.value(forKey: element.cashBookID) ?? "")")
             }
             return result
         } catch {
-            print("데이터 읽기 실패: \(error)")
+            debugPrint("데이터 읽기 실패: \(error)")
             return []
         }
     }
@@ -136,16 +136,16 @@ extension MyCashBookEntity: CoreDataManagable {
                 
                 do {
                     try context.save()
-                    print("업데이트 성공: \(data.note)")
+                    debugPrint("업데이트 성공: \(data.note)")
                 } catch {
-                    print("데이터 저장 실패: \(error)")
+                    debugPrint("데이터 저장 실패: \(error)")
                 }
                 
             } else {
-                print("해당 UUID를 가진 엔티티를 찾을 수 없습니다.")
+                debugPrint("해당 UUID를 가진 엔티티를 찾을 수 없습니다.")
             }
         } catch {
-            print("업데이트 중 오류 발생: \(error.localizedDescription)")
+            debugPrint("업데이트 중 오류 발생: \(error.localizedDescription)")
         }
     }
     
@@ -189,10 +189,10 @@ extension MyCashBookEntity {
         
         do {
             let result = try context.fetch(request)
-            print("모든 MyCashBookEntity fetch 성공")
+            debugPrint("모든 MyCashBookEntity fetch 성공")
             return result
         } catch {
-            print("MyCashBookEntity Fetch 실패: \(error)")
+            debugPrint("MyCashBookEntity Fetch 실패: \(error)")
             return []
         }
     }

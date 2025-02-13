@@ -22,7 +22,7 @@ extension Date {
         
         // 문자열 -> Date 변환
         guard let date = dateFormatter.date(from: dateString) else {
-            print("잘못된 날짜 형식입니다.")
+            debugPrint("잘못된 날짜 형식입니다.")
             return nil
         }
         

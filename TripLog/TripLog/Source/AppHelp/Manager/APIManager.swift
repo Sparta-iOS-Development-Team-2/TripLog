@@ -56,10 +56,10 @@ final class APIManager {
                 switch response.result {
                 case .success(let currenyRates):
                     guard let result = currenyRates.first?.result else { return }
-                    print("API 연결 성공: ResultCode \(result)")
+                    debugPrint("API 연결 성공: ResultCode \(result)")
                 case .failure(let error):
-                    print("연결 실패")
-                    print(error)
+                    debugPrint("연결 실패")
+                    debugPrint(error)
                 }
             }
     }

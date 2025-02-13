@@ -19,7 +19,7 @@ final class SyncManager {
                 let fireStore = try await FireStoreManager.shared.fetchAllData()
                 CoreDataManager.shared.save(type: CurrencyEntity.self, data: fireStore)
             } catch {
-                print(error)
+                debugPrint(error)
             }
         }
     }

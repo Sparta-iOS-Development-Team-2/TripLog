@@ -29,7 +29,7 @@ final class FireStoreManager {
                 // 비동기적 진행을 위한 클로져
                 closure?()
             case .failure(let error):
-                print("Alamofire 통신 실패: \(error.localizedDescription)")
+                debugPrint("Alamofire 통신 실패: \(error.localizedDescription)")
             }
         }
     }
@@ -47,14 +47,14 @@ final class FireStoreManager {
                 
                 dbRef.document(date).setData(dataToStore) { error in
                     if let error = error {
-                        print("Firestore 저장 실패: \(error.localizedDescription)")
+                        debugPrint("Firestore 저장 실패: \(error.localizedDescription)")
                     } else {
-                        print("Firestore 저장 성공! 전체 환율 데이터가 JSON으로 저장됨.")
+                        debugPrint("Firestore 저장 성공! 전체 환율 데이터가 JSON으로 저장됨.")
                     }
                 }
             }
         } catch {
-            print("JSON Encoding 실패: \(error.localizedDescription)")
+            debugPrint("JSON Encoding 실패: \(error.localizedDescription)")
         }
     }
     
@@ -72,7 +72,7 @@ final class FireStoreManager {
                 if let data = document.data(), let currencyRate = data[config.documentData] as? String {
                     // JSON 문자열을 Data 타입으로 변환
                     guard let jsonData = currencyRate.data(using: .utf8) else {
-                        print("JSON 문자열을 Data로 변환하는데 실패")
+                        debugPrint("JSON 문자열을 Data로 변환하는데 실패")
                         return
                     }
                     
@@ -82,13 +82,13 @@ final class FireStoreManager {
                         
                         completion(decodedRates)
                     } catch {
-                        print("JSON Decoding 실패: \(error.localizedDescription)")
+                        debugPrint("JSON Decoding 실패: \(error.localizedDescription)")
                     }
                 } else {
-                    print("Firestore에서 'jsonString' 키를 찾을 수 없음")
+                    debugPrint("Firestore에서 'jsonString' 키를 찾을 수 없음")
                 }
             } catch {
-                print("Firestore 불러오기 실패: \(error.localizedDescription)")
+                debugPrint("Firestore 불러오기 실패: \(error.localizedDescription)")
             }
         }
         
@@ -96,7 +96,7 @@ final class FireStoreManager {
     
     func fetchAllData() async throws -> CurrencyRate {
         let allDocuments = try await Firestore.firestore().collection(config.collectionName).getDocuments()
-        print("Firestore Document count : \(allDocuments.documents.count)")
+        debugPrint("Firestore Document count : \(allDocuments.documents.count)")
         
         var decodedRates: CurrencyRate = []
         
@@ -104,7 +104,7 @@ final class FireStoreManager {
             if let data = document.data()[config.documentData] as? String {
                 // JSON 문자열을 Data로 변환
                 guard let jsonData = data.data(using: .utf8) else {
-                    print("JSON 문자열을 Data로 변환 실패: \(document.documentID)")
+                    debugPrint("JSON 문자열을 Data로 변환 실패: \(document.documentID)")
                     continue
                 }
                 
@@ -119,10 +119,10 @@ final class FireStoreManager {
                     
                     decodedRates.append(contentsOf: rate)
                 } catch {
-                    print("JSON Decoding 실패: \(error.localizedDescription), document ID: \(document.documentID)")
+                    debugPrint("JSON Decoding 실패: \(error.localizedDescription), document ID: \(document.documentID)")
                 }
             } else {
-                print("문서에서 'CurrencyRate' 키를 찾을 수 없음: \(document.documentID)")
+                debugPrint("문서에서 'CurrencyRate' 키를 찾을 수 없음: \(document.documentID)")
             }
         }
         
@@ -134,15 +134,15 @@ final class FireStoreManager {
         
         db.collection(config.collectionName).getDocuments { (snapshot, error) in
             if let error = error {
-                print("Firestore 접근 실패: \(error.localizedDescription)")
+                debugPrint("Firestore 접근 실패: \(error.localizedDescription)")
             } else if let snapshot = snapshot {
                 let documents = snapshot.documents
-                print("Firestore 연결 성공: 문서 \(documents.count)개")
+                debugPrint("Firestore 연결 성공: 문서 \(documents.count)개")
                 
                 if let firstDocument = documents.first {
-                    print("첫 번째 문서: \(firstDocument.data())")
+                    debugPrint("첫 번째 문서: \(firstDocument.data())")
                 } else {
-                    print("문서가 없습니다.")
+                    debugPrint("문서가 없습니다.")
                 }
             }
         }
