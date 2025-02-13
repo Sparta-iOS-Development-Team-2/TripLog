@@ -3,7 +3,7 @@ import RxSwift
 import RxCocoa
 import CoreData
 
-class TodayViewModel {
+final class TodayViewModel {
     
     // **Input (사용자 액션)**
     struct Input {

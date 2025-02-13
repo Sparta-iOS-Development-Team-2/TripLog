@@ -4,7 +4,7 @@ import Then
 import RxSwift
 import RxCocoa
 
-class TodayViewController: UIViewController {
+final class TodayViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
     let viewModel: TodayViewModel
@@ -211,7 +211,7 @@ class TodayViewController: UIViewController {
                     date: self.getTodayDate(),
                     title: expense.note,
                     category: expense.category,
-                    amount: "\(CurrencyFormatter.formattedCurrency(from: expense.amount, currencyCode: expense.country))",
+                    amount: "\(expense.amount.formattedCurrency(currencyCode: expense.country))",
                     exchangeRate: "\(NumberFormatter.formattedString(from: expense.caculatedAmount.rounded())) 원",
                     payment: expense.payment
                 )
@@ -303,7 +303,7 @@ class TodayViewController: UIViewController {
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, _ in
-                let recentRateDate = CalculateDate.calculateDate()
+                let recentRateDate = Date.caculateDate()
                 PopoverManager.showPopover(on: owner,
                                            from: owner.helpButton,
                                            title: "현재의 환율은 \(recentRateDate) 환율입니다.",

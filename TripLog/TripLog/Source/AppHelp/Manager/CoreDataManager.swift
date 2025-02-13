@@ -9,7 +9,7 @@ import CoreData
 import UIKit
 
 /// CoreData 저장, 로드관련 매니져
-class CoreDataManager {
+final class CoreDataManager {
     
     static var shared: CoreDataManager!
     let persistentContainer: NSPersistentContainer

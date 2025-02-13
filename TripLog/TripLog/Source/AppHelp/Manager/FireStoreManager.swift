@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-class FireStoreManager {
+final class FireStoreManager {
     static let shared = FireStoreManager()
     let config: FireStoreConfig
     private init() {
