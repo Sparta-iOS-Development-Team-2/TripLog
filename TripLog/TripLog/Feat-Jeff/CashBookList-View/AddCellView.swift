@@ -39,7 +39,6 @@ final class AddCellView: UIView {
 }
 
 //MARK: - Private Method
-
 private extension AddCellView {
     
     /// setup UI

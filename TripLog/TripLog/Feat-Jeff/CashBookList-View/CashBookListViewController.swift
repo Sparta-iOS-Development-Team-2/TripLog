@@ -276,11 +276,3 @@ private extension CashBookListViewController {
     
 }
 
-extension CashBookListViewController: UIPopoverPresentationControllerDelegate {
-    /// 아이폰에서 popover기능을 사용하기 위한 메서드
-    /// 기본적으로 이 기능은 iPad에서 사용되면 popover기능으로 동작하지만
-    /// 아이폰에선 default가 fullScreen으로 동작하기에 구현해줘야한다.
-    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
-        return .none
-    }
-}
