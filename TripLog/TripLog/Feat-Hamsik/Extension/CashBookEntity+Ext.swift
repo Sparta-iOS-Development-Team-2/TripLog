@@ -39,8 +39,6 @@ extension CashBookEntity: CoreDataManagable {
         let entityName = EntityKeys.Name.CashBookEntity.rawValue
         let element = CashBookElement()
         guard let entity = NSEntityDescription.entity(forEntityName: entityName, in: context) else { return }
-        let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "\(element.tripName) == %@", data.tripName as CVarArg)
         let properties: [String: Any] = [
             element.id : data.id,
             element.budget : data.budget,
@@ -50,30 +48,21 @@ extension CashBookEntity: CoreDataManagable {
             element.tripName : data.tripName
         ]
         
-        do {
-            let existingItems = try context.fetch(fetchRequest)
-            if existingItems.isEmpty {
-                // 중복된 항목이 없으면 저장
-                // 비동기 저장
-                context.performAndWait {
-                    let att = NSManagedObject(entity: entity, insertInto: context)
-                    properties.forEach { key, value in
-                        att.setValue(value, forKey: key)
-                    }
-                
-                    do {
-                        try context.save()
-                        print("저장 성공: \(data.note)")
-                    } catch {
-                        print("데이터 저장 실패: \(error)")
-                    }
-                }
-            } else {
-                print("이미 존재하는 항목입니다.")
+        // 비동기 저장
+        context.performAndWait {
+            let att = NSManagedObject(entity: entity, insertInto: context)
+            properties.forEach { key, value in
+                att.setValue(value, forKey: key)
             }
-        } catch {
-            print("Fetch 오류: \(error.localizedDescription)")
+            
+            do {
+                try context.save()
+                print("저장 성공: \(data.note)")
+            } catch {
+                print("데이터 저장 실패: \(error)")
+            }
         }
+        
     }
     
     
