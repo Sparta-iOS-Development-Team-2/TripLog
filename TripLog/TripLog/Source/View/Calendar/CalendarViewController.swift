@@ -201,7 +201,7 @@ final class CalendarViewController: UIViewController {
                 
                 return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.calendarViewModel.cashBookID, date: date, exchangeRate: rates)))
                     .compactMap {
-                        $0 as? MockMyCashBookModel
+                        $0 as? MyCashBookModel
                     }
             }
             .asSignal(onErrorSignalWith: .empty())
@@ -355,7 +355,7 @@ extension CalendarViewController: UITableViewDelegate {
         let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date.formattedDateString(from: expense.expenseDate))
         
         ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: rates))
-            .compactMap { $0 as? MockMyCashBookModel }
+            .compactMap { $0 as? MyCashBookModel }
             .subscribe(onNext: { [weak self] updatedExpense in
                 self?.calendarViewModel.updateExpense(updatedExpense)
             })

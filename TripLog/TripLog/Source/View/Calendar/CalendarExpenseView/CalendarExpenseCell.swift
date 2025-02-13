@@ -96,7 +96,7 @@ final class CalendarExpenseCell: UITableViewCell {
     /// - Parameter item: 표시할 지출 항목 데이터
     /// - Note: 외화 금액은 통화 종류에 따라 다른 형식으로 표시
     ///   (JPY, CNY는 정수로, 다른 통화는 소수점 포함)
-    func configure(with model: MockMyCashBookModel) {
+    func configure(with model: MyCashBookModel) {
         titleLabel.text = model.note
         
         let numberFormatter = NumberFormatter()

@@ -20,9 +20,9 @@ final class TopViewController: UIViewController {
     /// ✅ 여행 요약 정보를 포함하는 상단 뷰 (별도 파일로 분리됨)
     private lazy var tripSummaryView = TripLogSummaryView(switcherView: switcherView)
             
-    private var cashBook: MockCashBookModel
+    private var cashBook: CashBookModel
 
-    init(cashBook: MockCashBookModel) {
+    init(cashBook: CashBookModel) {
         self.cashBook = cashBook
         self.viewModel = TopViewModel(cashBook: cashBook)
         self.todayViewController = TodayViewController(cashBookID: cashBook.id)

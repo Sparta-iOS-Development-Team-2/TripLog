@@ -23,7 +23,7 @@ enum ModalViewManager {
     ///  customTabBar.tabBarAddButtonTapped
     ///    .flatMap {
     ///        return ModalViewManager.showModal(state: .createNewCashBook)
-    ///            .compactMap { $0 as? MockCashBookModel }
+    ///            .compactMap { $0 as? CashBookModel }
     ///    }
     ///    .asSignal(onErrorSignalWith: .empty())
     ///    .emit { data in

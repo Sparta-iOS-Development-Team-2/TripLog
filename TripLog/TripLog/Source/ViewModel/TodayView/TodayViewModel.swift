@@ -8,20 +8,20 @@ final class TodayViewModel {
     // **Input (사용자 액션)**
     struct Input {
         let fetchTrigger: PublishRelay<UUID> // 특정 cashBookID에 대한 데이터 요청
-        let addExpenseTrigger: PublishRelay<MockMyCashBookModel> // 지출 추가 요청
+        let addExpenseTrigger: PublishRelay<MyCashBookModel> // 지출 추가 요청
         let deleteExpenseTrigger: PublishRelay<Int> // 특정 인덱스의 지출 삭제 요청
         let showAddExpenseModalTrigger: PublishRelay<Void> // 모달 표시 요청
     }
     
     // **Output (UI 업데이트)**
     struct Output {
-        let expenses: Driver<[MockMyCashBookModel]>
+        let expenses: Driver<[MyCashBookModel]>
         let totalAmount: Driver<String>
         let showAddExpenseModal: Signal<Void>
     }
     
     // **Relay (데이터 관리)**
-    private let expensesRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
+    private let expensesRelay = BehaviorRelay<[MyCashBookModel]>(value: [])
     private let totalAmountRelay = BehaviorRelay<String>(value: "0 원")
     private let showAddExpenseModalRelay = PublishRelay<Void>()
     let totalExpenseRelay = BehaviorRelay<Int>(value: 0)
@@ -48,18 +48,18 @@ final class TodayViewModel {
     
     // ✅ 먼저 Rx 트리거들을 선언 (순서 중요!)
     private let fetchTrigger = PublishRelay<UUID>()
-    private let addExpenseTrigger = PublishRelay<MockMyCashBookModel>()
+    private let addExpenseTrigger = PublishRelay<MyCashBookModel>()
     private let deleteExpenseTrigger = PublishRelay<Int>()
     private let showAddExpenseModalTrigger = PublishRelay<Void>()
 
     init(cashBookID: UUID) {
         // ✅ 특정 cashBookID의 데이터 가져오기
         fetchTrigger
-            .flatMapLatest { cashBookID -> Observable<[MockMyCashBookModel]> in
+            .flatMapLatest { cashBookID -> Observable<[MyCashBookModel]> in
                 let entities = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: cashBookID)
                 
                 let convertedData = entities.map { entity in
-                    MockMyCashBookModel(
+                    MyCashBookModel(
                         amount: entity.amount,
                         cashBookID: entity.cashBookID ?? cashBookID,
                         caculatedAmount: entity.caculatedAmount,

@@ -14,9 +14,9 @@ final class TopViewModel {
     
     private let disposeBag = DisposeBag()
     
-    let cashBook: MockCashBookModel
+    let cashBook: CashBookModel
 
-    init(cashBook: MockCashBookModel) {
+    init(cashBook: CashBookModel) {
         // ✅ 단일 여행 정보를 섹션으로 변환하여 RxDataSources에 전달
         let section = CashBookSection(items: [cashBook])
         sections.accept([section])

@@ -29,7 +29,7 @@ final class CalendarViewModel: ViewModelType {
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
-        let expenses: BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Int)>
+        let expenses: BehaviorRelay<(date: Date, data: [MyCashBookModel], balance: Int)>
         let addButtonTapped: PublishRelay<Date>
     }
     
@@ -41,10 +41,10 @@ final class CalendarViewModel: ViewModelType {
     private let balance: Int
     
     // 지출 데이터를 저장
-    private let expenseRelay = BehaviorRelay<[MockMyCashBookModel]>(value: [])
+    private let expenseRelay = BehaviorRelay<[MyCashBookModel]>(value: [])
     
     // 선택 날짜의 지출 데이터를 저장
-    private let selectedDateData = PublishRelay<([MockMyCashBookModel], Date)>()
+    private let selectedDateData = PublishRelay<([MyCashBookModel], Date)>()
     
     // 셀 데이트 저장
     var selectedDate = Date()
@@ -52,7 +52,7 @@ final class CalendarViewModel: ViewModelType {
     // 현재 페이지를 저장하는 Relay
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
     private let addButtonTapped = PublishRelay<Date>()
-    private let expensesData = BehaviorRelay<(date: Date, data: [MockMyCashBookModel], balance: Int)>(value: (Date(), [], 0))
+    private let expensesData = BehaviorRelay<(date: Date, data: [MyCashBookModel], balance: Int)>(value: (Date(), [], 0))
     
     
     // MARK: - Initalization
@@ -102,7 +102,7 @@ final class CalendarViewModel: ViewModelType {
         
         input.didSelected
             .withUnretained(self)
-            .map { owner, date -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
+            .map { owner, date -> (date: Date, data: [MyCashBookModel], balance: Int) in
                 owner.selectedDate = date
                 let remainingBudget = owner.calculateRemainingBudget(upTo: date)
                 return (date, owner.expensesForDate(date: date), remainingBudget)
@@ -115,7 +115,7 @@ final class CalendarViewModel: ViewModelType {
         
         expenseRelay
             .withUnretained(self)
-            .map { owner, _ -> (date: Date, data: [MockMyCashBookModel], balance: Int) in
+            .map { owner, _ -> (date: Date, data: [MyCashBookModel], balance: Int) in
                 let remainingBudget = owner.calculateRemainingBudget(upTo: owner.selectedDate)
                 return (owner.selectedDate, owner.expensesForDate(date: owner.selectedDate), remainingBudget)
             }
@@ -140,11 +140,11 @@ final class CalendarViewModel: ViewModelType {
             predicate: cashBookID
         )
         
-        let models = expenses.compactMap { entity -> MockMyCashBookModel? in
+        let models = expenses.compactMap { entity -> MyCashBookModel? in
             guard let entityID = entity.cashBookID,
                   entityID == self.cashBookID else { return nil }
             
-            return MockMyCashBookModel(
+            return MyCashBookModel(
                 amount: entity.amount,
                 cashBookID: entity.cashBookID ?? self.cashBookID,
                 caculatedAmount: entity.caculatedAmount,
@@ -175,7 +175,7 @@ final class CalendarViewModel: ViewModelType {
     
     /// 기존 지출 데이터를 수정하는 메서드
     /// - Parameter expense: 수정할 지출 데이터 모델
-    func updateExpense(_ expense: MockMyCashBookModel) {
+    func updateExpense(_ expense: MyCashBookModel) {
         CoreDataManager.shared.update(
             type: MyCashBookEntity.self,
             entityID: expense.id,
@@ -214,7 +214,7 @@ final class CalendarViewModel: ViewModelType {
     /// 지정된 날짜에 해당하는 지출내역을 가져오는 메서드 
     /// - Parameter date: 조회하는 날짜
     /// - Returns: 해당 날짜의 지출 내역 배열
-    func expensesForDate(date: Date) -> [MockMyCashBookModel] {
+    func expensesForDate(date: Date) -> [MyCashBookModel] {
         return expenseRelay.value.filter { expense in
             Calendar.current.isDate(expense.expenseDate, inSameDayAs: date)
         }

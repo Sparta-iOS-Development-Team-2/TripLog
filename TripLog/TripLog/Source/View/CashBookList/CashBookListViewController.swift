@@ -156,7 +156,7 @@ private extension CashBookListViewController {
         output.showAddListModal
             .flatMap {
                 return ModalViewManager.showModal(state: .createNewCashBook)
-                    .compactMap { $0 as? MockCashBookModel }
+                    .compactMap { $0 as? CashBookModel }
             }
             .asSignal(onErrorSignalWith: .empty())
             .emit { data in
@@ -177,7 +177,7 @@ private extension CashBookListViewController {
             .disposed(by: disposeBag)
         
         // 선택된 셀의 오늘 지출화면으로 이동
-        listCollectionView.rx.modelSelected(MockCashBookModel.self)
+        listCollectionView.rx.modelSelected(CashBookModel.self)
             .subscribe(onNext: { [weak self] selectedItem in
                 guard let self = self else { return }
                 let data = self.getData(selectedItem)
@@ -187,8 +187,8 @@ private extension CashBookListViewController {
     }
     
     /// 셀에서 선택된 데이터를 Model에 넣어서 전달
-    func getData(_ selectedData: ControlEvent<MockCashBookModel>.Element) -> MockCashBookModel {
-        let data = MockCashBookModel(
+    func getData(_ selectedData: ControlEvent<CashBookModel>.Element) -> CashBookModel {
+        let data = CashBookModel(
             id: selectedData.id,
             tripName: selectedData.tripName,
             note: selectedData.note,
@@ -248,14 +248,14 @@ private extension CashBookListViewController {
             configuration.leadingSwipeActionsConfigurationProvider = { indexPath in
                 let editAction = UIContextualAction(style: .normal, title: "수정") { [self] _, _, completion in
                     
-                    guard let data = try? self.dataSource.model(at: indexPath) as? MockCashBookModel else {
+                    guard let data = try? self.dataSource.model(at: indexPath) as? CashBookModel else {
                         completion(false)
                         return
                     }
                     
                     // CoreData에 수정한 데이터 업데이트
                     ModalViewManager.showModal(state: .editCashBook(data: data))
-                        .compactMap { $0 as? MockCashBookModel }
+                        .compactMap { $0 as? CashBookModel }
                         .asSignal(onErrorSignalWith: .empty())
                         .emit { data in
                             CoreDataManager.shared.update(type: CashBookEntity.self, entityID: data.id, data: data)

@@ -9,5 +9,5 @@ import Foundation
 
 protocol EntityDataSendable {}
 
-extension MockCashBookModel: EntityDataSendable {}
-extension MockMyCashBookModel: EntityDataSendable {}
+extension CashBookModel: EntityDataSendable {}
+extension MyCashBookModel: EntityDataSendable {}

@@ -9,8 +9,7 @@ import Foundation
 import CoreData
 import Differentiator
 
-// TODO: 임시데이터(삭제예정)
-struct MockCashBookModel: Hashable, IdentifiableType {
+struct CashBookModel: Hashable, IdentifiableType {
     typealias Identity = UUID
     var identity: UUID {
         self.id
@@ -26,8 +25,7 @@ struct MockCashBookModel: Hashable, IdentifiableType {
 
 extension CashBookEntity: CoreDataManagable {
     
-    // TODO: 임시 데이터 적용 중, 수정 필요
-    typealias Model = MockCashBookModel
+    typealias Model = CashBookModel
     typealias Entity = CashBookEntity
     
     
@@ -118,7 +116,7 @@ extension CashBookEntity: CoreDataManagable {
     ///   - data: 업데이트할 데이터
     ///   - entityID: 업데이트할 Entity의 ID
     ///   - context: CoreData 인스턴스
-    static func update(data: MockCashBookModel, entityID: UUID, context: NSManagedObjectContext) {
+    static func update(data: CashBookModel, entityID: UUID, context: NSManagedObjectContext) {
         let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
         let element = CashBookElement()
         fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)

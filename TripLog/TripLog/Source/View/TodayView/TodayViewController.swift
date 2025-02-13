@@ -193,7 +193,7 @@ final class TodayViewController: UIViewController {
         
         // 🔹 동일한 `cashBookID`, 날짜를 가진 항목만 표시하도록 필터링
         let filteredExpenses = viewModel.output.expenses
-            .map { [weak self] expenses -> [MockMyCashBookModel] in
+            .map { [weak self] expenses -> [MyCashBookModel] in
                 guard let self = self else { return [] }
                 
                 let today = Calendar.current.startOfDay(for: Date()) // 🔹 오늘 날짜 (시간 제거)
@@ -220,7 +220,7 @@ final class TodayViewController: UIViewController {
 
         // 🔹 `cashBookID` 기준으로만 필터링 (총합 계산용)
         let totalExpensesByID = viewModel.output.expenses
-            .map { [weak self] expenses -> [MockMyCashBookModel] in
+            .map { [weak self] expenses -> [MyCashBookModel] in
                 guard let self = self else { return [] }
                 
                 return expenses.filter { $0.cashBookID == self.cashBookID } // 🔹 날짜 필터링 제거
@@ -261,12 +261,12 @@ final class TodayViewController: UIViewController {
             })
             .disposed(by: disposeBag)
                 
-        tableView.rx.modelSelected(MockMyCashBookModel.self)
+        tableView.rx.modelSelected(MyCashBookModel.self)
             .withUnretained(self)
             .flatMap { owner, data in
                 let exchangeRate = owner.getTodayExchangeRate()
                 return ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: exchangeRate))
-                    .compactMap { $0 as? MockMyCashBookModel }
+                    .compactMap { $0 as? MyCashBookModel }
             }
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
@@ -282,7 +282,7 @@ final class TodayViewController: UIViewController {
             .flatMap { owner, _ in
                 let exchangeRate = owner.getTodayExchangeRate()
                 return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.cashBookID, date: Date(), exchangeRate: exchangeRate)))
-                    .compactMap { $0 as? MockMyCashBookModel }
+                    .compactMap { $0 as? MyCashBookModel }
             }
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)

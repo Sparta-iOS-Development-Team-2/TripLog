@@ -61,7 +61,7 @@ final class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsCont
             SectionOfListCellData(
                 id: UUID(), // 섹션 구분
                 items: fetchedData.map { entity in
-                    return MockCashBookModel(
+                    return CashBookModel(
                         id: entity.id ?? UUID(),
                         tripName: entity.tripName ?? "",
                         note: entity.note ?? "",

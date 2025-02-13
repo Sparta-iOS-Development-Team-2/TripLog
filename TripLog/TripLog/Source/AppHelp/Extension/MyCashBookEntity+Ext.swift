@@ -8,8 +8,7 @@
 import Foundation
 import CoreData
 
-// TODO: 임시데이터(삭제예정)
-struct MockMyCashBookModel {
+struct MyCashBookModel {
     let amount: Double // 지출금액
     let cashBookID: UUID // 가계부 Entity ID
     let caculatedAmount: Double // 계산값(원화)
@@ -23,8 +22,7 @@ struct MockMyCashBookModel {
 
 extension MyCashBookEntity: CoreDataManagable {
     
-    // TODO: 임시 데이터 적용 중, 수정 필요
-    typealias Model = MockMyCashBookModel
+    typealias Model = MyCashBookModel
     typealias Entity = MyCashBookEntity
     
     
@@ -110,7 +108,7 @@ extension MyCashBookEntity: CoreDataManagable {
     ///   - data: 업데이트할 데이터
     ///   - entityID: 업데이트할 Entity의 ID
     ///   - context: CoreData 인스턴스
-    static func update(data: MockMyCashBookModel, entityID: UUID, context: NSManagedObjectContext) {
+    static func update(data: MyCashBookModel, entityID: UUID, context: NSManagedObjectContext) {
         let fetchRequest: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
         let element = MyCashBookElement()
         fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)

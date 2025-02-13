@@ -17,8 +17,8 @@ final class ModalViewController: UIViewController {
     // MARK: - Rx Properties
     
     private let disposeBag = DisposeBag()
-    fileprivate let cashBookActiveButtonTapped = PublishRelay<MockCashBookModel>()
-    fileprivate let consumptionActiveButtonTapped = PublishRelay<MockMyCashBookModel>()
+    fileprivate let cashBookActiveButtonTapped = PublishRelay<CashBookModel>()
+    fileprivate let consumptionActiveButtonTapped = PublishRelay<MyCashBookModel>()
     
     // MARK: - Properties
     
@@ -154,12 +154,12 @@ private extension ModalViewController {
 
 extension Reactive where Base: ModalViewController {
     /// 모달뷰에서 입력된 가계부 정보를 전달하는 옵저버블
-    var sendCashBookData: PublishRelay<MockCashBookModel> {
+    var sendCashBookData: PublishRelay<CashBookModel> {
         return base.cashBookActiveButtonTapped
     }
     
     // 모달뷰에서 입력된 지출 정보를 전달하는 옵저버블
-    var sendConsumptionData: PublishRelay<MockMyCashBookModel> {
+    var sendConsumptionData: PublishRelay<MyCashBookModel> {
         return base.consumptionActiveButtonTapped
     }
 }

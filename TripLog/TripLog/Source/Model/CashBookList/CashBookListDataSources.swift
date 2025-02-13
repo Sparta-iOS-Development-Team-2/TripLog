@@ -10,17 +10,17 @@ import RxDataSources
 /// RxDataSource에서 사용되는 모델
 struct SectionOfListCellData {
     var id: UUID // coredata의 UUID사용 (섹션을 구분)
-    var items: [MockCashBookModel]
+    var items: [CashBookModel]
 }
 
 extension SectionOfListCellData: AnimatableSectionModelType {
     
     typealias Identity = UUID
-    typealias Item = MockCashBookModel
+    typealias Item = CashBookModel
     
     var identity: UUID { id } // coredata의 UUID사용 (dataSource에서 섹션 구분)
     
-    init(original: SectionOfListCellData, items: [MockCashBookModel]) {
+    init(original: SectionOfListCellData, items: [CashBookModel]) {
         self = original
         self.items = items
     }

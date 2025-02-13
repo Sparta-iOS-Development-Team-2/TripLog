@@ -39,7 +39,7 @@ final class CalendarExpenseView: UIView {
     
     // MARK: - Properties
     /// 현재 표시중인 지출 항목 배열
-    private var expenses: [MockMyCashBookModel] = []
+    private var expenses: [MyCashBookModel] = []
     
     // MARK: - Initialization
     override init(frame: CGRect) {
@@ -96,7 +96,7 @@ final class CalendarExpenseView: UIView {
     ///   - date: 선택된 날짜
     ///   - expenses: 해당 날짜의 지출 항목 배열
     ///   - balance: 현재 잔액
-    func configure(date: Date, expenses: [MockMyCashBookModel], balance: Int) {
+    func configure(date: Date, expenses: [MyCashBookModel], balance: Int) {
         self.expenses = expenses
         let totalExpense = expenses.reduce(0) { $0 + Int(round($1.caculatedAmount))}
         headerView.configure(date: date, expense: totalExpense, balance: balance)

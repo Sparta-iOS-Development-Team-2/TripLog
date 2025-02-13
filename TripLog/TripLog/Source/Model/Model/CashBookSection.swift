@@ -9,14 +9,14 @@ import RxDataSources
 
 // ✅ RxDataSources에서 사용할 SectionModel 정의
 struct CashBookSection {
-    var items: [MockCashBookModel]
+    var items: [CashBookModel]
 }
 
 // ✅ RxDataSources가 `SectionModelType`을 인식하도록 확장
 extension CashBookSection: SectionModelType {
-    typealias Item = MockCashBookModel
+    typealias Item = CashBookModel
 
-    init(original: CashBookSection, items: [MockCashBookModel]) {
+    init(original: CashBookSection, items: [CashBookModel]) {
         self = original
         self.items = items
     }
