@@ -1,12 +1,20 @@
 //
-//  Currencys.swift
+//  CurrencyRateResultType.swift
 //  TripLog
 //
-//  Created by 장상경 on 1/21/25.
+//  Created by 황석현 on 2/10/25.
 //
 
 import Foundation
 
+// MARK: - CurrencyRateResultType
+enum CurrencyRateResultType {
+    case noData
+    case isEmpty
+    case success
+}
+
+// MARK: - Currencies Code
 /// 나라별 통화코드(총 26개국)
 ///
 /// - AED (아랍에미리트 디르함)
@@ -21,7 +29,7 @@ import Foundation
 /// - GBP (영국 파운드)
 /// - HKD (홍콩 달러)
 /// - IDR (인도네시아 루피아)
-/// - JPY (일본 엔) 
+/// - JPY (일본 엔)
 /// - KRW (한국 원)
 /// - KWD (쿠웨이트 디나르)
 /// - MYR (말레이시아 링기트)

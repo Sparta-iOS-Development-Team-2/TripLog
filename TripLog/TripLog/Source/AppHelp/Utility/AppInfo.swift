@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 앱 관련 정보
 enum AppInfo {
     static let appId = "TripLog"
 }

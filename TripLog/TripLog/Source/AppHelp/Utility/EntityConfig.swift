@@ -7,12 +7,15 @@
 
 import Foundation
 
+/// Entity 이름
 enum EntityKeys {
     
     enum Name: String {
         case CurrencyEntity, CashBookEntity, MyCashBookEntity
     }
 }
+
+/// CurrencyEntity 속성
 struct CurrencyElement {
     let rateDate = "rateDate"
     let baseRate = "baseRate"
@@ -20,6 +23,7 @@ struct CurrencyElement {
     let currencyName = "currencyName"
 }
 
+/// MyCashBookEntity 속성
 struct MyCashBookElement {
     let amount = "amount"
     let caculatedAmount = "caculatedAmount"
@@ -32,6 +36,7 @@ struct MyCashBookElement {
     let payment = "payment"
 }
 
+/// CashBookEntity 속성
 struct CashBookElement {
     let budget = "budget"
     let departure = "departure"

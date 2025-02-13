@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 한국수출입은행 관련 정보
 enum APIInfo {
     /// 인증키
     static var apiKey: String {

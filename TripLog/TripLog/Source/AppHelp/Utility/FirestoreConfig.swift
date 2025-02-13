@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Firestore의 객체 이름
 struct FireStoreConfig {
     let collectionName = "Currency"
     let documentData = "CurrencyRate"
