@@ -161,20 +161,27 @@ extension CashBookEntity: CoreDataManagable {
     ///   - entityID: 삭제할 CashBookEntity ID
     ///   - context: CoreData 인스턴스
     static func delete(entityID: UUID?, context: NSManagedObjectContext) {
-        let entityName = EntityKeys.Name.CashBookEntity.rawValue
-        let element = CashBookElement()
+        let cashBookEntityName = EntityKeys.Name.CashBookEntity.rawValue
+        let cashBookID = CashBookElement().id
+        let myCashBookEntityName = EntityKeys.Name.MyCashBookEntity.rawValue
+        let myCashBookParentID = MyCashBookElement().cashBookID
         guard let entityID = entityID else { return }
         
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
-        fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)
-        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        let cashBookFetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: cashBookEntityName)
+        cashBookFetchRequest.predicate = NSPredicate(format: "\(cashBookID) == %@", entityID as CVarArg)
+        let cashBookDeleteRequest = NSBatchDeleteRequest(fetchRequest: cashBookFetchRequest)
+        
+        let myCashBookFetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: myCashBookEntityName)
+        myCashBookFetchRequest.predicate = NSPredicate(format: "\(myCashBookParentID) == %@", entityID as CVarArg)
+        let myCashBookDeleteRequest = NSBatchDeleteRequest(fetchRequest: myCashBookFetchRequest)
         
         do {
-            try context.execute(deleteRequest)
+            try context.execute(cashBookDeleteRequest)
+            try context.execute(myCashBookDeleteRequest)
             context.refreshAllObjects()
-            debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 완료")
+            debugPrint("\(cashBookEntityName)에서 id \(entityID) 데이터 삭제 완료")
         } catch {
-            debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 실패: \(error)")
+            debugPrint("\(cashBookEntityName)에서 id \(entityID) 데이터 삭제 실패: \(error)")
         }
     }
 }
