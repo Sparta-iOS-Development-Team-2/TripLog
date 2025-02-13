@@ -4,7 +4,7 @@ import Then
 import RxSwift
 import RxCocoa
 
-final class TodayViewController: UIViewController {
+class TodayViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
     let viewModel: TodayViewModel
@@ -204,14 +204,6 @@ final class TodayViewController: UIViewController {
                 }
             }
 
-
-        // 🔹 **콘솔 출력 (디버깅용)**
-        filteredExpenses
-            .drive(onNext: { expenses in
-                print("📌 expenses 데이터 확인:", expenses) // ✅ 콘솔에 데이터 출력
-            })
-            .disposed(by: disposeBag)
-
         // 🔹 테이블 뷰 바인딩 (필터링 적용)
         filteredExpenses
             .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
@@ -219,7 +211,7 @@ final class TodayViewController: UIViewController {
                     date: self.getTodayDate(),
                     title: expense.note,
                     category: expense.category,
-                    amount: "\(expense.amount.formattedCurrency(currencyCode: expense.country))",
+                    amount: "\(CurrencyFormatter.formattedCurrency(from: expense.amount, currencyCode: expense.country))",
                     exchangeRate: "\(NumberFormatter.formattedString(from: expense.caculatedAmount.rounded())) 원",
                     payment: expense.payment
                 )
@@ -270,24 +262,35 @@ final class TodayViewController: UIViewController {
             .disposed(by: disposeBag)
                 
         tableView.rx.modelSelected(MockMyCashBookModel.self)
-            .subscribe(onNext: { [weak self] selectedExpense in
-                guard let self = self else { return }
-
-                print("📌 선택된 셀 데이터 확인: \(selectedExpense)")
-
-                // ✅ 선택된 데이터를 이용하여 편집 모달 띄우기
-                self.presentExpenseEditModal(data: selectedExpense)
-            })
-            .disposed(by: disposeBag)
+            .withUnretained(self)
+            .flatMap { owner, data in
+                let exchangeRate = owner.getTodayExchangeRate()
+                return ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: exchangeRate))
+                    .compactMap { $0 as? MockMyCashBookModel }
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, data in
+                CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: data.id, data: data)
+                owner.viewModel.input.fetchTrigger.accept(owner.cashBookID)
+            }.disposed(by: disposeBag)
 
         
         // 🔹 모달 표시 바인딩 (RxSwift 적용)
         floatingButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                self.presentExpenseAddModal()
-            })
-            .disposed(by: disposeBag)
+            .withUnretained(self)
+            .flatMap { owner, _ in
+                let exchangeRate = owner.getTodayExchangeRate()
+                return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.cashBookID, date: Date(), exchangeRate: exchangeRate)))
+                    .compactMap { $0 as? MockMyCashBookModel }
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, data in
+                CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
+                owner.viewModel.input.fetchTrigger.accept(owner.cashBookID)
+            }.disposed(by: disposeBag)
+        
         // ✅ `totalExpenseRelay` 값 변경될 때 `onTotalExpenseUpdated` 실행
         viewModel.totalExpenseRelay
             .subscribe(onNext: { [weak self] totalExpense in
@@ -300,7 +303,7 @@ final class TodayViewController: UIViewController {
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, _ in
-                let recentRateDate = Date.caculateDate()
+                let recentRateDate = CalculateDate.calculateDate()
                 PopoverManager.showPopover(on: owner,
                                            from: owner.helpButton,
                                            title: "현재의 환율은 \(recentRateDate) 환율입니다.",
@@ -311,77 +314,12 @@ final class TodayViewController: UIViewController {
                 
             }.disposed(by: disposeBag)
     }
-                           
-    @objc private func presentExpenseAddModal() {
-        
-        // 오늘 날짜를 "YYYYMMDD" 형식의 문자열로 변환
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd"
-        let todayString = dateFormatter.string(from: Date())
-
-        // CoreData에서 오늘 날짜에 해당하는 데이터 가져오기
+    
+    private func getTodayExchangeRate() -> [CurrencyEntity] {
+        let todayString = Date.formattedDateString(from: Date())
         let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
-
         
-        ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: self.cashBookID, date: Date(), exchangeRate: exchangeRate)))
-            .asSignal(onErrorSignalWith: .empty())
-            .emit(onNext: { [weak self] data in
-                guard let self = self,
-                let cashBookData = data as? MockMyCashBookModel else { return }
-                debugPrint("📌 모달뷰 닫힘 후 데이터 갱신 시작")
-                
-                CoreDataManager.shared.save(type: MyCashBookEntity.self, data: cashBookData)
-                
-                // ✅ fetchTrigger 실행하여 데이터 갱신 요청
-                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
-
-                // ✅ fetchTrigger 실행 후 1초 뒤 `expenses`를 다시 구독하여 값 확인
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    self.viewModel.output.expenses
-                        .drive(onNext: { fetchedExpenses in
-                            print("📌 🔥 fetchTrigger 실행 후 expenses 업데이트됨: \(fetchedExpenses.count)개 항목")
-                            print("ee\(exchangeRate)")
-                        })
-                        .disposed(by: self.disposeBag)
-
-                    // ✅ 테이블 뷰 강제 갱신 (UI 반영 확인용)
-                    self.tableView.reloadData()
-                }
-            })
-            .disposed(by: disposeBag)
-    }
-
-    private func presentExpenseEditModal(data: MockMyCashBookModel) {
-        let todayDate = Date.formattedDateString(from: Date())
-        let exchagedRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayDate)
-        
-        ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: exchagedRate))
-            .asSignal(onErrorSignalWith: .empty())
-            .emit(onNext: { [weak self] updatedData in
-                guard let self = self,
-                      let updatedExpense = updatedData as? MockMyCashBookModel else { return }
-
-                debugPrint("📌 모달뷰 닫힘 후 수정된 데이터: \(updatedExpense)")
-
-                // ✅ CoreData에서 기존 데이터를 업데이트
-                CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: updatedExpense.id, data: updatedExpense)
-
-                // ✅ fetchTrigger 실행하여 데이터 갱신 요청
-                self.viewModel.input.fetchTrigger.accept(self.cashBookID)
-
-                // ✅ 데이터 갱신 후 UI 업데이트 (비동기 처리)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    self.viewModel.output.expenses
-                        .drive(onNext: { fetchedExpenses in
-                            print("📌 🔥 fetchTrigger 실행 후 expenses 업데이트됨: \(fetchedExpenses.count)개 항목")
-                        })
-                        .disposed(by: self.disposeBag)
-
-                    // ✅ 테이블 뷰 강제 갱신 (UI 반영 확인용)
-                    self.tableView.reloadData()
-                }
-            })
-            .disposed(by: disposeBag)
+        return exchangeRate
     }
     
     func getTodayDate() -> String {
