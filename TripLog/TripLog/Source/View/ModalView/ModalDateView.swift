@@ -162,6 +162,13 @@ private extension ModalDateView {
         startDatePicker.rx.datePickerIsEmpty
             .bind(to: startDateIsEmpty)
             .disposed(by: disposeBag)
+        
+        startDatePicker.rx.selectedDate
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { _ in
+                guard let vc = AppHelpers.getTopViewController() else { return }
+                vc.view.endEditing(true)
+            }.disposed(by: disposeBag)
     }
     
     /// EndDatePicker 바인딩 메소드
@@ -188,6 +195,13 @@ private extension ModalDateView {
         endDatePicker.rx.datePickerIsEmpty
             .bind(to: endDateIsEmpty)
             .disposed(by: disposeBag)
+        
+        endDatePicker.rx.selectedDate
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { _ in
+                guard let vc = AppHelpers.getTopViewController() else { return }
+                vc.view.endEditing(true)
+            }.disposed(by: disposeBag)
     }
     
 }

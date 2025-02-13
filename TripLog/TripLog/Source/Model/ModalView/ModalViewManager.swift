@@ -32,7 +32,7 @@ enum ModalViewManager {
     /// ```
     ///
     /// ``ModalViewState``
-    static func showModal(state: ModalViewState) -> Observable<MockDataProtocol> {
+    static func showModal(state: ModalViewState) -> Observable<EntityDataSendable> {
         guard let view = AppHelpers.getTopViewController() else {
             return .error(NSError(domain: "No top view controller", code: -1))
         }
@@ -40,9 +40,9 @@ enum ModalViewManager {
         let modalVC = ModalViewController(state: state)
         view.present(modalVC, animated: true)
         
-        return Observable<MockDataProtocol>.merge(
-            modalVC.rx.sendCashBookData.map { $0 as MockDataProtocol },
-            modalVC.rx.sendConsumptionData.map { $0 as MockDataProtocol }
+        return Observable<EntityDataSendable>.merge(
+            modalVC.rx.sendCashBookData.map { $0 as EntityDataSendable },
+            modalVC.rx.sendConsumptionData.map { $0 as EntityDataSendable }
         )
     }
     
