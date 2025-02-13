@@ -9,11 +9,6 @@ import UIKit
 
 struct PopoverManager {
     
-    private let title: String
-    private let subTitle: String
-    private let width: Int
-    private let height : Int
-    
     /// popover 사용는 메서드
     /// Parameters:
     ///  - on : 사용할 해당 뷰컨트롤러
