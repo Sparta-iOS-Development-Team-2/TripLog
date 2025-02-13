@@ -48,29 +48,19 @@ extension CashBookEntity: CoreDataManagable {
             element.tripName : data.tripName
         ]
         
-        do {
-            let existingItems = try context.fetch(fetchRequest)
-            if existingItems.isEmpty {
-                // 중복된 항목이 없으면 저장
-                // 비동기 저장
-                context.performAndWait {
-                    let att = NSManagedObject(entity: entity, insertInto: context)
-                    properties.forEach { key, value in
-                        att.setValue(value, forKey: key)
-                    }
-                
-                    do {
-                        try context.save()
-                        print("저장 성공: \(data.note)")
-                    } catch {
-                        print("데이터 저장 실패: \(error)")
-                    }
-                }
-            } else {
-                print("이미 존재하는 항목입니다.")
+        // 비동기 저장
+        context.performAndWait {
+            let att = NSManagedObject(entity: entity, insertInto: context)
+            properties.forEach { key, value in
+                att.setValue(value, forKey: key)
             }
-        } catch {
-            print("Fetch 오류: \(error.localizedDescription)")
+            
+            do {
+                try context.save()
+                print("저장 성공: \(data.note)")
+            } catch {
+                print("데이터 저장 실패: \(error)")
+            }
         }
     }
     
@@ -159,20 +149,27 @@ extension CashBookEntity: CoreDataManagable {
     ///   - entityID: 삭제할 CashBookEntity ID
     ///   - context: CoreData 인스턴스
     static func delete(entityID: UUID?, context: NSManagedObjectContext) {
-        let entityName = EntityKeys.Name.CashBookEntity.rawValue
-        let element = CashBookElement()
+        let cashBookEntityName = EntityKeys.Name.CashBookEntity.rawValue
+        let cashBookID = CashBookElement().id
+        let myCashBookEntityName = EntityKeys.Name.MyCashBookEntity.rawValue
+        let myCashBookParentID = MyCashBookElement().cashBookID
         guard let entityID = entityID else { return }
         
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
-        fetchRequest.predicate = NSPredicate(format: "\(element.id) == %@", entityID as CVarArg)
-        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        let cashBookFetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: cashBookEntityName)
+        cashBookFetchRequest.predicate = NSPredicate(format: "\(cashBookID) == %@", entityID as CVarArg)
+        let cashBookDeleteRequest = NSBatchDeleteRequest(fetchRequest: cashBookFetchRequest)
+        
+        let myCashBookFetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: myCashBookEntityName)
+        myCashBookFetchRequest.predicate = NSPredicate(format: "\(myCashBookParentID) == %@", entityID as CVarArg)
+        let myCashBookDeleteRequest = NSBatchDeleteRequest(fetchRequest: myCashBookFetchRequest)
         
         do {
-            try context.execute(deleteRequest)
+            try context.execute(cashBookDeleteRequest)
+            try context.execute(myCashBookDeleteRequest)
             context.refreshAllObjects()
-            debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 완료")
+            debugPrint("\(cashBookEntityName)에서 id \(entityID) 데이터 삭제 완료")
         } catch {
-            debugPrint("\(entityName)에서 id \(entityID) 데이터 삭제 실패: \(error)")
+            debugPrint("\(cashBookEntityName)에서 id \(entityID) 데이터 삭제 실패: \(error)")
         }
     }
 }
