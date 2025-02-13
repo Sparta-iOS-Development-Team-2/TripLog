@@ -31,7 +31,11 @@ final class CashBookListViewModel: NSObject, ViewModelType, NSFetchedResultsCont
     /// 타입은 제네릭으로 선언, 정렬이 필수적으로 필요
     private lazy var fetchedResultsController: NSFetchedResultsController<CashBookEntity> = {
         let fetchRequest: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "departure", ascending: true)]
+        // 정렬 설정(1순위 출발날짜, 2순위 도착날짜)
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "departure", ascending: true),
+            NSSortDescriptor(key: "homecoming", ascending: true)
+        ]
         
         let controller = NSFetchedResultsController(
             fetchRequest: fetchRequest,

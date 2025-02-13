@@ -36,6 +36,9 @@ final class CashBookListViewController: UIViewController {
         // 스크롤 제거
         $0.showsHorizontalScrollIndicator = false
         $0.showsVerticalScrollIndicator = false
+        
+        // 하단 여백
+        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 40, right: 0)
     }
     
     // RxdataSource(animated)
@@ -202,6 +205,9 @@ private extension CashBookListViewController {
     func listCollectionViewLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection in
             var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+            
+            // 셀 간의 seperator구분 선 삭제
+            configuration.showsSeparators = false
             
             // 셀 뒤의 스크롤뷰 색상 변경
             configuration.backgroundColor = UIColor.CustomColors.Background.background
