@@ -98,21 +98,10 @@ final class CustomProgressView: UIView {
             $0.centerY.equalToSuperview()
             $0.trailing.equalTo(progress.snp.trailing).offset(-5) // ✅ progress 끝에 고정
         }
-
-        // ✅ 그라데이션 레이어 초기화
-//        setupGradientLayer()
     }
-
-//    /// ✅ 그라데이션 레이어 설정
-//    private func setupGradientLayer() {
-//        let gradient = CAGradientLayer()
-//        gradient.colors = [progressGradientColors]
-//        progress.applyGradient(colors: progressGradientColors)
-//    }
-
+    
     /// ✅ 그라데이션 애니메이션 적용
     private func applyGradientAnimation() {
-//        let gradientColors = [progressGradientColors]
         progress.applyGradientAnimation(colors: progressGradientColors) // ✅ UIView의 applyGradientAnimation() 사용
     }
 }
