@@ -46,4 +46,15 @@ enum ModalViewManager {
         )
     }
     
+    static func showCategoryModal(_ model: [String]) -> Observable<String> {
+        guard let view = AppHelpers.getTopViewController() else {
+            return .error(NSError(domain: "No top view controller", code: -1))
+        }
+        
+        let categoryVC = CategoryViewController(model)
+        view.present(categoryVC, animated: true)
+        
+        return categoryVC.rx.selectedCell.asObservable()
+    }
+    
 }
