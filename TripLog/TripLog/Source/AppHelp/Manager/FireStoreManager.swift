@@ -20,16 +20,17 @@ final class FireStoreManager {
     
     /// 환율정보 생성(API 요청)
     /// - Parameter date: API에 요청할 환율 날짜
-    func generateCurrencyRate(date: String, closure: (() ->Void)? = nil ) {
+    func generateCurrencyRate(date: String, closure: ((Bool) -> Void)? = nil ) {
         
         APIManager.shared.fetchCurrencyRatesWithAlamofire(dataType: APIInfo.exchangeRate, date: date) { result in
             switch result {
             case .success(let currencyRates):
                 self.saveCurrencyToFirestore(data: currencyRates, date: date)
                 // 비동기적 진행을 위한 클로져
-                closure?()
+                closure?(true)
             case .failure(let error):
                 debugPrint("Alamofire 통신 실패: \(error.localizedDescription)")
+                closure?(false)
             }
         }
     }
