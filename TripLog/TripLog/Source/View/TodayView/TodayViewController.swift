@@ -26,17 +26,6 @@ final class TodayViewController: UIViewController {
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
         $0.textColor = UIColor(named: "textPrimary")
     }
-        
-    // 도움말 버튼
-    // 도움말 버튼 (원형으로 만들기)
-    private let helpButton = UIButton(type: .system).then {
-        $0.setTitle("?", for: .normal)
-        $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-        $0.applyBackgroundColor()
-        $0.clipsToBounds = true
-        $0.applyFloatingButtonShadow()
-        $0.applyCornerRadius(12)
-    }
 
     // "오늘 사용 금액" 라벨
     private let totalLabel = UILabel().then {
@@ -112,12 +101,11 @@ final class TodayViewController: UIViewController {
         super.viewDidLayoutSubviews()
         
         floatingButton.layer.shadowPath = floatingButton.shadowPath()
-        helpButton.layer.shadowPath = helpButton.shadowPath()
     }
     
     // 🔹 UI 요소 추가
     private func setupViews() {
-        let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel, helpButton]).then {
+        let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel]).then {
             $0.axis = .horizontal
             $0.spacing = 8
             $0.alignment = .center
@@ -145,10 +133,6 @@ final class TodayViewController: UIViewController {
     
     // 🔹 UI 레이아웃 설정
     private func setupConstraints() {
-        
-        helpButton.snp.makeConstraints {
-            $0.width.height.equalTo(24) // 버튼 크기를 40x40으로 고정
-        }
         
         topStackView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
@@ -296,21 +280,7 @@ final class TodayViewController: UIViewController {
                 debugPrint("-----------\(totalExpense)")
             })
             .disposed(by: disposeBag)
-        
-        helpButton.rx.tap
-            .asSignal(onErrorSignalWith: .empty())
-            .withUnretained(self)
-            .emit { owner, _ in
-                let recentRateDate = Date.caculateDate()
-                PopoverManager.showPopover(on: owner,
-                                           from: owner.helpButton,
-                                           title: "현재의 환율은 \(recentRateDate) 환율입니다.",
-                                           subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
-                                           width: 170,
-                                           height: 60,
-                                           arrow: .down)
-                
-            }.disposed(by: disposeBag)
+
     }
     
     private func getTodayExchangeRate() -> [CurrencyEntity] {
@@ -434,12 +404,5 @@ extension UIView {
         return renderer.image { rendererContext in
             layer.render(in: rendererContext.cgContext)
         }
-    }
-}
-
-// 사용하는 뷰컨트롤러에 추가를 해주셔야 popover기능을 아이폰에서 정상적으로 사용 가능합니다.
-extension TodayViewController: UIPopoverPresentationControllerDelegate {
-    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
-        return .none
     }
 }
