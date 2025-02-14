@@ -12,10 +12,10 @@ final class TodayViewController: UIViewController {
     // 🔹 상단 UI StackView
     private let topStackView = UIStackView()
     
-    var onTotalAmountUpdated: ((String)->Void)?
+    var onTotalAmountUpdated: ((Int)->Void)?
     
     let totalExpense = BehaviorRelay<Int>(value: 0)
-    let formattedTotalRelay = BehaviorRelay<String>(value: "0 원") // ✅ Rx로 관리
+    let formattedTotalRelay = BehaviorRelay<Int>(value: 0) // ✅ Rx로 관리
 
     // ✅ TripLogTopView에 반영할 총 지출 금액 Relay (클로저 방식)
     var onTotalExpenseUpdated: ((Int) -> Void)?
@@ -228,14 +228,12 @@ final class TodayViewController: UIViewController {
 
         // 🔹 **필터링된 데이터에서 총합 계산**
         totalExpensesByID
-            .map { expenses -> String in
-                let totalExchangeRate = expenses.map { Int($0.caculatedAmount) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
-                let formattedTotal = NumberFormatter.formattedString(from: Double(totalExchangeRate)) + " 원"
-                debugPrint("🔹 formattedTotal 업데이트됨: \(formattedTotal)")
+            .map { expenses -> Int in
+                let totalExchangeRate = expenses.map { Int($0.caculatedAmount.rounded()) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
                 
-                return formattedTotal
+                return totalExchangeRate
             }
-            .startWith("0 원") // ✅ 첫 화면 로딩 시 기본 값 설정
+            .startWith(0) // ✅ 첫 화면 로딩 시 기본 값 설정
             .drive(formattedTotalRelay) // ✅ `formattedTotalRelay`에 값 전달
             .disposed(by: disposeBag)
 
@@ -243,7 +241,7 @@ final class TodayViewController: UIViewController {
         // ✅ `totalAmountLabel`에 바인딩하여 UI 반영
         filteredExpenses
             .map { expense -> String in
-                let todayTotalExpense = Int(expense.reduce(0) { $0 + $1.caculatedAmount })
+                let todayTotalExpense = Int(expense.reduce(0) { $0 + $1.caculatedAmount.rounded() })
                 return NumberFormatter.wonFormat(todayTotalExpense)
             }
             .asObservable()

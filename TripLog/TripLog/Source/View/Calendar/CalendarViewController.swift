@@ -72,7 +72,7 @@ final class CalendarViewController: UIViewController {
     // MARK: - Properties
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
     private let selectedDate = PublishRelay<Date>()
-    fileprivate let updateTotalAmount = PublishRelay<String>()
+    fileprivate let updateTotalAmount = PublishRelay<Int>()
     private let disposeBag = DisposeBag()
     
     // MARK: - View Lifecycle
@@ -218,7 +218,7 @@ final class CalendarViewController: UIViewController {
             .drive { owner, data in
                 owner.calendarView.calendar.reloadData()
                 owner.expenseListView.configure(date: data.date, expenses: data.data, balance: data.balance)
-                owner.updateTotalAmount.accept("\(owner.getTotalAmount())")
+                owner.updateTotalAmount.accept(owner.getTotalAmount())
             }
             .disposed(by: disposeBag)
     }
@@ -366,7 +366,7 @@ extension CalendarViewController: UITableViewDelegate {
 }
 
 extension Reactive where Base: CalendarViewController {
-    var updateTotalAmount: PublishRelay<String> {
+    var updateTotalAmount: PublishRelay<Int> {
         return base.updateTotalAmount
     }
 }
