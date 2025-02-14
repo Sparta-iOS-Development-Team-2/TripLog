@@ -96,7 +96,6 @@ private extension ModalViewController {
             .emit { owner, data in
                 
                 guard !data.0 else {
-                    guard let vc = AppHelpers.getTopViewController() else { return }
                     let alert = AlertManager(title: "알림", message: "모든 내용을 정확히 입력해주세요", cancelTitle: "확인")
                     alert.showAlert(.alert)
                     return
@@ -120,7 +119,6 @@ private extension ModalViewController {
             .emit { owner, data in
                 
                 guard !data.0 else {
-                    guard let vc = AppHelpers.getTopViewController() else { return }
                     let alert = AlertManager(title: "알림", message: "모든 내용을 정확히 입력해주세요", cancelTitle: "확인")
                     alert.showAlert(.alert)
                     return

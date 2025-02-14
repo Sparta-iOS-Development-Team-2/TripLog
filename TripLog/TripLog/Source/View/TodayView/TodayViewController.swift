@@ -6,13 +6,19 @@ import RxCocoa
 
 final class TodayViewController: UIViewController {
     
+    // MARK: - Rx Properties
+    
     private let disposeBag = DisposeBag()
     private let fetchTrigger = PublishRelay<UUID>()
     private let deleteExpenseTrigger = PublishRelay<Int>()
     fileprivate let totalAmountRelay = PublishRelay<Int>()
     
+    // MARK: - Properties
+    
     private let viewModel: TodayViewModel
     private let cashBookID: UUID // ✅ 저장된 cashBookID
+    
+    // MARK: - UI Components
     
     // 🔹 상단 UI StackView
     private let topStackView = UIStackView()
@@ -61,6 +67,8 @@ final class TodayViewController: UIViewController {
         $0.applyFloatingButtonStroke()
     }
     
+    // MARK: - Initializer
+    
     init(cashBookID: UUID) {
         self.cashBookID = cashBookID
         self.viewModel = TodayViewModel()
@@ -71,23 +79,13 @@ final class TodayViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - ViewController LifeCycle
+    
     // 뷰가 로드될 때 실행
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor.CustomColors.Background.detailBackground
-        
-        setupViews()
-        setupConstraints()
-        bindViewModel()
-        
-        // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
-        fetchTrigger.accept(cashBookID)
-        
-        // ✅ Rx 방식으로 delegate 설정
-        tableView.rx.setDelegate(self)
-            .disposed(by: disposeBag)
-        
+        setupUI()
     }
     
     override func viewDidLayoutSubviews() {
@@ -101,7 +99,21 @@ final class TodayViewController: UIViewController {
     }
 }
 
+// MARK: - Private Method
+
 private extension TodayViewController {
+    
+    func setupUI() {
+        view.backgroundColor = UIColor.CustomColors.Background.detailBackground
+        
+        setupViews()
+        setupConstraints()
+        bind()
+        
+        // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
+        fetchTrigger.accept(cashBookID)
+    }
+    
     // 🔹 UI 요소 추가
     private func setupViews() {
         let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel]).then {
@@ -152,6 +164,8 @@ private extension TodayViewController {
         }
     }
     
+    /// 지출 목록이 비었을 경우 emptyLabel의 hidden 속성을 변환하는 메소드
+    /// - Parameter isEmpty: 지출 목록이 비어있는지에 대한 여부
     func updateEmptyState(isEmpty: Bool) {
         if isEmpty {
             let emptyLabel = UILabel().then {
@@ -162,15 +176,16 @@ private extension TodayViewController {
             }
             tableView.backgroundView = emptyLabel
         } else {
+            tableView.backgroundView?.removeFromSuperview()
             tableView.backgroundView = nil
         }
     }
     
-    func bindViewModel() {
+    // Rx 바인딩 메소드
+    func bind() {
         
         let input: TodayViewModel.Input = .init(fetchTrigger: fetchTrigger,
-                                                deleteExpenseTrigger: deleteExpenseTrigger
-        )
+                                                deleteExpenseTrigger: deleteExpenseTrigger)
         
         let output = viewModel.transform(input: input)
         
@@ -246,9 +261,14 @@ private extension TodayViewController {
                 owner.fetchTrigger.accept(owner.cashBookID)
                 owner.totalAmountRelay.accept(owner.getTotalAmount())
             }.disposed(by: disposeBag)
-
+        
+        // ✅ Rx 방식으로 delegate 설정
+        tableView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
     }
     
+    /// 오늘의 환율을 반환하는 메소드
+    /// - Returns: 금일 환율
     func getTodayExchangeRate() -> [CurrencyEntity] {
         let todayString = Date.formattedDateString(from: Date())
         let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
@@ -256,6 +276,8 @@ private extension TodayViewController {
         return exchangeRate
     }
     
+    /// 오늘 날짜의 포맷을 변경하여 반환하는 메소드
+    /// - Returns: "yyyy.MM.dd" 형식의 금일 날짜
     func getTodayDate() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy.MM.dd"  // 날짜 포맷 설정
@@ -263,6 +285,8 @@ private extension TodayViewController {
         return dateFormatter.string(from: Date()) // 현재 날짜 반환
     }
     
+    /// 현재 가계부의 총 지출 합계를 가져오는 메소드
+    /// - Returns: 현재 가계부의 총 지출 합계
     func getTotalAmount() -> Int {
         let data = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: self.cashBookID)
         let totalExpense = data.reduce(0) { $0 + Int(round($1.caculatedAmount))}
@@ -271,6 +295,8 @@ private extension TodayViewController {
     }
     
 }
+
+// MARK: - TableView Delegate Method
 
 extension TodayViewController: UITableViewDelegate {
     
@@ -350,7 +376,10 @@ extension TodayViewController: UITableViewDelegate {
     
 }
 
+// MARK: - Reactive Extension
+
 extension Reactive where Base: TodayViewController {
+    /// 총 지출 합계를 이벤트로 방출하는 옵저버블
     var totalAmount: PublishRelay<Int> {
         base.totalAmountRelay
     }

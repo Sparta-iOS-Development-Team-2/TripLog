@@ -232,8 +232,6 @@ final class CalendarViewModel: ViewModelType {
     /// - Parameter date: 계산할 기준 날짜
     /// - Returns: 해당 날짜까지의 예산 잔액
     func calculateRemainingBudget(upTo date: Date) -> Int {
-        // date를 기준으로 적용
-        let targetDate = Calendar.current.startOfDay(for: date)
         // 해당 날짜까지의 모든 지출 필터링
         let allExpenses = expenseRelay.value.filter { expense in
             Calendar.current.isDate(expense.expenseDate, inSameDayAs: date) || expense.expenseDate < date

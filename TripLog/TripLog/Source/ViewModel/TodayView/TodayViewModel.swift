@@ -43,9 +43,9 @@ final class TodayViewModel: ViewModelType {
                                     payment: $0.payment
                     )
                 }
-                let fileteredExpense = owner.fileteredTodayExpense(cashBookID: cashBookID, expense)
+                let filteredExpense = owner.filteredTodayExpense(cashBookID: cashBookID, expense)
                 
-                return fileteredExpense
+                return filteredExpense
             }
             .withUnretained(self)
             .asSignal(onErrorSignalWith: .empty())
@@ -72,8 +72,13 @@ final class TodayViewModel: ViewModelType {
                       expenses: expensesRelay
         )
     }
-
-    private func fileteredTodayExpense(cashBookID: UUID, _ expenses: [MyCashBookModel]) -> [MyCashBookModel] {
+    
+    /// 지출 목록을 금일 지출 목록으로 필터링 하는 메소드
+    /// - Parameters:
+    ///   - cashBookID: 불러올 지출 목록의 가계부 ID
+    ///   - expenses: 필터링할 지출 목록
+    /// - Returns: 필터링된 지출 목록
+    private func filteredTodayExpense(cashBookID: UUID, _ expenses: [MyCashBookModel]) -> [MyCashBookModel] {
         let today = Calendar.current.startOfDay(for: Date()) // 🔹 오늘 날짜 (시간 제거)
         
         return expenses.filter {
@@ -82,7 +87,9 @@ final class TodayViewModel: ViewModelType {
         }
     }
     
-    // ✅ 현재 데이터 배열에서 인덱스로 `UUID` 찾기
+    /// index를 이용해 특정 지출 내역 데이터를 필터링 하는 메소드
+    /// - Parameter index: 필터링 기준 index
+    /// - Returns: 필터링된 데이터
     private func filteredExpenseData(_ index: Int) -> MyCashBookModel {
         let currentExpenses = self.expensesRelay.value
         // ✅ 유효한 인덱스인지 확인

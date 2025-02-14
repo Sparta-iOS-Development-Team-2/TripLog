@@ -232,8 +232,7 @@ private extension CashBookListViewController {
                 let item = section.items[indexPath.row]
                 
                 // 삭제 기능
-                let deletAction = UIContextualAction(style: .destructive, title: "삭제") {[weak self] _, _, completion in
-                    guard let self = self else { return }
+                let deletAction = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
                     
                     // alert으로 삭제 여부 확인
                     let alert = AlertManager.init(title: "경고",
