@@ -21,6 +21,7 @@ final class ModalView: UIView {
     fileprivate let cancelButtonTapped = PublishRelay<Void>()
     fileprivate let cashBookActiveButtonTapped = PublishRelay<ModalCashBookData>()
     fileprivate let consumptionActiveButtonTapped = PublishRelay<ModalConsumptionData>()
+    fileprivate let categoryButtonTapped = PublishRelay<Void>()
     
     private let firstTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
     private let secondTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
@@ -86,7 +87,7 @@ final class ModalView: UIView {
             self.titleLabel.text = state.modalTitle
             self.firstSection = ModalSegmentView()
             self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
-            self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비", keyboardType: .default)
+            self.thirdSection = ModalCategoryView()
             self.forthSection = ModalAmountView()
         }
         
@@ -273,7 +274,7 @@ private extension ModalView {
         case .createNewConsumption(data: let data):
             if
                let secondSection = self.secondSection as? ModalTextField,
-               let thirdSection = self.thirdSection as? ModalTextField,
+               let thirdSection = self.thirdSection as? ModalCategoryView,
                let forthSection = self.forthSection as? ModalAmountView
             {
                 self.cashBookID = data.cashBookID
@@ -284,7 +285,7 @@ private extension ModalView {
                     .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.textFieldIsEmpty
+                thirdSection.rx.categoryIsEmpty
                     .bind(to: secondTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
@@ -296,12 +297,12 @@ private extension ModalView {
         case .editConsumption(data: let data, exchangeRate: let rate):
             if let firstSection = self.firstSection as? ModalSegmentView,
                let secondSection = self.secondSection as? ModalTextField,
-               let thirdSection = self.thirdSection as? ModalTextField,
+               let thirdSection = self.thirdSection as? ModalCategoryView,
                let forthSection = self.forthSection as? ModalAmountView
             {
                 firstSection.configureSegment(to: data.payment)
                 secondSection.configureTextField(text: data.note)
-                thirdSection.configureTextField(text: data.category)
+                thirdSection.configurePlaceholderText(text: data.category)
                 forthSection.configureAmountView(amount: data.amount, country: data.country)
                 
                 self.cashBookID = data.cashBookID
@@ -313,7 +314,7 @@ private extension ModalView {
                     .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.textFieldIsEmpty
+                thirdSection.rx.categoryIsEmpty
                     .bind(to: secondTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
@@ -361,7 +362,7 @@ private extension ModalView {
             guard
                 let first = firstSection as? ModalSegmentView,
                 let second = secondSection as? ModalTextField,
-                let third = thirdSection as? ModalTextField,
+                let third = thirdSection as? ModalCategoryView,
                 let forth = forthSection as? ModalAmountView
             else { return nil }
             
@@ -372,7 +373,7 @@ private extension ModalView {
                                    getExpenseDate(),
                                    first.paymentExtraction(),
                                    second.textFieldExtraction(),
-                                   third.textFieldExtraction(),
+                                   third.categoryExtraction(),
                                    forth.amountExtraction(),
                                    forth.currencyExtraction(),
                                    state,
@@ -442,4 +443,5 @@ extension Reactive where Base: ModalView {
     var checkBlankOfSections: Observable<Bool> {
         return base.allSectionIsEmpty
     }
+
 }

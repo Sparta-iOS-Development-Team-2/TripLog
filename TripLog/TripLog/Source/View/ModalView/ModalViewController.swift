@@ -145,6 +145,7 @@ private extension ModalViewController {
             .emit { owner, _ in
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
+        
     }
 }
 

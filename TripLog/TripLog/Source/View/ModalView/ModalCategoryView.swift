@@ -14,9 +14,15 @@ import RxCocoa
 /// 모달에서 텍스트 입력을 받을 텍스트 필드 공용 컴포넌츠
 final class ModalCategoryView: UIView {
     
+    // MARK: - Rx Properties
+    
+    fileprivate var categoryIsEmpty = PublishRelay<Bool>()
+    private let disposeBag = DisposeBag()
+    
     // MARK: - UI Components
     
     private let title = UILabel().then {
+        $0.text = "카테고리"
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
         $0.numberOfLines = 1
         $0.textColor = UIColor.Dark.base
@@ -26,6 +32,13 @@ final class ModalCategoryView: UIView {
     
     fileprivate let categoryButton = UIButton().then {
         $0.applyTextFieldStyle()
+    }
+    
+    private let buttonIcon = UIImageView().then {
+        $0.image = UIImage(systemName: "arrowtriangle.down.fill")
+        $0.tintColor = .CustomColors.Accent.blue
+        $0.contentMode = .scaleAspectFill
+        $0.backgroundColor = .clear
     }
     
     private let categoryPlaceholderText = UILabel().then {
@@ -69,6 +82,7 @@ final class ModalCategoryView: UIView {
         categoryPlaceholderText.font = .SCDream(size: .body, weight: .regular)
         categoryPlaceholderText.backgroundColor = UIColor(red: .random(in: 0...0.6), green: .random(in: 0...0.6), blue: .random(in: 0...0.6), alpha: 1.0)
         categoryPlaceholderText.layer.cornerRadius = categoryPlaceholderText.bounds.height / 2
+        categoryIsEmpty.accept(false)
     }
     
     /// 텍스트필드의 데이터를 추출하는 메소드
@@ -87,11 +101,13 @@ private extension ModalCategoryView {
     func setupUI() {
         configureSelf()
         setupLayout()
+        categoryIsEmpty.accept(true) // 초기값 세팅
+        bind()
     }
     
     func configureSelf() {
         self.backgroundColor = .clear
-        [title, categoryButton, categoryPlaceholderText].forEach { self.addSubview($0) }
+        [title, categoryButton, buttonIcon, categoryPlaceholderText].forEach { self.addSubview($0) }
     }
     
     func setupLayout() {
@@ -106,11 +122,35 @@ private extension ModalCategoryView {
             $0.bottom.equalToSuperview()
         }
         
+        buttonIcon.snp.makeConstraints {
+            $0.centerY.equalTo(categoryButton)
+            $0.trailing.equalTo(categoryButton).inset(12)
+            $0.width.height.equalTo(12)
+        }
+        
         categoryPlaceholderText.snp.makeConstraints {
             $0.centerY.equalTo(categoryButton)
             $0.leading.equalTo(categoryButton).offset(12)
             $0.width.equalTo(64)
             $0.height.equalTo(26)
         }
+    }
+    
+    func bind() {
+        categoryButton.rx.tap
+            .withUnretained(self)
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { owner, _ in
+                debugPrint("카테고리 버튼 클릭")
+            }.disposed(by: disposeBag)
+    }
+}
+
+// MARK: - Reactive Extension
+
+extension Reactive where Base: ModalCategoryView {
+    /// 카테고리가 비어있는지 여부를 확인하여 이벤트를 방출하는 옵저버블
+    var categoryIsEmpty: PublishRelay<Bool> {
+        return base.categoryIsEmpty
     }
 }
