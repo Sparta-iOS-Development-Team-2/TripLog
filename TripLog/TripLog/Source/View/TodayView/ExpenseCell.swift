@@ -30,7 +30,7 @@ final class ExpenseCell: UITableViewCell {
 
     private let exchangeRateLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .body, weight: .medium)
-        $0.textColor = UIColor.Personal.normal
+        $0.textColor = .CustomColors.Accent.blue
         $0.textAlignment = .right
     }
 

@@ -27,7 +27,7 @@ final class ModalTextField: UIView {
     private let subTitle = UILabel().then {
         $0.font = UIFont.SCDream(size: .headline, weight: .medium)
         $0.numberOfLines = 1
-        $0.textColor = UIColor.Personal.normal
+        $0.textColor = .CustomColors.Accent.blue
         $0.textAlignment = .right
         $0.backgroundColor = .clear
     }

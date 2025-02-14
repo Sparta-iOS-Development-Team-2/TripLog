@@ -29,11 +29,11 @@ final class ModalAmountView: UIView {
     
     private let currencyButton = UIButton().then {
         $0.setTitle("KRW(원)", for: .normal)
-        $0.setTitleColor(UIColor.Personal.normal, for: .normal)
+        $0.setTitleColor(.CustomColors.Accent.blue, for: .normal)
         $0.titleLabel?.font = UIFont.SCDream(size: .headline, weight: .medium)
         $0.setImage(UIImage(systemName: "chevron.up.chevron.down"), for: .normal)
         $0.semanticContentAttribute = .forceRightToLeft
-        $0.tintColor = UIColor.Personal.normal
+        $0.tintColor = .CustomColors.Accent.blue
         $0.backgroundColor = .clear
     }
     

@@ -41,7 +41,7 @@ final class TodayViewController: UIViewController {
     private let totalAmountLabel = UILabel().then {
         $0.text = "0 원"
         $0.font = UIFont.SCDream(size: .body, weight: .bold)
-        $0.textColor = UIColor.Personal.normal
+        $0.textColor = .CustomColors.Accent.blue
     }
     
     // 지출 내역을 표시할 테이블 뷰
@@ -62,7 +62,7 @@ final class TodayViewController: UIViewController {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
         $0.tintColor = UIColor.CustomColors.Background.background
         $0.layer.cornerRadius = 32 // ((버튼 뷰 크기 - 버튼 패딩) / 2)
-        $0.backgroundColor = UIColor.Personal.normal
+        $0.backgroundColor = .CustomColors.Accent.blue
         $0.applyFloatingButtonShadow()
         $0.applyFloatingButtonStroke()
     }

@@ -33,6 +33,7 @@ final class ModalCategoryView: UIView {
         $0.font = .SCDream(size: .body, weight: .light)
         $0.textColor = .CustomColors.Text.textPlaceholder
         $0.backgroundColor = .clear
+        $0.clipsToBounds = true
     }
     
     // MARK: - Initializer
