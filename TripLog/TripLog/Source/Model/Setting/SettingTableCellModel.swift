@@ -74,7 +74,6 @@ private extension SettingTableCellModel {
     
     /// 문의 기능을 Alert으로 구현한 메소드
     static func inquiry() {
-        guard let view = AppHelpers.getTopViewController() else { return }
         let alert = AlertManager(
             title: "문의하기",
             message: "이메일: jeffap324@gmail.com\n구글폼 문의는 아래 버튼을 눌러주세요!",
