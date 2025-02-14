@@ -58,7 +58,7 @@ final class ModalTextField: UIView {
         
         self.title.text = title
         self.subTitle.text = subTitle
-        self.textField.setPlaceholder(title: placeholder, color: .Light.r400)
+        self.textField.setPlaceholder(title: placeholder, color: .CustomColors.Text.textPlaceholder)
         setupUI()
         self.textField.keyboardType = keyboardType
     }
