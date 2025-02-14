@@ -194,20 +194,26 @@ final class CalendarViewController: UIViewController {
             .withUnretained(self)
             .flatMap { owner, date in
                 
+                let checkDate: (_ date: Date) -> Date = { date in
+                    return Date() < date ? Date() : date
+                }
+                
                 let rates = CoreDataManager.shared.fetch(
                     type: CurrencyEntity.self,
-                    predicate: Date.formattedDateString(from: date)
+                    predicate: Date.formattedDateString(from: checkDate(date))
                 )
-                
+
                 return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.calendarViewModel.cashBookID, date: date, exchangeRate: rates)))
                     .compactMap {
                         $0 as? MyCashBookModel
                     }
             }
             .asSignal(onErrorSignalWith: .empty())
-            .emit { [weak self] data in
+            .withUnretained(self)
+            .emit { owner, data in
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
-                self?.calendarViewModel.loadExpenseData()
+                owner.calendarViewModel.loadExpenseData()
+                owner.updateTotalAmount.accept(owner.getTotalAmount())
             }
             .disposed(by: disposeBag)
         
@@ -218,7 +224,6 @@ final class CalendarViewController: UIViewController {
             .drive { owner, data in
                 owner.calendarView.calendar.reloadData()
                 owner.expenseListView.configure(date: data.date, expenses: data.data, balance: data.balance)
-                owner.updateTotalAmount.accept(owner.getTotalAmount())
             }
             .disposed(by: disposeBag)
     }
@@ -339,10 +344,11 @@ extension CalendarViewController: UITableViewDelegate {
                 destructiveTitle: "삭제"
             ) {
                 self.calendarViewModel.deleteExpense(id: expense.id)
+                self.updateTotalAmount.accept(self.getTotalAmount())
             }
             
-            alert.showAlert(on: self, .alert)
             completion(true)
+            alert.showAlert(.alert)
         }
         
         return UISwipeActionsConfiguration(actions: [deleteAction])
@@ -352,13 +358,19 @@ extension CalendarViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let expenses = calendarViewModel.expensesForDate(date: calendarViewModel.selectedDate)
         let expense = expenses[indexPath.row]
-        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date.formattedDateString(from: expense.expenseDate))
+        let checkDate: (_ date: Date) -> Date = { date in
+            return Date() < date ? Date() : date
+        }
+        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date.formattedDateString(from: checkDate(expense.expenseDate)))
         
         ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: rates))
             .compactMap { $0 as? MyCashBookModel }
-            .subscribe(onNext: { [weak self] updatedExpense in
-                self?.calendarViewModel.updateExpense(updatedExpense)
-            })
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, updatedExpense in
+                owner.calendarViewModel.updateExpense(updatedExpense)
+                owner.updateTotalAmount.accept(owner.getTotalAmount())
+            }
             .disposed(by: disposeBag)
         
         tableView.deselectRow(at: indexPath, animated: true)

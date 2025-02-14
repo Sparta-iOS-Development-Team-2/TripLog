@@ -242,7 +242,7 @@ private extension CashBookListViewController {
                                                   destructiveTitle: "삭제") {
                         CoreDataManager.shared.delete(type: CashBookEntity.self, entityID: item.identity)
                     }
-                    alert.showAlert(on: self, .alert)
+                    alert.showAlert(.alert)
                     completion(true)
                 }
                 return UISwipeActionsConfiguration(actions: [deletAction])
