@@ -52,6 +52,15 @@ final class ModalAmountView: UIView {
         $0.keyboardType = .decimalPad
     }
     
+    private let helpButton = UIButton().then {
+        $0.setTitle("?", for: .normal)
+        $0.setTitleColor(.CustomColors.Accent.blue, for: .normal)
+        $0.titleLabel?.font = .SCDream(size: .body, weight: .bold)
+        $0.applyBackgroundColor()
+        $0.applyTextFieldStroke()
+        $0.applyCornerRadius(9)
+    }
+    
     // MARK: - Initializer
     
     override init(frame: CGRect) {
@@ -69,6 +78,7 @@ final class ModalAmountView: UIView {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             self.textField.applyTextFieldStroke()
+            self.helpButton.applyTextFieldStroke()
         }
     }
     
@@ -116,7 +126,7 @@ private extension ModalAmountView {
     
     func configureSelf() {
         self.backgroundColor = .clear
-        [title, currencyButton, textField].forEach { self.addSubview($0) }
+        [title, helpButton, currencyButton, textField].forEach { self.addSubview($0) }
     }
     
     /// 통화 선택 버튼에 메뉴 뷰를 추가하는 메소드
@@ -148,6 +158,12 @@ private extension ModalAmountView {
             $0.height.equalTo(16)
         }
         
+        helpButton.snp.makeConstraints {
+            $0.centerY.equalTo(title)
+            $0.leading.equalTo(title.snp.trailing).offset(5)
+            $0.width.height.equalTo(18)
+        }
+        
         currencyButton.snp.makeConstraints {
             $0.top.trailing.equalToSuperview()
             $0.height.equalTo(title)
@@ -166,6 +182,21 @@ private extension ModalAmountView {
             .map { self.formatInput($0) } // 입력값 포맷팅
             .bind(to: textField.rx.text) // 필터링된 값 적용
             .disposed(by: disposeBag)
+        
+        helpButton.rx.tap
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, _ in
+                guard let vc = AppHelpers.getTopViewController() else { return }
+                let recentRateDate = Date.caculateDate()
+                PopoverManager.showPopover(on: vc,
+                                           from: owner.helpButton,
+                                           title: "현재의 환율은 \(recentRateDate) 환율입니다.",
+                                           subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
+                                           width: 170,
+                                           height: 60,
+                                           arrow: .down)
+            }.disposed(by: disposeBag)
     }
     
     /// 소수점을 1개만 입력할 수 있도록 필터링 하는 메소드

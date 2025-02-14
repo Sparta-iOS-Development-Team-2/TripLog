@@ -163,3 +163,10 @@ extension Reactive where Base: ModalViewController {
         return base.consumptionActiveButtonTapped
     }
 }
+
+// 사용하는 뷰컨트롤러에 추가를 해주셔야 popover기능을 아이폰에서 정상적으로 사용 가능합니다.
+extension ModalViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
+    }
+}
