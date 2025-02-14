@@ -3,6 +3,26 @@
     {
       "filename" : "Frame 1261157340.png",
       "idiom" : "iphone"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "light"
+        }
+      ],
+      "filename" : "Frame 1261157341.png",
+      "idiom" : "iphone"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "settinIcon3.png",
+      "idiom" : "iphone"
     }
   ],
   "info" : {

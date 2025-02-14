@@ -237,7 +237,6 @@ extension UIView {
     
     /// popover custom Style
     func applyPopoverButtonStyle() {
-        applyPopoverViewShadow()
         applyBackgroundColor()
     }
 }

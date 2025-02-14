@@ -1,8 +1,8 @@
 {
   "images" : [
     {
-      "filename" : "settinIcon1.png",
-      "idiom" : "iphone"
+      "filename" : "listIcon5 1.png",
+      "idiom" : "universal"
     },
     {
       "appearances" : [
@@ -11,8 +11,8 @@
           "value" : "light"
         }
       ],
-      "filename" : "settinIcon1 1.png",
-      "idiom" : "iphone"
+      "filename" : "listIcon5.png",
+      "idiom" : "universal"
     },
     {
       "appearances" : [
@@ -21,8 +21,8 @@
           "value" : "dark"
         }
       ],
-      "filename" : "settinIcon2.png",
-      "idiom" : "iphone"
+      "filename" : "listIcon2.png",
+      "idiom" : "universal"
     }
   ],
   "info" : {

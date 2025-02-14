@@ -89,7 +89,7 @@ private extension SettingTableCellModel {
                 }
             }
         
-        alert.showAlert(on: view, .alert)
+        alert.showAlert(.alert)
     }
     
     /// 앱스토어 링크로 이동하는 메소드

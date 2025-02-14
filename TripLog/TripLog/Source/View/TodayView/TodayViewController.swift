@@ -7,19 +7,16 @@ import RxCocoa
 final class TodayViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
-    let viewModel: TodayViewModel
+    private let fetchTrigger = PublishRelay<UUID>()
+    private let deleteExpenseTrigger = PublishRelay<Int>()
+    fileprivate let totalAmountRelay = PublishRelay<Int>()
+    
+    private let viewModel: TodayViewModel
+    private let cashBookID: UUID // ✅ 저장된 cashBookID
     
     // 🔹 상단 UI StackView
     private let topStackView = UIStackView()
     
-    var onTotalAmountUpdated: ((Int)->Void)?
-    
-    let totalExpense = BehaviorRelay<Int>(value: 0)
-    let formattedTotalRelay = BehaviorRelay<Int>(value: 0) // ✅ Rx로 관리
-
-    // ✅ TripLogTopView에 반영할 총 지출 금액 Relay (클로저 방식)
-    var onTotalExpenseUpdated: ((Int) -> Void)?
-
     // "지출 내역" 헤더 레이블
     private let headerTitleLabel = UILabel().then {
         $0.text = "지출 내역"
@@ -33,14 +30,14 @@ final class TodayViewController: UIViewController {
         $0.font = UIFont.SCDream(size: .body, weight: .medium)
         $0.textColor = UIColor(named: "textPrimary")
     }
-        
+    
     // 총 금액 표시 라벨
     private let totalAmountLabel = UILabel().then {
         $0.text = "0 원"
         $0.font = UIFont.SCDream(size: .body, weight: .bold)
         $0.textColor = UIColor.Personal.normal
     }
-        
+    
     // 지출 내역을 표시할 테이블 뷰
     private let tableView = UITableView().then {
         $0.register(ExpenseCell.self, forCellReuseIdentifier: ExpenseCell.identifier)
@@ -63,13 +60,10 @@ final class TodayViewController: UIViewController {
         $0.applyFloatingButtonShadow()
         $0.applyFloatingButtonStroke()
     }
-
     
-    private let cashBookID: UUID // ✅ 저장된 cashBookID
-
     init(cashBookID: UUID) {
         self.cashBookID = cashBookID
-        self.viewModel = TodayViewModel(cashBookID: cashBookID)
+        self.viewModel = TodayViewModel()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -86,15 +80,14 @@ final class TodayViewController: UIViewController {
         setupViews()
         setupConstraints()
         bindViewModel()
-                
+        
         // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
-        viewModel.input.fetchTrigger.accept(cashBookID)
+        fetchTrigger.accept(cashBookID)
         
         // ✅ Rx 방식으로 delegate 설정
         tableView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
-        updateExpense()
     }
     
     override func viewDidLayoutSubviews() {
@@ -103,6 +96,12 @@ final class TodayViewController: UIViewController {
         floatingButton.layer.shadowPath = floatingButton.shadowPath()
     }
     
+    func updateTodayConsumption() {
+        fetchTrigger.accept(cashBookID)
+    }
+}
+
+private extension TodayViewController {
     // 🔹 UI 요소 추가
     private func setupViews() {
         let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel]).then {
@@ -110,13 +109,13 @@ final class TodayViewController: UIViewController {
             $0.spacing = 8
             $0.alignment = .center
         }
-           
+        
         let totalStackView = UIStackView(arrangedSubviews: [totalLabel, totalAmountLabel]).then {
             $0.axis = .vertical
             $0.alignment = .trailing
             $0.spacing = 4
         }
-           
+        
         topStackView.addArrangedSubview(headerStackView)
         topStackView.addArrangedSubview(totalStackView)
         topStackView.do {
@@ -125,20 +124,20 @@ final class TodayViewController: UIViewController {
             $0.alignment = .center
             $0.distribution = .equalSpacing
         }
-           
+        
         view.addSubview(topStackView)
         view.addSubview(tableView)
         view.addSubview(floatingButton) // ✅ 추가
     }
     
     // 🔹 UI 레이아웃 설정
-    private func setupConstraints() {
+    func setupConstraints() {
         
         topStackView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
             $0.leading.trailing.equalToSuperview().inset(16)
         }
-            
+        
         tableView.snp.makeConstraints {
             $0.top.equalTo(topStackView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(8)
@@ -153,13 +152,7 @@ final class TodayViewController: UIViewController {
         }
     }
     
-    private func updateExpense() {
-
-        let TotalExpense = totalExpense.value
-        totalExpense.accept(TotalExpense)
-    }
-    
-    private func updateEmptyState(isEmpty: Bool) {
+    func updateEmptyState(isEmpty: Bool) {
         if isEmpty {
             let emptyLabel = UILabel().then {
                 $0.text = "지출 내역이 없습니다"
@@ -172,25 +165,19 @@ final class TodayViewController: UIViewController {
             tableView.backgroundView = nil
         }
     }
-
-    private func bindViewModel() {
+    
+    func bindViewModel() {
         
-        // 🔹 동일한 `cashBookID`, 날짜를 가진 항목만 표시하도록 필터링
-        let filteredExpenses = viewModel.output.expenses
-            .map { [weak self] expenses -> [MyCashBookModel] in
-                guard let self = self else { return [] }
-                
-                let today = Calendar.current.startOfDay(for: Date()) // 🔹 오늘 날짜 (시간 제거)
-                
-                return expenses.filter {
-                    $0.cashBookID == self.cashBookID &&
-                    Calendar.current.isDate($0.expenseDate, inSameDayAs: today) // 🔹 오늘 날짜와 같은 데이터만 필터링
-                }
-            }
-
-        // 🔹 테이블 뷰 바인딩 (필터링 적용)
-        filteredExpenses
-            .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
+        let input: TodayViewModel.Input = .init(fetchTrigger: fetchTrigger,
+                                                deleteExpenseTrigger: deleteExpenseTrigger
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+         output.expenses
+            .asDriver(onErrorDriveWith: .empty())
+            .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { [weak self] _, expense, cell in
+                guard let self else { return }
                 cell.configure(
                     date: self.getTodayDate(),
                     title: expense.note,
@@ -201,29 +188,9 @@ final class TodayViewController: UIViewController {
                 )
             }
             .disposed(by: disposeBag)
-
-        // 🔹 `cashBookID` 기준으로만 필터링 (총합 계산용)
-        let totalExpensesByID = viewModel.output.expenses
-            .map { [weak self] expenses -> [MyCashBookModel] in
-                guard let self = self else { return [] }
-                
-                return expenses.filter { $0.cashBookID == self.cashBookID } // 🔹 날짜 필터링 제거
-            }
-
-        // 🔹 **필터링된 데이터에서 총합 계산**
-        totalExpensesByID
-            .map { expenses -> Int in
-                let totalExchangeRate = expenses.map { Int($0.caculatedAmount.rounded()) }.reduce(0, +) // ✅ `cashBookID` 기반으로 총합 계산
-                
-                return totalExchangeRate
-            }
-            .startWith(0) // ✅ 첫 화면 로딩 시 기본 값 설정
-            .drive(formattedTotalRelay) // ✅ `formattedTotalRelay`에 값 전달
-            .disposed(by: disposeBag)
-
-
+        
         // ✅ `totalAmountLabel`에 바인딩하여 UI 반영
-        filteredExpenses
+        output.expenses
             .map { expense -> String in
                 let todayTotalExpense = Int(expense.reduce(0) { $0 + $1.caculatedAmount.rounded() })
                 return NumberFormatter.wonFormat(todayTotalExpense)
@@ -233,16 +200,21 @@ final class TodayViewController: UIViewController {
             .disposed(by: disposeBag)
         
         
-        filteredExpenses
-            .drive(onNext: { [weak self] expenses in
-                guard let self = self else { return }
-                
-                self.updateEmptyState(isEmpty: expenses.isEmpty)
-                
-                self.tableView.reloadData() // ✅ 셀이 변경될 때 프로그레스 바 반영
-            })
+        output.expenses
+            .withUnretained(self)
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { owner, expenses in
+                owner.updateEmptyState(isEmpty: expenses.isEmpty)
+            }
             .disposed(by: disposeBag)
-                
+        
+        output.deleteExpenseTrigger
+            .withUnretained(self)
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { owner, _ in
+                owner.fetchTrigger.accept(owner.cashBookID)
+            }.disposed(by: disposeBag)
+        
         tableView.rx.modelSelected(MyCashBookModel.self)
             .withUnretained(self)
             .flatMap { owner, data in
@@ -254,9 +226,10 @@ final class TodayViewController: UIViewController {
             .withUnretained(self)
             .emit { owner, data in
                 CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: data.id, data: data)
-                owner.viewModel.input.fetchTrigger.accept(owner.cashBookID)
+                owner.fetchTrigger.accept(owner.cashBookID)
+                owner.totalAmountRelay.accept(owner.getTotalAmount())
             }.disposed(by: disposeBag)
-
+        
         
         // 🔹 모달 표시 바인딩 (RxSwift 적용)
         floatingButton.rx.tap
@@ -270,20 +243,13 @@ final class TodayViewController: UIViewController {
             .withUnretained(self)
             .emit { owner, data in
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
-                owner.viewModel.input.fetchTrigger.accept(owner.cashBookID)
+                owner.fetchTrigger.accept(owner.cashBookID)
+                owner.totalAmountRelay.accept(owner.getTotalAmount())
             }.disposed(by: disposeBag)
-        
-        // ✅ `totalExpenseRelay` 값 변경될 때 `onTotalExpenseUpdated` 실행
-        viewModel.totalExpenseRelay
-            .subscribe(onNext: { [weak self] totalExpense in
-                self?.onTotalExpenseUpdated?(totalExpense) // ✅ 값 변경 시 클로저 실행
-                debugPrint("-----------\(totalExpense)")
-            })
-            .disposed(by: disposeBag)
 
     }
     
-    private func getTodayExchangeRate() -> [CurrencyEntity] {
+    func getTodayExchangeRate() -> [CurrencyEntity] {
         let todayString = Date.formattedDateString(from: Date())
         let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
         
@@ -297,27 +263,13 @@ final class TodayViewController: UIViewController {
         return dateFormatter.string(from: Date()) // 현재 날짜 반환
     }
     
-    func updateTodayConsumption() {
-        viewModel.input.fetchTrigger.accept(cashBookID)
+    func getTotalAmount() -> Int {
+        let data = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: self.cashBookID)
+        let totalExpense = data.reduce(0) { $0 + Int(round($1.caculatedAmount))}
+        
+        return totalExpense
     }
-}
-
-// 🔹 천 단위 숫자 포맷 변환 (소수점 유지)
-extension NumberFormatter {
-    static func formattedString(from number: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-
-        // ✅ 정수라면 소수점 제거, 소수점이 있으면 최대 2자리 표시
-        if number.truncatingRemainder(dividingBy: 1) == 0 {
-            formatter.maximumFractionDigits = 0  // 정수일 때 소수점 제거
-        } else {
-            formatter.minimumFractionDigits = 2  // 소수점이 있을 때 최소 2자리
-            formatter.maximumFractionDigits = 2  // 소수점 2자리까지 표시
-        }
-
-        return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
-    }
+    
 }
 
 extension TodayViewController: UITableViewDelegate {
@@ -326,42 +278,43 @@ extension TodayViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         // 기본 삭제 기능 비활성화 (아무 동작도 하지 않음)
     }
-
+    
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
         // ✅ "삭제" 버튼을 위한 UIView를 UIImage로 변환
         let deleteImage = createDeleteButtonImage()
-
+        
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
             guard let self = self else { return }
-
+            
             let alert = AlertManager(title: "삭제 확인",
                                      message: "정말로 삭제하시겠습니까?",
                                      cancelTitle: "취소",
                                      destructiveTitle: "삭제")
             {
-                self.viewModel.input.deleteExpenseTrigger.accept(indexPath.row)
+                self.deleteExpenseTrigger.accept(indexPath.row)
+                self.totalAmountRelay.accept(self.getTotalAmount())
                 completionHandler(true)
             }
             
-            alert.showAlert(on: self, .alert)
+            alert.showAlert(.alert)
         }
-
+        
         deleteAction.image = deleteImage // ✅ "삭제" 버튼을 이미지로 설정
         deleteAction.backgroundColor = UIColor.CustomColors.Background.detailBackground
-
+        
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
         configuration.performsFirstActionWithFullSwipe = false
         
         return configuration
     }
-
+    
     /// ✅ "삭제" 버튼을 이미지로 생성하는 메서드 (cornerRadius 적용)
     private func createDeleteButtonImage() -> UIImage? {
         let size = CGSize(width: 70, height: 108) // ✅ 버튼 크기 설정
         let cornerRadius: CGFloat = 16 // ✅ 원하는 radius 값 설정
         let renderer = UIGraphicsImageRenderer(size: size)
-
+        
         return renderer.image { context in
             let rect = CGRect(origin: .zero, size: size)
             
@@ -375,14 +328,14 @@ extension TodayViewController: UITableViewDelegate {
             // ✅ 배경 색 적용
             UIColor.red.setFill()
             context.fill(rect)
-
+            
             // ✅ 텍스트 속성 설정
             let text = "삭제"
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 16, weight: .bold),
                 .foregroundColor: UIColor.white
             ]
-
+            
             // ✅ 텍스트 위치 조정 후 그리기
             let textSize = text.size(withAttributes: attributes)
             let textRect = CGRect(
@@ -394,15 +347,11 @@ extension TodayViewController: UITableViewDelegate {
             text.draw(in: textRect, withAttributes: attributes)
         }
     }
-
+    
 }
 
-// ✅ UIView를 UIImage로 변환하는 확장 함수
-extension UIView {
-    func asImage() -> UIImage {
-        let renderer = UIGraphicsImageRenderer(bounds: bounds)
-        return renderer.image { rendererContext in
-            layer.render(in: rendererContext.cgContext)
-        }
+extension Reactive where Base: TodayViewController {
+    var totalAmount: PublishRelay<Int> {
+        base.totalAmountRelay
     }
 }
