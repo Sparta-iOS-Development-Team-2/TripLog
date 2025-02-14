@@ -103,7 +103,6 @@ private extension ModalCategoryView {
     func setupUI() {
         configureSelf()
         setupLayout()
-//        categoryIsEmpty.accept(true) // 초기값 세팅
         bind()
     }
     
@@ -141,6 +140,7 @@ private extension ModalCategoryView {
     func bind() {
         categoryButton.rx.tap
             .flatMap {
+                // 임시 데이터
                 let model: [String] = [
                     "식비", "교통", "숙소", "쇼핑",
                     "의료", "통신", "여가/취미", "기타"

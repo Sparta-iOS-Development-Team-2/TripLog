@@ -11,12 +11,19 @@ import Then
 import RxSwift
 import RxCocoa
 
+/// 카테고리 뷰 컨트롤러
 final class CategoryViewController: UIViewController {
+    
+    // MARK: - Rx Properties
     
     private let disposeBag = DisposeBag()
     fileprivate let selectedCell = PublishRelay<String>()
     
+    // MARK: - Properties
+    
     private let categoryData: [String]
+    
+    // MARK: - UI Components
     
     private let viewTitle = UILabel().then {
         $0.text = "카테고리 선택"
@@ -70,6 +77,8 @@ final class CategoryViewController: UIViewController {
         return layout
     }()
     
+    // MARK: - Initializer
+    
     init(_ categorys: [String]) {
         categoryData = categorys
         super.init(nibName: nil, bundle: nil)
@@ -81,6 +90,8 @@ final class CategoryViewController: UIViewController {
     }
     
 }
+
+// MARK: - UI Setting Method
 
 private extension CategoryViewController {
     
@@ -131,6 +142,8 @@ private extension CategoryViewController {
     
 }
 
+// MARK: - UICollectionViewDelegate Method
+
 extension CategoryViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let cell = categoryCollectionView.cellForItem(at: indexPath) as? CategoryViewCell else { return }
@@ -139,6 +152,8 @@ extension CategoryViewController: UICollectionViewDelegate {
         self.dismiss(animated: true)
     }
 }
+
+// MARK: - UICollectionViewDataSource Method
 
 extension CategoryViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -156,7 +171,10 @@ extension CategoryViewController: UICollectionViewDataSource {
     
 }
 
+// MARK: - Reactive Extension
+
 extension Reactive where Base: CategoryViewController {
+    /// 셀의 선택 이벤트를 방출하는 옵저버블
     var selectedCell: PublishRelay<String> {
         base.selectedCell
     }

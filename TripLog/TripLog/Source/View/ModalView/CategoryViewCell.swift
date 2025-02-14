@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
+/// 카테고리뷰의 커스텀 셀
 final class CategoryViewCell: UICollectionViewCell {
     
     static let id: String = "CategoryViewCell"
@@ -44,6 +45,7 @@ final class CategoryViewCell: UICollectionViewCell {
         category.text = title
     }
     
+    /// 선택된 셀을 강조하는 메소드
     func selectedCell() {
         category.font = .SCDream(size: .headline, weight: .bold)
         category.textColor = .white
