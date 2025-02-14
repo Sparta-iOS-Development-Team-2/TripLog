@@ -7,7 +7,6 @@ import RxDataSources
 
 final class TopViewController: UIViewController {
     
-    private let viewModel: TopViewModel
     private let disposeBag = DisposeBag()
     
     fileprivate let todayViewController: TodayViewController
@@ -24,7 +23,6 @@ final class TopViewController: UIViewController {
 
     init(cashBook: CashBookModel) {
         self.cashBook = cashBook
-        self.viewModel = TopViewModel(cashBook: cashBook)
         self.todayViewController = TodayViewController(cashBookID: cashBook.id)
         self.calendarViewController = CalendarViewController(cashBook: cashBook.id, balance: cashBook.budget)
         super.init(nibName: nil, bundle: nil)
@@ -69,29 +67,45 @@ final class TopViewController: UIViewController {
         tripSummaryView.configure(
             subtitle: cashBook.note,
             date: "\(cashBook.departure.formattedDate()) - \(cashBook.homecoming.formattedDate())",
-            budget: "\(NumberFormatter.formattedString(from: Double(cashBook.budget)))",
-            todayVC: todayViewController
+            budget: cashBook.budget,
+            amount: getTotalAmount()
         )
+    }
+    
+    private func getTotalAmount() -> Int {
+        let data = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: self.cashBook.id)
+        let totalExpense = data.reduce(0) { $0 + Int(round($1.caculatedAmount))}
+        
+        return totalExpense
     }
 
     /// ✅ 오늘 지출 업데이트 바인딩
     private func bindFormattedTotal() {
-        todayViewController.formattedTotalRelay
-            .distinctUntilChanged()
-            .subscribe(onNext: { [weak self] totalAmount in
+        todayViewController.rx.totalAmount
+            .withUnretained(self)
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { owner, totalAmount in
                 debugPrint("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
-                self?.tripSummaryView.progressView.expense.accept(totalAmount)
-                self?.calendarViewController.reloadCalendarView()
-            })
+                owner.tripSummaryView.progressView.expense.accept(totalAmount)
+                owner.calendarViewController.reloadCalendarView()
+            }
             .disposed(by: disposeBag)
         
         calendarViewController.rx.updateTotalAmount
-            .distinctUntilChanged()
-            .subscribe(onNext: { [weak self] totalAmount in
+            .withUnretained(self)
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { owner, totalAmount in
                 debugPrint("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
-                self?.tripSummaryView.progressView.expense.accept(totalAmount)
-                self?.todayViewController.updateTodayConsumption()
-            })
+                owner.tripSummaryView.progressView.expense.accept(totalAmount)
+                owner.todayViewController.updateTodayConsumption()
+            }
             .disposed(by: disposeBag)
+    }
+}
+
+// 사용하는 뷰컨트롤러에 추가를 해주셔야 popover기능을 아이폰에서 정상적으로 사용 가능합니다.
+extension TopViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
     }
 }

@@ -42,8 +42,8 @@ final class TopProgressView: UIView {
         bindExpense()
     }
 
-    func setBudget(_ budget: String) {
-        budgetAmount = Int(budget.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0
+    func setBudget(_ budget: Int) {
+        budgetAmount = budget
         budgetLabel.text = "예산: \(NumberFormatter.wonFormat(budgetAmount))"
     }
 
@@ -74,7 +74,7 @@ final class TopProgressView: UIView {
                 let progressValue: CGFloat = (owner.budgetAmount > 0) ? CGFloat(expense) / CGFloat(owner.budgetAmount) : 0.0
                 debugPrint("✅ Progress Bar Value: \(progressValue)")
 
-                self.progressBar.updateProgress(progressValue) // ✅ 프로그레스 업데이트
+                owner.progressBar.updateProgress(progressValue) // ✅ 프로그레스 업데이트
             }
             .disposed(by: disposeBag)
     }

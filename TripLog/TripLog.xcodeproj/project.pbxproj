@@ -19,7 +19,6 @@
 		AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A82D3A72C9006892A7 /* FSCalendar */; };
 		AAC9B0AC2D3A72E4006892A7 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0AB2D3A72E4006892A7 /* Then */; };
 		C334FC182D4D1291008DDC8E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C334FC172D4D1291008DDC8E /* FirebaseFirestore */; };
-		F91DDB4B2D5F0D170049DB04 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F91DDB4A2D5F0D170049DB04 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,7 +43,6 @@
 		AAC9B05D2D3A7070006892A7 /* TripLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TripLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC9B0762D3A7073006892A7 /* TripLogTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC9B0802D3A7073006892A7 /* TripLogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F91DDB4A2D5F0D170049DB04 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -118,7 +116,6 @@
 			isa = PBXGroup;
 			children = (
 				AA2EFDC92D5D99A600FD357A /* PrivacyInfo.xcprivacy */,
-				F91DDB4A2D5F0D170049DB04 /* InfoPlist.xcstrings */,
 				AAC9B05F2D3A7070006892A7 /* TripLog */,
 				AAC9B0792D3A7073006892A7 /* TripLogTests */,
 				AAC9B0832D3A7073006892A7 /* TripLogUITests */,
@@ -242,12 +239,11 @@
 				};
 			};
 			buildConfigurationList = AAC9B0582D3A7070006892A7 /* Build configuration list for PBXProject "TripLog" */;
-			developmentRegion = ko;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
-				ko,
 			);
 			mainGroup = AAC9B0542D3A7070006892A7;
 			minimizedProjectReferenceProxies = 1;
@@ -279,7 +275,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F91DDB4B2D5F0D170049DB04 /* InfoPlist.xcstrings in Resources */,
 				AA2EFDCA2D5D99A600FD357A /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -469,7 +464,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -526,7 +520,6 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
