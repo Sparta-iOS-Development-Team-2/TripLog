@@ -187,10 +187,8 @@ private extension ModalAmountView {
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, _ in
-                guard let vc = AppHelpers.getTopViewController() else { return }
                 let recentRateDate = Date.caculateDate()
-                PopoverManager.showPopover(on: vc,
-                                           from: owner.helpButton,
+                PopoverManager.showPopover(from: owner.helpButton,
                                            title: "현재의 환율은 \(recentRateDate) 환율입니다.",
                                            subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
                                            width: 170,
@@ -234,6 +232,8 @@ private extension ModalAmountView {
     }
     
 }
+
+// MARK: - Reactive Extension
 
 extension Reactive where Base: ModalAmountView {
     /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
