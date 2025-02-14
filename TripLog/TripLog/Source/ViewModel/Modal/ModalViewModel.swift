@@ -31,7 +31,7 @@ final class ModalViewModel: ViewModelType {
     private let cashBookActive = PublishRelay<(Bool, ModalView.ModalCashBookData)>()
     private let consumptionActive = PublishRelay<(Bool, ModalView.ModalConsumptionData)>()
     
-    private var textFieldIsEmpty: Bool?
+    private var ModelSectionIsEmpty: Bool?
     
     /// input을 output으로 변환해주는 메소드
     /// - Parameter input:
@@ -50,7 +50,7 @@ final class ModalViewModel: ViewModelType {
             .withUnretained(self)
             .emit { owner, data in
                 
-                guard let isEmpty = owner.textFieldIsEmpty else { return }
+                guard let isEmpty = owner.ModelSectionIsEmpty else { return }
                 owner.cashBookActive.accept((isEmpty, data))
                 
             }.disposed(by: disposeBag)
@@ -60,7 +60,7 @@ final class ModalViewModel: ViewModelType {
             .withUnretained(self)
             .emit { owner, data in
                 
-                guard let isEmpty = owner.textFieldIsEmpty else { return }
+                guard let isEmpty = owner.ModelSectionIsEmpty else { return }
                 owner.consumptionActive.accept((isEmpty, data))
                 
             }.disposed(by: disposeBag)
@@ -79,7 +79,7 @@ final class ModalViewModel: ViewModelType {
             .withUnretained(self)
             .emit { owner, isEmpty in
                 
-                owner.textFieldIsEmpty = isEmpty
+                owner.ModelSectionIsEmpty = isEmpty
                 
             }.disposed(by: disposeBag)
         
