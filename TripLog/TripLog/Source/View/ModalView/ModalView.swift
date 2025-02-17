@@ -13,7 +13,7 @@ import RxCocoa
 
 /// 모달 뷰 컨트롤러의 뷰로 쓰일 모달 뷰
 final class ModalView: UIView {
-    typealias ModalCashBookData = (id: UUID, tripName: String, note: String, budget: Int,departure: String, homecoming: String, state: ModalViewState)
+    typealias ModalCashBookData = (id: UUID, tripName: String, note: String, budget: Int, departure: String, homecoming: String, state: ModalViewState)
     typealias ModalConsumptionData = (id: UUID, cashBookID: UUID, expenseDate: Date, payment: Bool, note: String, category: String, amount: Double, country: String, state: ModalViewState, exchangeRate: Double)
     
     // MARK: - Rx Properties

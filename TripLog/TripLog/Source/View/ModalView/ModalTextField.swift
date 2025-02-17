@@ -89,7 +89,7 @@ final class ModalTextField: UIView {
     /// - Returns: 텍스트필드의 텍스트
     func textFieldExtraction() -> String {
         guard let text = textField.text else { return "" }
-        return text
+        return text.replacingOccurrences(of: ",", with: "")
     }
     
 }

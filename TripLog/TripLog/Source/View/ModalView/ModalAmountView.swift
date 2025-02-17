@@ -98,7 +98,7 @@ final class ModalAmountView: UIView {
     func amountExtraction() -> Double {
         guard
             let text = textField.text,
-            let amount = Double(text)
+            let amount = Double(text.replacingOccurrences(of: ",", with: ""))
         else { return 0 }
         
         return amount
@@ -245,7 +245,7 @@ extension Reactive where Base: ModalAmountView {
     /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
     var amountViewIsEmpty: Observable<Bool> {
         return base.textField.rx.text.orEmpty
-            .map { Double($0) == nil }
+            .map { Double($0.replacingOccurrences(of: ",", with: "")) == nil }
             .distinctUntilChanged()
             .asObservable()
     }
