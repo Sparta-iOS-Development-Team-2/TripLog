@@ -40,7 +40,7 @@ struct SettingTableCellModel {
         
         SettingTableCellModel(
             icon: UIImage(named: "versionIcon") ?? UIImage(),
-            title: "버전 1.0.0",
+            title: "버전 \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")",
             extraView: nil,
             action: nil
         )
