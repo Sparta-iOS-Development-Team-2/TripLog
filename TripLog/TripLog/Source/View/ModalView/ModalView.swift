@@ -21,7 +21,7 @@ final class ModalView: UIView {
     fileprivate let cancelButtonTapped = PublishRelay<Void>()
     fileprivate let cashBookActiveButtonTapped = PublishRelay<ModalCashBookData>()
     fileprivate let consumptionActiveButtonTapped = PublishRelay<ModalConsumptionData>()
-    fileprivate let categoryButtonTapped = PublishRelay<Void>()
+    fileprivate let categoryButtonTapped = PublishRelay<String>()
     
     private let firstTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
     private let secondTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
@@ -110,6 +110,11 @@ final class ModalView: UIView {
         super.layoutSubviews()
         
         self.layer.shadowPath = self.shadowPath()
+    }
+    
+    func configureCategoryView(_ text: String) {
+        guard let categoryView = thirdSection as? ModalCategoryView else { return }
+        categoryView.configurePlaceholderText(text: text)
     }
 
 }
@@ -289,6 +294,10 @@ private extension ModalView {
                     .bind(to: secondTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
+                thirdSection.rx.categoryButtonTapped
+                    .bind(to: categoryButtonTapped)
+                    .disposed(by: disposeBag)
+                
                 forthSection.rx.amountViewIsEmpty
                     .bind(to: thirdTextFieldIsEmpty)
                     .disposed(by: disposeBag)
@@ -316,6 +325,10 @@ private extension ModalView {
                 
                 thirdSection.rx.categoryIsEmpty
                     .bind(to: secondTextFieldIsEmpty)
+                    .disposed(by: disposeBag)
+                
+                thirdSection.rx.categoryButtonTapped
+                    .bind(to: categoryButtonTapped)
                     .disposed(by: disposeBag)
                 
                 forthSection.rx.amountViewIsEmpty
@@ -442,6 +455,10 @@ extension Reactive where Base: ModalView {
     /// 빈 값인 섹션이 있는지 검사하고 이벤트를 방출하는 옵저버블
     var checkBlankOfSections: Observable<Bool> {
         return base.allSectionIsEmpty
+    }
+    
+    var categoryButtonTapped: PublishRelay<String> {
+        return base.categoryButtonTapped
     }
 
 }

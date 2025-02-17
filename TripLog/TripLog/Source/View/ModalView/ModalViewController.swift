@@ -65,6 +65,7 @@ final class ModalViewController: UIViewController {
         
         self.view.layer.shadowPath = self.view.shadowPath()
     }
+
 }
 
 // MARK: - UI Setting Method
@@ -85,7 +86,8 @@ private extension ModalViewController {
             cancelButtonTapped: self.modalView.rx.cancelButtonTapped,
             cashBookActiveButtonTapped: self.modalView.rx.cashBookActiveButtonTapped,
             consumptionActiveButtonTapped: self.modalView.rx.consumptionActiveButtonTapped,
-            sectionIsEmpty: self.modalView.rx.checkBlankOfSections
+            sectionIsEmpty: self.modalView.rx.checkBlankOfSections,
+            categoryButtonTapped: self.modalView.rx.categoryButtonTapped
         )
         
         let output = viewModel.transform(input: input)
@@ -146,7 +148,15 @@ private extension ModalViewController {
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
         
+        output.showCategoryModal
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, category in
+                owner.modalView.configureCategoryView(category)
+            }.disposed(by: disposeBag)
+        
     }
+
 }
 
 // MARK: - Reactive Extension
