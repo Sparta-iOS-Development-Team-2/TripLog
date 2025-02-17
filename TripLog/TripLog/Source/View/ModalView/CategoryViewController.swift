@@ -21,7 +21,12 @@ final class CategoryViewController: UIViewController {
     
     // MARK: - Properties
     
-    private let categoryData: [String]
+    private let categoryData: [String] = [
+        "식비", "교통", "숙소", "쇼핑",
+        "의료", "통신", "여가/취미", "기타"
+    ]
+    
+    private let selectedCategory: String
     
     // MARK: - UI Components
     
@@ -79,8 +84,8 @@ final class CategoryViewController: UIViewController {
     
     // MARK: - Initializer
     
-    init(_ categorys: [String]) {
-        categoryData = categorys
+    init(_ selected: String) {
+        selectedCategory = selected
         super.init(nibName: nil, bundle: nil)
         setupUI()
     }
@@ -88,7 +93,6 @@ final class CategoryViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
 }
 
 // MARK: - UI Setting Method
@@ -102,10 +106,10 @@ private extension CategoryViewController {
     }
     
     func configureSelf() {
-        self.modalPresentationStyle = .formSheet
-        self.sheetPresentationController?.preferredCornerRadius = 12
-        self.sheetPresentationController?.detents = [.custom(resolver: { _ in 190 })]
         self.view.backgroundColor = .CustomColors.Background.background
+        self.view.layer.cornerRadius = 12
+        self.view.layer.borderWidth = 1
+        self.view.layer.borderColor = UIColor.CustomColors.Border.border.cgColor
         
         [viewTitle, closeButton, categoryCollectionView].forEach { view.addSubview($0) }
     }
@@ -136,8 +140,18 @@ private extension CategoryViewController {
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, _ in
-                owner.dismiss(animated: true)
+                owner.dismissSelf()
             }.disposed(by: disposeBag)
+    }
+    
+    func dismissSelf() {
+        UIView.animate(withDuration: 0.2, delay: 0, options: .curveLinear, animations: {
+            self.view.frame.origin.y += 200
+            self.view.layoutIfNeeded()
+        }) { _ in
+            self.view.snp.removeConstraints()
+            self.view.removeFromSuperview()
+        }
     }
     
 }
@@ -149,7 +163,7 @@ extension CategoryViewController: UICollectionViewDelegate {
         guard let cell = categoryCollectionView.cellForItem(at: indexPath) as? CategoryViewCell else { return }
         cell.selectedCell()
         self.selectedCell.accept(categoryData[indexPath.item])
-        self.dismiss(animated: true)
+        self.dismissSelf()
     }
 }
 
@@ -165,6 +179,10 @@ extension CategoryViewController: UICollectionViewDataSource {
         else { return UICollectionViewCell() }
         
         cell.configureCell(title: categoryData[indexPath.item])
+        
+        if categoryData[indexPath.item] == selectedCategory {
+            cell.selectedCell()
+        }
         
         return cell
     }

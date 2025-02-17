@@ -16,7 +16,8 @@ final class ModalCategoryView: UIView {
     
     // MARK: - Rx Properties
     
-    fileprivate var categoryIsEmpty = BehaviorRelay<Bool>(value: true)
+    fileprivate let categoryIsEmpty = BehaviorRelay<Bool>(value: true)
+    fileprivate let categoryButtonTapped = PublishRelay<String>()
     private let disposeBag = DisposeBag()
     
     // MARK: - UI Components
@@ -47,7 +48,6 @@ final class ModalCategoryView: UIView {
         $0.font = .SCDream(size: .body, weight: .light)
         $0.textColor = .CustomColors.Text.textPlaceholder
         $0.backgroundColor = .clear
-        $0.clipsToBounds = true
     }
     
     // MARK: - Initializer
@@ -80,11 +80,8 @@ final class ModalCategoryView: UIView {
     func configurePlaceholderText(text: String) {
         self.categoryIsEmpty.accept(false)
         categoryPlaceholderText.text = text
-        categoryPlaceholderText.textAlignment = .center
         categoryPlaceholderText.font = .SCDream(size: .body, weight: .regular)
-        categoryPlaceholderText.textColor = .white
-        categoryPlaceholderText.backgroundColor = UIColor(red: .random(in: 0...0.6), green: .random(in: 0...0.6), blue: .random(in: 0...0.6), alpha: 1.0)
-        categoryPlaceholderText.layer.cornerRadius = 13
+        categoryPlaceholderText.textColor = .CustomColors.Text.textPrimary
     }
     
     /// 텍스트필드의 데이터를 추출하는 메소드
@@ -139,20 +136,12 @@ private extension ModalCategoryView {
     
     func bind() {
         categoryButton.rx.tap
-            .flatMap {
-                // 임시 데이터
-                let model: [String] = [
-                    "식비", "교통", "숙소", "쇼핑",
-                    "의료", "통신", "여가/취미", "기타"
-                ]
-                
-                return ModalViewManager.showCategoryModal(model)
-            }
-            .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
-            .emit { owner, category in
-                owner.configurePlaceholderText(text: category)
-            }.disposed(by: disposeBag)
+            .compactMap { owner, _ in
+                owner.categoryPlaceholderText.text
+            }
+            .bind(to: categoryButtonTapped)
+            .disposed(by: disposeBag)
     }
 }
 
@@ -162,5 +151,9 @@ extension Reactive where Base: ModalCategoryView {
     /// 카테고리가 비어있는지 여부를 확인하여 이벤트를 방출하는 옵저버블
     var categoryIsEmpty: BehaviorRelay<Bool> {
         return base.categoryIsEmpty
+    }
+    
+    var categoryButtonTapped: PublishRelay<String> {
+        return base.categoryButtonTapped
     }
 }
