@@ -55,7 +55,8 @@ final class CalendarCustomHeaderView: UIView {
         
         // 이전 달 버튼 제약 조건
         previousButton.snp.makeConstraints {
-            $0.left.centerY.equalToSuperview()
+            $0.left.equalToSuperview().inset(16)
+            $0.centerY.equalToSuperview()
             $0.width.equalTo(40)
         }
         
@@ -66,7 +67,8 @@ final class CalendarCustomHeaderView: UIView {
         
         // 다음 달 버튼 제약 조건
         nextButton.snp.makeConstraints {
-            $0.right.centerY.equalToSuperview()
+            $0.right.equalToSuperview().inset(16)
+            $0.centerY.equalToSuperview()
             $0.width.equalTo(40)
         }
     }
