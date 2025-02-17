@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA2EFDCA2D5D99A600FD357A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2EFDC92D5D99A600FD357A /* PrivacyInfo.xcprivacy */; };
+		AA3030332D44B9CA0057DB35 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AA3030322D44B9CA0057DB35 /* Lottie */; };
 		AAC9B0962D3A721C006892A7 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0952D3A721C006892A7 /* SnapKit */; };
 		AAC9B0992D3A722B006892A7 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0982D3A722B006892A7 /* Alamofire */; };
 		AAC9B09C2D3A7257006892A7 /* RxDataSources in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B09B2D3A7257006892A7 /* RxDataSources */; };
@@ -16,6 +18,7 @@
 		AAC9B0A62D3A72A9006892A7 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A52D3A72A9006892A7 /* RxSwift */; };
 		AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0A82D3A72C9006892A7 /* FSCalendar */; };
 		AAC9B0AC2D3A72E4006892A7 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = AAC9B0AB2D3A72E4006892A7 /* Then */; };
+		C334FC182D4D1291008DDC8E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C334FC172D4D1291008DDC8E /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA2EFDC92D5D99A600FD357A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AAC9B05D2D3A7070006892A7 /* TripLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TripLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC9B0762D3A7073006892A7 /* TripLogTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAC9B0802D3A7073006892A7 /* TripLogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TripLogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -82,9 +86,11 @@
 				AAC9B09C2D3A7257006892A7 /* RxDataSources in Frameworks */,
 				AAC9B09F2D3A7265006892A7 /* RxKeyboard in Frameworks */,
 				AAC9B0A22D3A72A9006892A7 /* RxCocoa in Frameworks */,
+				AA3030332D44B9CA0057DB35 /* Lottie in Frameworks */,
 				AAC9B0962D3A721C006892A7 /* SnapKit in Frameworks */,
 				AAC9B0A92D3A72C9006892A7 /* FSCalendar in Frameworks */,
 				AAC9B0992D3A722B006892A7 /* Alamofire in Frameworks */,
+				C334FC182D4D1291008DDC8E /* FirebaseFirestore in Frameworks */,
 				AAC9B0A62D3A72A9006892A7 /* RxSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -109,6 +115,7 @@
 		AAC9B0542D3A7070006892A7 = {
 			isa = PBXGroup;
 			children = (
+				AA2EFDC92D5D99A600FD357A /* PrivacyInfo.xcprivacy */,
 				AAC9B05F2D3A7070006892A7 /* TripLog */,
 				AAC9B0792D3A7073006892A7 /* TripLogTests */,
 				AAC9B0832D3A7073006892A7 /* TripLogUITests */,
@@ -155,6 +162,8 @@
 				AAC9B0A52D3A72A9006892A7 /* RxSwift */,
 				AAC9B0A82D3A72C9006892A7 /* FSCalendar */,
 				AAC9B0AB2D3A72E4006892A7 /* Then */,
+				AA3030322D44B9CA0057DB35 /* Lottie */,
+				C334FC172D4D1291008DDC8E /* FirebaseFirestore */,
 			);
 			productName = TripLog;
 			productReference = AAC9B05D2D3A7070006892A7 /* TripLog.app */;
@@ -246,6 +255,8 @@
 				AAC9B0A02D3A72A9006892A7 /* XCRemoteSwiftPackageReference "RxSwift" */,
 				AAC9B0A72D3A72C9006892A7 /* XCRemoteSwiftPackageReference "FSCalendar" */,
 				AAC9B0AA2D3A72E4006892A7 /* XCRemoteSwiftPackageReference "Then" */,
+				AA3030312D44B9CA0057DB35 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				C334FC162D4D1291008DDC8E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AAC9B05E2D3A7070006892A7 /* Products */;
@@ -264,6 +275,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2EFDCA2D5D99A600FD357A /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,8 +338,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G59RU3455W;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TripLog/Application/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -342,6 +357,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLog";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "team-triplog";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -357,8 +374,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = G59RU3455W;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TripLog/Application/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -373,6 +393,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLog";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "team-triplog";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -506,13 +528,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLogTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -528,13 +552,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLogTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -549,13 +575,15 @@
 		AAC9B0922D3A7073006892A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLogUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -570,13 +598,15 @@
 		AAC9B0932D3A7073006892A7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Sparta-iOS-Tech-2team.TripLogUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -630,6 +660,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		AA3030312D44B9CA0057DB35 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.1;
+			};
+		};
 		AAC9B0942D3A721C006892A7 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
@@ -686,9 +724,22 @@
 				minimumVersion = 3.0.0;
 			};
 		};
+		C334FC162D4D1291008DDC8E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.7.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AA3030322D44B9CA0057DB35 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA3030312D44B9CA0057DB35 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
 		AAC9B0952D3A721C006892A7 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AAC9B0942D3A721C006892A7 /* XCRemoteSwiftPackageReference "SnapKit" */;
@@ -733,6 +784,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AAC9B0AA2D3A72E4006892A7 /* XCRemoteSwiftPackageReference "Then" */;
 			productName = Then;
+		};
+		C334FC172D4D1291008DDC8E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C334FC162D4D1291008DDC8E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
