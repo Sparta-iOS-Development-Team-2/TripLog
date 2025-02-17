@@ -148,7 +148,7 @@ private extension ModalViewController {
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
         
-        output.showCategoryModal
+        output.categoryViewDismissed
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, category in

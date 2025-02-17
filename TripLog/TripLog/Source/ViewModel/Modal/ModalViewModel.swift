@@ -25,7 +25,7 @@ final class ModalViewModel: ViewModelType {
         let modalDismiss: PublishRelay<Void>
         let cashBookActive: PublishRelay<(Bool, ModalView.ModalCashBookData)>
         let consumptionActive: PublishRelay<(Bool, ModalView.ModalConsumptionData)>
-        let showCategoryModal: PublishRelay<String>
+        let categoryViewDismissed: PublishRelay<String>
     }
     
     let disposeBag = DisposeBag()
@@ -102,7 +102,7 @@ final class ModalViewModel: ViewModelType {
             modalDismiss: self.modalDismiss,
             cashBookActive: self.cashBookActive,
             consumptionActive: self.consumptionActive,
-            showCategoryModal: self.showCategoryModal
+            categoryViewDismissed: self.showCategoryModal
         )
     }
     
@@ -115,6 +115,11 @@ final class ModalViewModel: ViewModelType {
         
         let categoryVC = CategoryViewController(category)
         let dismissSignal = categoryVC.rx.deallocated.map { _ in "" }
+        
+        if vc.children.last as? CategoryViewController != nil {
+            vc.children.last?.removeFromParent()
+            debugPrint(vc.children.last)
+        }
         
         vc.addChild(categoryVC)
         vc.view.addSubview(categoryVC.view)

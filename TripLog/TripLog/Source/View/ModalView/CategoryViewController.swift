@@ -17,7 +17,7 @@ final class CategoryViewController: UIViewController {
     // MARK: - Rx Properties
     
     private let disposeBag = DisposeBag()
-    fileprivate let selectedCell = PublishRelay<String>()
+    fileprivate let sendCategoryData = PublishRelay<String>()
     
     // MARK: - Properties
     
@@ -27,6 +27,7 @@ final class CategoryViewController: UIViewController {
     ]
     
     private let selectedCategory: String
+    private var selectedCellIndexPath: IndexPath = IndexPath()
     
     // MARK: - UI Components
     
@@ -160,9 +161,17 @@ private extension CategoryViewController {
 
 extension CategoryViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let cell = categoryCollectionView.cellForItem(at: indexPath) as? CategoryViewCell else { return }
-        cell.selectedCell()
-        self.selectedCell.accept(categoryData[indexPath.item])
+        guard let selectcell = categoryCollectionView.cellForItem(at: indexPath) as? CategoryViewCell else { return }
+        
+        selectcell.selectedCell()
+        self.sendCategoryData.accept(categoryData[indexPath.item])
+        
+        if let previousCell =  categoryCollectionView.cellForItem(at: self.selectedCellIndexPath) as? CategoryViewCell {
+            previousCell.resetCell()
+        }
+        
+        self.selectedCellIndexPath = indexPath
+        
         self.dismissSelf()
     }
 }
@@ -182,6 +191,7 @@ extension CategoryViewController: UICollectionViewDataSource {
         
         if categoryData[indexPath.item] == selectedCategory {
             cell.selectedCell()
+            self.selectedCellIndexPath = indexPath
         }
         
         return cell
@@ -194,6 +204,6 @@ extension CategoryViewController: UICollectionViewDataSource {
 extension Reactive where Base: CategoryViewController {
     /// 셀의 선택 이벤트를 방출하는 옵저버블
     var selectedCell: PublishRelay<String> {
-        base.selectedCell
+        base.sendCategoryData
     }
 }

@@ -47,10 +47,21 @@ final class CategoryViewCell: UICollectionViewCell {
     
     /// 선택된 셀을 강조하는 메소드
     func selectedCell() {
-        category.font = .SCDream(size: .headline, weight: .bold)
-        category.textColor = .white
-        category.layer.borderColor = .none
-        category.backgroundColor = .CustomColors.Accent.blue
+        DispatchQueue.main.async {
+            self.category.font = .SCDream(size: .headline, weight: .bold)
+            self.category.textColor = .white
+            self.category.layer.borderColor = .none
+            self.category.backgroundColor = .CustomColors.Accent.blue
+        }
+    }
+    
+    func resetCell() {
+        DispatchQueue.main.async {
+            self.category.font = .SCDream(size: .headline, weight: .medium)
+            self.category.textColor = .CustomColors.Text.textSecondary
+            self.category.layer.borderColor = UIColor.CustomColors.Text.textSecondary.cgColor
+            self.category.backgroundColor = .CustomColors.Background.background
+        }
     }
     
 }
