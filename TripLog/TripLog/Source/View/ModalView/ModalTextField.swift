@@ -14,6 +14,9 @@ import RxCocoa
 /// 모달에서 텍스트 입력을 받을 텍스트 필드 공용 컴포넌츠
 final class ModalTextField: UIView {
     
+    private let disposeBag = DisposeBag()
+    private var state: ModalTextFieldState
+    
     // MARK: - UI Components
     
     private let title = UILabel().then {
@@ -53,7 +56,8 @@ final class ModalTextField: UIView {
     ///   - subTitle: 텍스트필드 부제목(없을 수 있음)
     ///   - placeholder: placeholder 텍스트
     ///   - keyboardType: 키보드 타입 지정
-    init(title: String, subTitle: String?, placeholder: String, keyboardType: UIKeyboardType) {
+    init(title: String, subTitle: String?, placeholder: String, keyboardType: UIKeyboardType, state: ModalTextFieldState) {
+        self.state = state
         super.init(frame: .zero)
         
         self.title.text = title
@@ -77,8 +81,8 @@ final class ModalTextField: UIView {
     
     /// 텍스트필드를 세팅하는 메소드
     /// - Parameter text: 텍스트필드에 넣을 텍스트
-    func configureTextField(text: String?) {
-        textField.text = text
+    func configureTextField(text: String) {
+        textField.text = formatNumber(text)
     }
     
     /// 텍스트필드의 데이터를 추출하는 메소드
@@ -97,6 +101,9 @@ private extension ModalTextField {
     func setupUI() {
         configureSelf()
         setupLayout()
+        if state == .numberTextField {
+            bind()
+        }
     }
     
     func configureSelf() {
@@ -120,6 +127,18 @@ private extension ModalTextField {
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
+    }
+    
+    func bind() {
+        textField.rx.text.orEmpty
+            .map { self.formatNumber($0) }
+            .bind(to: textField.rx.text)
+            .disposed(by: disposeBag)
+    }
+    
+    func formatNumber(_ text: String) -> String {
+        guard let number = Double(text.replacingOccurrences(of: ",", with: "")) else { return text }
+        return number.formattedWithFormatter
     }
 }
 

@@ -78,15 +78,15 @@ final class ModalView: UIView {
         switch state {
         case .createNewCashBook, .editCashBook:
             self.titleLabel.text = state.modalTitle
-            self.firstSection = ModalTextField(title: "가계부 이름", subTitle: nil, placeholder: "예: 도쿄 여행 2024", keyboardType: .default)
-            self.secondSection = ModalTextField(title: "여행 국가", subTitle: nil, placeholder: "예: 일본", keyboardType: .default)
-            self.thirdSection = ModalTextField(title: "예산 설정", subTitle: "원(한화)", placeholder: "0", keyboardType: .numberPad)
+            self.firstSection = ModalTextField(title: "가계부 이름", subTitle: nil, placeholder: "예: 도쿄 여행 2024", keyboardType: .default, state: .justTextField)
+            self.secondSection = ModalTextField(title: "여행 국가", subTitle: nil, placeholder: "예: 일본", keyboardType: .default, state: .justTextField)
+            self.thirdSection = ModalTextField(title: "예산 설정", subTitle: "원(한화)", placeholder: "0", keyboardType: .numberPad, state: .numberTextField)
             self.forthSection = ModalDateView()
             
         case .createNewConsumption, .editConsumption:
             self.titleLabel.text = state.modalTitle
             self.firstSection = ModalSegmentView()
-            self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
+            self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default, state: .justTextField)
             self.thirdSection = ModalCategoryView()
             self.forthSection = ModalAmountView()
         }

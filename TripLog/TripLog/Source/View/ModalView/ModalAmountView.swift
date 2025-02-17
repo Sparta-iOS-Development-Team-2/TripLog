@@ -180,6 +180,7 @@ private extension ModalAmountView {
         textField.rx.text.orEmpty
             .map { self.filterInput($0) } // 입력값 필터링
             .map { self.formatInput($0) } // 입력값 포맷팅
+            .map { self.formatNumber($0) }
             .bind(to: textField.rx.text) // 필터링된 값 적용
             .disposed(by: disposeBag)
         
@@ -229,6 +230,11 @@ private extension ModalAmountView {
         } else {
             return input
         }
+    }
+    
+    func formatNumber(_ text: String) -> String {
+        guard let number = Double(text.replacingOccurrences(of: ",", with: "")) else { return text }
+        return number.formattedWithFormatter
     }
     
 }
