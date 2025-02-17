@@ -207,10 +207,9 @@ private extension TodayViewController {
         
          output.expenses
             .asDriver(onErrorDriveWith: .empty())
-            .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { [weak self] _, expense, cell in
-                guard let self else { return }
+            .drive(tableView.rx.items(cellIdentifier: ExpenseCell.identifier, cellType: ExpenseCell.self)) { _, expense, cell in
                 cell.configure(
-                    date: self.getTodayDate(),
+                    date: Date.formattedDateDotString(from: expense.expenseDate),
                     title: expense.note,
                     category: expense.category,
                     amount: "\(expense.amount.formattedCurrency(currencyCode: expense.country))",
@@ -260,7 +259,6 @@ private extension TodayViewController {
                 owner.fetchTrigger.accept(owner.cashBookID)
                 owner.totalAmountRelay.accept(owner.getTotalAmount())
             }.disposed(by: disposeBag)
-        
         
         // 🔹 모달 표시 바인딩 (RxSwift 적용)
         floatingButton.rx.tap

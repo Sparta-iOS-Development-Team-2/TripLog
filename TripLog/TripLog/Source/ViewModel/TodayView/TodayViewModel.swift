@@ -79,11 +79,11 @@ final class TodayViewModel: ViewModelType {
     ///   - expenses: 필터링할 지출 목록
     /// - Returns: 필터링된 지출 목록
     private func filteredTodayExpense(cashBookID: UUID, _ expenses: [MyCashBookModel]) -> [MyCashBookModel] {
-        let today = Calendar.current.startOfDay(for: Date()) // 🔹 오늘 날짜 (시간 제거)
+//        let today = Calendar.current.startOfDay(for: Date()) // 🔹 오늘 날짜 (시간 제거)
         
         return expenses.filter {
-            $0.cashBookID == cashBookID &&
-            Calendar.current.isDate($0.expenseDate, inSameDayAs: today) // 🔹 오늘 날짜와 같은 데이터만 필터링
+            $0.cashBookID == cashBookID 
+//            Calendar.current.isDate($0.expenseDate, inSameDayAs: today) // 🔹 오늘 날짜와 같은 데이터만 필터링
         }
     }
     
