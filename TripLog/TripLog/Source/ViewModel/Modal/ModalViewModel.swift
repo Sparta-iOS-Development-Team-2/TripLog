@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SnapKit
 import RxSwift
 import RxCocoa
 
@@ -17,12 +18,14 @@ final class ModalViewModel: ViewModelType {
         let cashBookActiveButtonTapped: PublishRelay<ModalView.ModalCashBookData>
         let consumptionActiveButtonTapped: PublishRelay<ModalView.ModalConsumptionData>
         let sectionIsEmpty: Observable<Bool>
+        let categoryButtonTapped: PublishRelay<String>
     }
     
     struct Output {
         let modalDismiss: PublishRelay<Void>
         let cashBookActive: PublishRelay<(Bool, ModalView.ModalCashBookData)>
         let consumptionActive: PublishRelay<(Bool, ModalView.ModalConsumptionData)>
+        let showCategoryModal: PublishRelay<String>
     }
     
     let disposeBag = DisposeBag()
@@ -30,6 +33,7 @@ final class ModalViewModel: ViewModelType {
     private let modalDismiss = PublishRelay<Void>()
     private let cashBookActive = PublishRelay<(Bool, ModalView.ModalCashBookData)>()
     private let consumptionActive = PublishRelay<(Bool, ModalView.ModalConsumptionData)>()
+    private let showCategoryModal = PublishRelay<String>()
     
     private var ModelSectionIsEmpty: Bool?
     
@@ -83,10 +87,51 @@ final class ModalViewModel: ViewModelType {
                 
             }.disposed(by: disposeBag)
         
+        input.categoryButtonTapped
+            .withUnretained(self)
+            .flatMap { owner, category in
+                owner.showCategoryModal(category)
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { [weak self] category in
+                self?.showCategoryModal.accept(category)
+            }
+            .disposed(by: disposeBag)
+        
         return Output(
             modalDismiss: self.modalDismiss,
             cashBookActive: self.cashBookActive,
-            consumptionActive: self.consumptionActive
+            consumptionActive: self.consumptionActive,
+            showCategoryModal: self.showCategoryModal
         )
     }
+    
+    private func showCategoryModal(_ category: String) -> Observable<String> {
+        guard let vc = AppHelpers.getTopViewController(),
+              vc as? ModalViewController != nil
+        else {
+            return .error(NSError(domain: "no top view controller", code: -1))
+        }
+        
+        let categoryVC = CategoryViewController(category)
+        let dismissSignal = categoryVC.rx.deallocated.map { _ in "" }
+        
+        vc.addChild(categoryVC)
+        vc.view.addSubview(categoryVC.view)
+        categoryVC.view.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.top.equalTo(vc.view.snp.bottom)
+            $0.height.equalTo(190)
+        }
+        vc.view.layoutIfNeeded()
+        categoryVC.didMove(toParent: vc)
+        
+        UIView.animate(withDuration: 0.2, delay: 0, options: .curveLinear) {
+            categoryVC.view.frame.origin.y -= 190
+            vc.view.layoutIfNeeded()
+        }
+        
+        return categoryVC.rx.selectedCell.take(until: dismissSignal)
+    }
+    
 }
