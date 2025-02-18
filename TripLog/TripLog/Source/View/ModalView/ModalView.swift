@@ -13,7 +13,7 @@ import RxCocoa
 
 /// 모달 뷰 컨트롤러의 뷰로 쓰일 모달 뷰
 final class ModalView: UIView {
-    typealias ModalCashBookData = (id: UUID, tripName: String, note: String, budget: Int,departure: String, homecoming: String, state: ModalViewState)
+    typealias ModalCashBookData = (id: UUID, tripName: String, note: String, budget: Int, departure: String, homecoming: String, state: ModalViewState)
     typealias ModalConsumptionData = (id: UUID, cashBookID: UUID, expenseDate: Date, payment: Bool, note: String, category: String, amount: Double, country: String, state: ModalViewState, exchangeRate: Double)
     
     // MARK: - Rx Properties
@@ -21,6 +21,7 @@ final class ModalView: UIView {
     fileprivate let cancelButtonTapped = PublishRelay<Void>()
     fileprivate let cashBookActiveButtonTapped = PublishRelay<ModalCashBookData>()
     fileprivate let consumptionActiveButtonTapped = PublishRelay<ModalConsumptionData>()
+    fileprivate let categoryButtonTapped = PublishRelay<String>()
     
     private let firstTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
     private let secondTextFieldIsEmpty = BehaviorSubject<Bool>(value: true)
@@ -77,16 +78,16 @@ final class ModalView: UIView {
         switch state {
         case .createNewCashBook, .editCashBook:
             self.titleLabel.text = state.modalTitle
-            self.firstSection = ModalTextField(title: "가계부 이름", subTitle: nil, placeholder: "예: 도쿄 여행 2024", keyboardType: .default)
-            self.secondSection = ModalTextField(title: "여행 국가", subTitle: nil, placeholder: "예: 일본", keyboardType: .default)
-            self.thirdSection = ModalTextField(title: "예산 설정", subTitle: "원(한화)", placeholder: "0", keyboardType: .numberPad)
+            self.firstSection = ModalTextField(title: "가계부 이름", subTitle: nil, placeholder: "예: 도쿄 여행 2024", keyboardType: .default, state: .justTextField)
+            self.secondSection = ModalTextField(title: "여행 국가", subTitle: nil, placeholder: "예: 일본", keyboardType: .default, state: .justTextField)
+            self.thirdSection = ModalTextField(title: "예산 설정", subTitle: "원(한화)", placeholder: "0", keyboardType: .numberPad, state: .numberTextField)
             self.forthSection = ModalDateView()
             
         case .createNewConsumption, .editConsumption:
             self.titleLabel.text = state.modalTitle
             self.firstSection = ModalSegmentView()
-            self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default)
-            self.thirdSection = ModalTextField(title: "카테고리", subTitle: nil, placeholder: "예: 식비", keyboardType: .default)
+            self.secondSection = ModalTextField(title: "지출 내용", subTitle: nil, placeholder: "예: 스시 오마카세", keyboardType: .default, state: .justTextField)
+            self.thirdSection = ModalCategoryView()
             self.forthSection = ModalAmountView()
         }
         
@@ -109,6 +110,11 @@ final class ModalView: UIView {
         super.layoutSubviews()
         
         self.layer.shadowPath = self.shadowPath()
+    }
+    
+    func configureCategoryView(_ text: String) {
+        guard let categoryView = thirdSection as? ModalCategoryView else { return }
+        categoryView.configurePlaceholderText(text: text)
     }
 
 }
@@ -273,19 +279,27 @@ private extension ModalView {
         case .createNewConsumption(data: let data):
             if
                let secondSection = self.secondSection as? ModalTextField,
-               let thirdSection = self.thirdSection as? ModalTextField,
+               let thirdSection = self.thirdSection as? ModalCategoryView,
                let forthSection = self.forthSection as? ModalAmountView
             {
                 self.cashBookID = data.cashBookID
                 self.expenseDate = data.date
                 self.exchangeRate = data.exchangeRate
                 
+                if let country = UserDefaults.standard.string(forKey: "lastSelectedCurrency") {
+                    forthSection.configureAmountView(amount: nil, country: country)
+                }
+                
                 secondSection.rx.textFieldIsEmpty
                     .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.textFieldIsEmpty
+                thirdSection.rx.categoryIsEmpty
                     .bind(to: secondTextFieldIsEmpty)
+                    .disposed(by: disposeBag)
+                
+                thirdSection.rx.categoryButtonTapped
+                    .bind(to: categoryButtonTapped)
                     .disposed(by: disposeBag)
                 
                 forthSection.rx.amountViewIsEmpty
@@ -296,12 +310,12 @@ private extension ModalView {
         case .editConsumption(data: let data, exchangeRate: let rate):
             if let firstSection = self.firstSection as? ModalSegmentView,
                let secondSection = self.secondSection as? ModalTextField,
-               let thirdSection = self.thirdSection as? ModalTextField,
+               let thirdSection = self.thirdSection as? ModalCategoryView,
                let forthSection = self.forthSection as? ModalAmountView
             {
                 firstSection.configureSegment(to: data.payment)
                 secondSection.configureTextField(text: data.note)
-                thirdSection.configureTextField(text: data.category)
+                thirdSection.configurePlaceholderText(text: data.category)
                 forthSection.configureAmountView(amount: data.amount, country: data.country)
                 
                 self.cashBookID = data.cashBookID
@@ -313,8 +327,12 @@ private extension ModalView {
                     .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)
                 
-                thirdSection.rx.textFieldIsEmpty
+                thirdSection.rx.categoryIsEmpty
                     .bind(to: secondTextFieldIsEmpty)
+                    .disposed(by: disposeBag)
+                
+                thirdSection.rx.categoryButtonTapped
+                    .bind(to: categoryButtonTapped)
                     .disposed(by: disposeBag)
                 
                 forthSection.rx.amountViewIsEmpty
@@ -361,7 +379,7 @@ private extension ModalView {
             guard
                 let first = firstSection as? ModalSegmentView,
                 let second = secondSection as? ModalTextField,
-                let third = thirdSection as? ModalTextField,
+                let third = thirdSection as? ModalCategoryView,
                 let forth = forthSection as? ModalAmountView
             else { return nil }
             
@@ -372,7 +390,7 @@ private extension ModalView {
                                    getExpenseDate(),
                                    first.paymentExtraction(),
                                    second.textFieldExtraction(),
-                                   third.textFieldExtraction(),
+                                   third.categoryExtraction(),
                                    forth.amountExtraction(),
                                    forth.currencyExtraction(),
                                    state,
@@ -442,4 +460,9 @@ extension Reactive where Base: ModalView {
     var checkBlankOfSections: Observable<Bool> {
         return base.allSectionIsEmpty
     }
+    
+    var categoryButtonTapped: PublishRelay<String> {
+        return base.categoryButtonTapped
+    }
+
 }

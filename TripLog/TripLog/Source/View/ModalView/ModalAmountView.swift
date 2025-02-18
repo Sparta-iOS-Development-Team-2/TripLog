@@ -29,11 +29,11 @@ final class ModalAmountView: UIView {
     
     private let currencyButton = UIButton().then {
         $0.setTitle("KRW(원)", for: .normal)
-        $0.setTitleColor(UIColor.Personal.normal, for: .normal)
+        $0.setTitleColor(.CustomColors.Accent.blue, for: .normal)
         $0.titleLabel?.font = UIFont.SCDream(size: .headline, weight: .medium)
         $0.setImage(UIImage(systemName: "chevron.up.chevron.down"), for: .normal)
         $0.semanticContentAttribute = .forceRightToLeft
-        $0.tintColor = UIColor.Personal.normal
+        $0.tintColor = .CustomColors.Accent.blue
         $0.backgroundColor = .clear
     }
     
@@ -50,6 +50,15 @@ final class ModalAmountView: UIView {
         $0.rightViewMode = .always
         $0.autocapitalizationType = .none
         $0.keyboardType = .decimalPad
+    }
+    
+    private let helpButton = UIButton().then {
+        $0.setTitle("?", for: .normal)
+        $0.setTitleColor(.CustomColors.Accent.blue, for: .normal)
+        $0.titleLabel?.font = .SCDream(size: .body, weight: .bold)
+        $0.applyBackgroundColor()
+        $0.applyTextFieldStroke()
+        $0.applyCornerRadius(9)
     }
     
     // MARK: - Initializer
@@ -69,6 +78,7 @@ final class ModalAmountView: UIView {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             self.textField.applyTextFieldStroke()
+            self.helpButton.applyTextFieldStroke()
         }
     }
     
@@ -88,7 +98,7 @@ final class ModalAmountView: UIView {
     func amountExtraction() -> Double {
         guard
             let text = textField.text,
-            let amount = Double(text)
+            let amount = Double(text.replacingOccurrences(of: ",", with: ""))
         else { return 0 }
         
         return amount
@@ -116,7 +126,7 @@ private extension ModalAmountView {
     
     func configureSelf() {
         self.backgroundColor = .clear
-        [title, currencyButton, textField].forEach { self.addSubview($0) }
+        [title, helpButton, currencyButton, textField].forEach { self.addSubview($0) }
     }
     
     /// 통화 선택 버튼에 메뉴 뷰를 추가하는 메소드
@@ -148,6 +158,12 @@ private extension ModalAmountView {
             $0.height.equalTo(16)
         }
         
+        helpButton.snp.makeConstraints {
+            $0.centerY.equalTo(title)
+            $0.leading.equalTo(title.snp.trailing).offset(5)
+            $0.width.height.equalTo(18)
+        }
+        
         currencyButton.snp.makeConstraints {
             $0.top.trailing.equalToSuperview()
             $0.height.equalTo(title)
@@ -162,53 +178,98 @@ private extension ModalAmountView {
     
     func bind() {
         textField.rx.text.orEmpty
-            .map { self.filterInput($0) } // 입력값 필터링
-            .map { self.formatInput($0) } // 입력값 포맷팅
+            .map { self.formatFinalInput($0) }
             .bind(to: textField.rx.text) // 필터링된 값 적용
             .disposed(by: disposeBag)
+        
+        helpButton.rx.tap
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, _ in
+                let recentRateDate = Date.caculateDate()
+                PopoverManager.showPopover(from: owner.helpButton,
+                                           title: "현재의 환율은 \(recentRateDate) 환율입니다.",
+                                           subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
+                                           width: 170,
+                                           height: 60,
+                                           arrow: .down)
+            }.disposed(by: disposeBag)
     }
     
     /// 소수점을 1개만 입력할 수 있도록 필터링 하는 메소드
     /// - Parameter input: 필터링할 텍스트
     /// - Returns: 필터링된 텍스트
     func filterInput(_ input: String) -> String {
-        let components = input.components(separatedBy: ".")
-        if components.count > 2 {
-            return components.dropLast().joined(separator: ".") // 마지막 `.` 제거
-        } else {
-            return input
+        let filtered = input.filter { $0.isNumber || $0 == "." }
+        
+        // 소수점 1개만 허용
+        if filtered.filter({ $0 == "." }).count > 1 {
+            return String(filtered.dropLast())
         }
+        
+        // 첫 번째 글자가 '.'이 되지 않도록 처리
+        if filtered.starts(with: ".") {
+            return "0\(filtered)"
+        }
+        
+        return filtered
     }
     
     /// 소수점 이후로 2자리 수 까지만 입력할 수 있도록 포매팅하는 메소드
     /// - Parameter input: 포매팅할 텍스트
     /// - Returns: 포매팅된 텍스트
     func formatInput(_ input: String) -> String {
-        if input.contains(".") {
-            let components = input.split(separator: ".")
-            
-            if components.count > 1 {
-                let integerPart = String(components.first ?? "")
-                let decimalPart = String(components.last ?? "").prefix(2)
-                
-                return "\(integerPart).\(decimalPart)"
-            } else {
-                guard input.first != "." else { return String(input.prefix(3)) }
-                return input
-            }
-            
-        } else {
-            return input
+        guard !input.isEmpty else { return "" }
+        
+        // 소수점이 있으면 소수점 이하 2자리 제한
+        if let dotIndex = input.firstIndex(of: ".") {
+            let integerPart = input[..<dotIndex]
+            let decimalPart = input[input.index(after: dotIndex)...].prefix(2)
+            return "\(integerPart).\(decimalPart)"
         }
+        
+        return input
+    }
+    
+    func formatNumber(_ text: String) -> String {
+        let numbers = text.components(separatedBy: ".")
+        var firstPart: String
+        var secondPart: String
+        if numbers.count > 1 {
+            firstPart = numbers.first ?? ""
+            secondPart = numbers.last ?? ""
+            guard let number = Double(firstPart.replacingOccurrences(of: ",", with: "")) else { return text }
+            return "\(number.formattedWithFormatter).\(secondPart)"
+        }
+        guard let number = Double(text.replacingOccurrences(of: ",", with: "")) else { return text }
+        return number.formattedWithFormatter
+    }
+    
+    func checkInputLimit(_ input: String) -> String {
+        guard input.count > 20 else { return input }
+        let text = String(input.prefix(20))
+        
+        HapticManager.notification(type: .warning)
+        
+        return text
+    }
+    
+    func formatFinalInput(_ input: String) -> String {
+        let filtered = filterInput(input)
+        let formatted = formatInput(filtered)
+        let formatNumber = formatNumber(formatted)
+        return checkInputLimit(formatNumber)
     }
     
 }
+
+// MARK: - Reactive Extension
 
 extension Reactive where Base: ModalAmountView {
     /// 금액뷰의 텍스트필드가 비었는지 확인하는 옵저버블
     var amountViewIsEmpty: Observable<Bool> {
         return base.textField.rx.text.orEmpty
-            .map { Double($0) == nil }
+            .map { Double($0.replacingOccurrences(of: ",", with: "")) == nil }
             .distinctUntilChanged()
             .asObservable()
     }

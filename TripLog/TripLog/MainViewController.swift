@@ -111,24 +111,14 @@ private extension MainViewController {
     
     /// 메인뷰에 온보딩 뷰를 설정하는 메소드
     func setupOnboardingView() {
-        let onboardingVC = OnboardingViewController()
-        addChild(onboardingVC)
-        view.addSubview(onboardingVC.view)
-        
-        onboardingVC.view.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
-        onboardingVC.didMove(toParent: self)
-        
-        onboardingVC.rx.activeButtonTapped
+        OnboardingManager.showOnboardingView()
             .asSignal(onErrorSignalWith: .empty())
-            .emit { _ in
+            .emit { vc in
                 UIView.animate(withDuration: 0.3, animations: {
-                    onboardingVC.view.alpha = 0
+                    vc.view.alpha = 0
                 }) { _ in
-                    onboardingVC.removeFromParent()
-                    onboardingVC.view.removeFromSuperview()
+                    vc.removeFromParent()
+                    vc.view.removeFromSuperview()
                 }
                 // "시작하기" 버튼을 눌렀는지 여부로 첫 실행 여부 판정
                 UserDefaults.standard.set(false, forKey: "isFirstLaunch")

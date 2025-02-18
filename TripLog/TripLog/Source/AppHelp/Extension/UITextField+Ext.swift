@@ -16,7 +16,9 @@ extension UITextField {
         let title = title
         self.attributedPlaceholder = NSAttributedString(
             string: title,
-            attributes: [NSAttributedString.Key.foregroundColor: color]
+            attributes: [NSAttributedString.Key.foregroundColor: color,
+                         NSAttributedString.Key.font: UIFont.SCDream(size: .body, weight: .light)
+                        ]
         )
     }
 }

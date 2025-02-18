@@ -68,7 +68,7 @@ final class TopProgressView: UIView {
                 
                 owner.expenseLabel.text = "지출: \(formattedExpense)"
                 owner.balanceLabel.text = "잔액: \(formattedBalance)"
-                owner.balanceLabel.textColor = (balance < 0) ? .red : UIColor.Personal.normal
+                owner.balanceLabel.textColor = (balance < 0) ? .red : .CustomColors.Accent.blue
 
                 // ✅ 6. Progress Bar 값 확인
                 let progressValue: CGFloat = (owner.budgetAmount > 0) ? CGFloat(expense) / CGFloat(owner.budgetAmount) : 0.0

@@ -30,7 +30,7 @@ final class ModalButtons: UIView {
         $0.setTitleColor(.CustomColors.Background.detailBackground, for: .normal)
         $0.titleLabel?.numberOfLines = 1
         $0.titleLabel?.textAlignment = .center
-        $0.backgroundColor = .Personal.normal
+        $0.backgroundColor = .CustomColors.Accent.blue
         $0.layer.cornerRadius = 8
     }
     

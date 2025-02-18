@@ -53,11 +53,8 @@ final class CustomTabBarViewModel: ViewModelType {
         
         // 탭바 추가버튼 동작
         input.tabBarAddButtonTapped
-            .asSignal(onErrorSignalWith: .empty())
-            .emit(onNext: { [weak self] in
-                guard let self = self else { return }
-                self.showAddListModal.accept(())
-            }).disposed(by: disposeBag)
+            .bind(to: showAddListModal)
+            .disposed(by: disposeBag)
         
         // 탭의 상태에 따른 탭바 추가버튼 활성화
         let isAddButtonEnable = currentState

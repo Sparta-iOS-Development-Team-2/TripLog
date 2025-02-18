@@ -29,17 +29,6 @@ final class TodayViewController: UIViewController {
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
         $0.textColor = UIColor(named: "textPrimary")
     }
-        
-    // 도움말 버튼
-    // 도움말 버튼 (원형으로 만들기)
-    private let helpButton = UIButton(type: .system).then {
-        $0.setTitle("?", for: .normal)
-        $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-        $0.applyBackgroundColor()
-        $0.clipsToBounds = true
-        $0.applyFloatingButtonShadow()
-        $0.applyCornerRadius(12)
-    }
 
     // "오늘 사용 금액" 라벨
     private let totalLabel = UILabel().then {
@@ -52,7 +41,7 @@ final class TodayViewController: UIViewController {
     private let totalAmountLabel = UILabel().then {
         $0.text = "0 원"
         $0.font = UIFont.SCDream(size: .body, weight: .bold)
-        $0.textColor = UIColor.Personal.normal
+        $0.textColor = .CustomColors.Accent.blue
     }
     
     // 지출 내역을 표시할 테이블 뷰
@@ -73,7 +62,7 @@ final class TodayViewController: UIViewController {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
         $0.tintColor = UIColor.CustomColors.Background.background
         $0.layer.cornerRadius = 32 // ((버튼 뷰 크기 - 버튼 패딩) / 2)
-        $0.backgroundColor = UIColor.Personal.normal
+        $0.backgroundColor = .CustomColors.Accent.blue
         $0.applyFloatingButtonShadow()
         $0.applyFloatingButtonStroke()
     }
@@ -103,7 +92,6 @@ final class TodayViewController: UIViewController {
         super.viewDidLayoutSubviews()
         
         floatingButton.layer.shadowPath = floatingButton.shadowPath()
-        helpButton.layer.shadowPath = helpButton.shadowPath()
     }
     
     func updateTodayConsumption() {
@@ -127,8 +115,8 @@ private extension TodayViewController {
     }
     
     // 🔹 UI 요소 추가
-    func setupViews() {
-        let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel, helpButton]).then {
+    private func setupViews() {
+        let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel]).then {
             $0.axis = .horizontal
             $0.spacing = 8
             $0.alignment = .center
@@ -156,10 +144,6 @@ private extension TodayViewController {
     
     // 🔹 UI 레이아웃 설정
     func setupConstraints() {
-        
-        helpButton.snp.makeConstraints {
-            $0.width.height.equalTo(24) // 버튼 크기를 40x40으로 고정
-        }
         
         topStackView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
@@ -213,7 +197,7 @@ private extension TodayViewController {
                     date: self.getTodayDate(),
                     title: expense.note,
                     category: expense.category,
-                    amount: "\(expense.amount.formattedCurrency(currencyCode: expense.country))",
+                    amount: "\(expense.amount.formattedWithFormatter)",
                     exchangeRate: "\(NumberFormatter.formattedString(from: expense.caculatedAmount.rounded())) 원",
                     payment: expense.payment
                 )
@@ -276,22 +260,8 @@ private extension TodayViewController {
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
                 owner.fetchTrigger.accept(owner.cashBookID)
                 owner.totalAmountRelay.accept(owner.getTotalAmount())
+                UserDefaults.standard.set(data.country, forKey: "lastSelectedCurrency")
             }.disposed(by: disposeBag)
-        
-        helpButton.rx.tap
-            .asSignal(onErrorSignalWith: .empty())
-            .withUnretained(self)
-            .emit { owner, _ in
-                let recentRateDate = Date.caculateDate()
-                PopoverManager.showPopover(from: owner.helpButton,
-                                           title: "현재의 환율은 \(recentRateDate) 환율입니다.",
-                                           subTitle: "한국 수출입 은행에서 제공하는 가장 최근 환율정보입니다.",
-                                           width: 170,
-                                           height: 60,
-                                           arrow: .down)
-                
-            }.disposed(by: disposeBag)
-        
         
         // ✅ Rx 방식으로 delegate 설정
         tableView.rx.setDelegate(self)
@@ -415,4 +385,3 @@ extension Reactive where Base: TodayViewController {
         base.totalAmountRelay
     }
 }
-

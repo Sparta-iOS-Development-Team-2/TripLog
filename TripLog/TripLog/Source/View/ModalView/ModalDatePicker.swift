@@ -85,6 +85,23 @@ final class ModalDatePicker: UIView {
         datePicker.rx.date.onNext(date)
         updateTextField(date: date)
     }
+    
+    
+    /// DatePicker 뷰의 날짜를 설정하는 메소드
+    /// - Parameter date: 입력할 날짜
+    func updateTextField(date: Date) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy년 MM월 dd일"
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.textField.text = formatter.string(from: date)
+            self?.textField.sendActions(for: .valueChanged)
+        }
+    }
+    
+    func setMinmumDate(_ date: Date) {
+        datePicker.minimumDate = date
+    }
 }
 
 // MARK: - UI Setting Method
@@ -94,7 +111,6 @@ private extension ModalDatePicker {
     func setupUI() {
         configureSelf()
         setupLayout()
-        bind()
     }
     
     func configureSelf() {
@@ -116,31 +132,6 @@ private extension ModalDatePicker {
             $0.centerY.equalToSuperview()
             $0.width.height.equalTo(20)
         }
-    }
-    
-    /// DatePicker 뷰의 날짜를 설정하는 메소드
-    /// - Parameter date: 입력할 날짜
-    func updateTextField(date: Date) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 MM월 dd일"
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.textField.text = formatter.string(from: date)
-            self?.textField.sendActions(for: .valueChanged)
-        }
-    }
-    
-    func bind() {
-        datePicker.rx.date
-            .skip(2)
-            .distinctUntilChanged()
-            .asSignal(onErrorSignalWith: .empty())
-            .withUnretained(self)
-            .emit { owner, date in
-                
-                owner.updateTextField(date: date)
-                
-            }.disposed(by: disposeBag)
     }
     
 }

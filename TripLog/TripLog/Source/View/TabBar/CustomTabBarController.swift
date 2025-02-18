@@ -14,8 +14,9 @@ import RxCocoa
 final class CustomTabBarController: UIViewController {
     
     private let disposeBag = DisposeBag()
-    private let customTabBar = TabBarView()
     private let viewModel = CustomTabBarViewModel()
+    
+    private let customTabBar = TabBarView()
     
     // 텝바에 들어가는 화면 선언
     private let cashBookVC = CashBookListViewController()
@@ -124,11 +125,14 @@ private extension CustomTabBarController {
             }).disposed(by: disposeBag)
         
         output.isAddButtonEnable
-            .drive(customTabBar.tabBarAddButton.rx.isEnabled)
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { [weak self] state in
+                self?.customTabBar.addButtonDisable(state)
+            }
             .disposed(by: disposeBag)
         
         // 탭바의 추가하기 버튼 바인딩
-        customTabBar.tabBarAddButtonTapped
+        output.showAddListModal
             .flatMap {
                 return ModalViewManager.showModal(state: .createNewCashBook)
                     .compactMap { $0 as? CashBookModel }
