@@ -10,9 +10,9 @@ final class ExpenseCell: UITableViewCell {
         $0.applyBoxStyle()
     }
 
-    private let dateLabel = UILabel().then {
-        $0.font = UIFont.SCDream(size: .caption, weight: .regular)
-    }
+//    private let dateLabel = UILabel().then {
+//        $0.font = UIFont.SCDream(size: .caption, weight: .regular)
+//    }
 
     private let titleLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .display, weight: .medium)
@@ -54,7 +54,7 @@ final class ExpenseCell: UITableViewCell {
 
         contentView.addSubview(containerView)
 
-        [dateLabel, titleLabel, categoryLabel, amountLabel, exchangeRateLabel].forEach {
+        [titleLabel, categoryLabel, amountLabel, exchangeRateLabel].forEach {
             containerView.addSubview($0)
         }
 
@@ -77,14 +77,14 @@ final class ExpenseCell: UITableViewCell {
             $0.edges.equalToSuperview().inset(8)
         }
 
-        dateLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(16)
-            $0.top.equalToSuperview().offset(16)
-            $0.height.equalTo(16)
-        }
+//        dateLabel.snp.makeConstraints {
+//            $0.leading.equalToSuperview().offset(16)
+//            $0.top.equalToSuperview().offset(16)
+//            $0.height.equalTo(16)
+//        }
 
         firstRowStackView.snp.makeConstraints {
-            $0.top.equalTo(dateLabel.snp.bottom).offset(4) // ✅ 여백 추가
+            $0.top.equalToSuperview().offset(16) // ✅ 여백 추가
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(24)
         }
@@ -100,11 +100,11 @@ final class ExpenseCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(date: String, title: String, category: String, amount: String, exchangeRate: String, payment: Bool) {
+    func configure(title: String, category: String, amount: String, exchangeRate: String, payment: Bool) {
 
         let paymentStatus = payment ? "카드" : "현금"
 
-        dateLabel.text = date
+//        dateLabel.text = date
         titleLabel.text = title
         categoryLabel.text = "\(category) / \(paymentStatus)"
         amountLabel.text = amount
