@@ -60,7 +60,7 @@ final class TabBarView: UIView {
         $0.configuration = config
     }
     
-    let tabBarAddButton = UIButton().then {
+    private let tabBarAddButton = UIButton().then {
         $0.setImage(UIImage(systemName: "plus"), for: .normal)
         $0.tintColor = UIColor.CustomColors.Background.background
         $0.backgroundColor = UIColor.CustomColors.Accent.blue
@@ -85,6 +85,23 @@ final class TabBarView: UIView {
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             
             tabBarAddButton.applyTabBarButtonStyle()
+        }
+    }
+    
+    func addButtonDisable(_ disable: Bool) {
+        switch disable {
+        case true:
+            UIView.animate(withDuration: 0.3) {
+                self.tabBarAddButton.transform = CGAffineTransform.identity
+            }
+            tabBarAddButton.isEnabled = true
+            tabBarAddButton.backgroundColor = .CustomColors.Accent.blue
+        case false:
+            UIView.animate(withDuration: 0.3) {
+                self.tabBarAddButton.transform = self.tabBarAddButton.transform.rotated(by: .pi / 4)
+            }
+            tabBarAddButton.isEnabled = false
+            tabBarAddButton.backgroundColor = UIColor.CustomColors.Text.textSecondary
         }
     }
     
