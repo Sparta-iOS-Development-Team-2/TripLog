@@ -197,7 +197,7 @@ private extension TodayViewController {
                     date: self.getTodayDate(),
                     title: expense.note,
                     category: expense.category,
-                    amount: "\(expense.amount.formattedCurrency(currencyCode: expense.country))",
+                    amount: "\(expense.amount.formattedWithFormatter)",
                     exchangeRate: "\(NumberFormatter.formattedString(from: expense.caculatedAmount.rounded())) 원",
                     payment: expense.payment
                 )

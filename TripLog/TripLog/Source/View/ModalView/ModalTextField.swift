@@ -37,7 +37,7 @@ final class ModalTextField: UIView {
     
     fileprivate let textField = UITextField().then {
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
-        $0.textColor = UIColor.Dark.base
+        $0.textColor = .CustomColors.Text.textPrimary
         $0.borderStyle = .none
         $0.clipsToBounds = true
         $0.applyTextFieldStyle()
@@ -46,6 +46,13 @@ final class ModalTextField: UIView {
         $0.rightView = UIView(frame: .init(x: 0, y: 0, width: 12, height: 12))
         $0.rightViewMode = .always
         $0.autocapitalizationType = .none
+    }
+    
+    private let limitInfoLabel = UILabel().then {
+        $0.text = "0/20"
+        $0.font = UIFont.SCDream(size: .body, weight: .regular)
+        $0.textColor = .CustomColors.Text.textPlaceholder
+        $0.backgroundColor = .clear
     }
     
     // MARK: - Initializer
@@ -82,14 +89,26 @@ final class ModalTextField: UIView {
     /// 텍스트필드를 세팅하는 메소드
     /// - Parameter text: 텍스트필드에 넣을 텍스트
     func configureTextField(text: String) {
-        textField.text = formatNumber(text)
+        switch state {
+        case .justTextField:
+            textField.text = text
+            textField.sendActions(for: .valueChanged)
+        case .numberTextField:
+            textField.text = formatNumber(text)
+        }
     }
     
     /// 텍스트필드의 데이터를 추출하는 메소드
     /// - Returns: 텍스트필드의 텍스트
     func textFieldExtraction() -> String {
         guard let text = textField.text else { return "" }
-        return text.replacingOccurrences(of: ",", with: "")
+        
+        switch state {
+        case .justTextField:
+            return text
+        case .numberTextField:
+            return text.replacingOccurrences(of: ",", with: "")
+        }
     }
     
 }
@@ -101,14 +120,15 @@ private extension ModalTextField {
     func setupUI() {
         configureSelf()
         setupLayout()
+        bind()
         if state == .numberTextField {
-            bind()
+            limitInfoLabel.isHidden = true
         }
     }
     
     func configureSelf() {
         self.backgroundColor = .clear
-        [title, subTitle, textField].forEach { self.addSubview($0) }
+        [title, subTitle, textField, limitInfoLabel].forEach { self.addSubview($0) }
     }
     
     func setupLayout() {
@@ -127,18 +147,53 @@ private extension ModalTextField {
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
+        
+        limitInfoLabel.snp.makeConstraints {
+            $0.centerY.equalTo(textField)
+            $0.trailing.equalTo(textField).inset(12)
+        }
     }
     
     func bind() {
-        textField.rx.text.orEmpty
-            .map { self.formatNumber($0) }
-            .bind(to: textField.rx.text)
-            .disposed(by: disposeBag)
+        switch state {
+        case .justTextField:
+            textField.rx.text.orEmpty
+                .map { self.checkInputLimit($0) }
+                .bind(to: textField.rx.text)
+                .disposed(by: disposeBag)
+            
+            textField.rx.text.orEmpty
+                .asDriver(onErrorDriveWith: .empty())
+                .drive { [weak self] text in
+                    self?.updateLimitLabel(text)
+                }.disposed(by: disposeBag)
+            
+        case .numberTextField:
+            textField.rx.text.orEmpty
+                .map { self.formatNumber($0) }
+                .map { self.checkInputLimit($0) }
+                .bind(to: textField.rx.text)
+                .disposed(by: disposeBag)
+        }
     }
     
     func formatNumber(_ text: String) -> String {
         guard let number = Double(text.replacingOccurrences(of: ",", with: "")) else { return text }
         return number.formattedWithFormatter
+    }
+    
+    func checkInputLimit(_ input: String) -> String {
+        guard input.count > 20 else { return input }
+        let text = String(input.prefix(20))
+        
+        HapticManager.notification(type: .warning)
+        
+        return text
+    }
+    
+    func updateLimitLabel(_ text: String) {
+        limitInfoLabel.text = "\(text.count)/20"
+        limitInfoLabel.textColor = text.count >= 20 ? .systemRed : .CustomColors.Text.textPlaceholder
     }
 }
 

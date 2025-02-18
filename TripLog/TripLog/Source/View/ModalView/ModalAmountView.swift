@@ -178,9 +178,7 @@ private extension ModalAmountView {
     
     func bind() {
         textField.rx.text.orEmpty
-            .map { self.filterInput($0) } // 입력값 필터링
-            .map { self.formatInput($0) } // 입력값 포맷팅
-            .map { self.formatNumber($0) }
+            .map { self.formatFinalInput($0) }
             .bind(to: textField.rx.text) // 필터링된 값 적용
             .disposed(by: disposeBag)
         
@@ -202,39 +200,65 @@ private extension ModalAmountView {
     /// - Parameter input: 필터링할 텍스트
     /// - Returns: 필터링된 텍스트
     func filterInput(_ input: String) -> String {
-        let components = input.components(separatedBy: ".")
-        if components.count > 2 {
-            return components.dropLast().joined(separator: ".") // 마지막 `.` 제거
-        } else {
-            return input
+        let filtered = input.filter { $0.isNumber || $0 == "." }
+        
+        // 소수점 1개만 허용
+        if filtered.filter({ $0 == "." }).count > 1 {
+            return String(filtered.dropLast())
         }
+        
+        // 첫 번째 글자가 '.'이 되지 않도록 처리
+        if filtered.starts(with: ".") {
+            return "0\(filtered)"
+        }
+        
+        return filtered
     }
     
     /// 소수점 이후로 2자리 수 까지만 입력할 수 있도록 포매팅하는 메소드
     /// - Parameter input: 포매팅할 텍스트
     /// - Returns: 포매팅된 텍스트
     func formatInput(_ input: String) -> String {
-        if input.contains(".") {
-            let components = input.split(separator: ".")
-            
-            if components.count > 1 {
-                let integerPart = String(components.first ?? "")
-                let decimalPart = String(components.last ?? "").prefix(2)
-                
-                return "\(integerPart).\(decimalPart)"
-            } else {
-                guard input.first != "." else { return String(input.prefix(3)) }
-                return input
-            }
-            
-        } else {
-            return input
+        guard !input.isEmpty else { return "" }
+        
+        // 소수점이 있으면 소수점 이하 2자리 제한
+        if let dotIndex = input.firstIndex(of: ".") {
+            let integerPart = input[..<dotIndex]
+            let decimalPart = input[input.index(after: dotIndex)...].prefix(2)
+            return "\(integerPart).\(decimalPart)"
         }
+        
+        return input
     }
     
     func formatNumber(_ text: String) -> String {
+        let numbers = text.components(separatedBy: ".")
+        var firstPart: String
+        var secondPart: String
+        if numbers.count > 1 {
+            firstPart = numbers.first ?? ""
+            secondPart = numbers.last ?? ""
+            guard let number = Double(firstPart.replacingOccurrences(of: ",", with: "")) else { return text }
+            return "\(number.formattedWithFormatter).\(secondPart)"
+        }
         guard let number = Double(text.replacingOccurrences(of: ",", with: "")) else { return text }
         return number.formattedWithFormatter
+    }
+    
+    func checkInputLimit(_ input: String) -> String {
+        guard input.count > 20 else { return input }
+        let text = String(input.prefix(20))
+        
+        HapticManager.notification(type: .warning)
+        
+        return text
+    }
+    
+    func formatFinalInput(_ input: String) -> String {
+        let filtered = filterInput(input)
+        let formatted = formatInput(filtered)
+        let formatNumber = formatNumber(formatted)
+        return checkInputLimit(formatNumber)
     }
     
 }
