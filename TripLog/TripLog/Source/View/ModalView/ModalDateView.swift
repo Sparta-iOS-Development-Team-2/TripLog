@@ -149,6 +149,8 @@ private extension ModalDateView {
                 
                 owner.startDate = date
                 owner.startDatePicker.configureDatePicker(date: date)
+                owner.startDatePicker.updateTextField(date: date)
+                owner.endDatePicker.setMinmumDate(date)
                 
                 guard let endDate = owner.endDate,
                       endDate < date
@@ -156,19 +158,41 @@ private extension ModalDateView {
                 
                 owner.endDate = date
                 owner.endDatePicker.configureDatePicker(date: date)
+                owner.endDatePicker.updateTextField(date: date)
                 
+            }.disposed(by: disposeBag)
+        
+        startDatePicker.rx.selectedDate
+            .withUnretained(self)
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { owner, _ in
+                guard let vc = AppHelpers.getTopViewController(),
+                      vc as? ModalViewController == nil,
+                      vc as? MainViewController == nil,
+                      vc as? CustomTabBarController == nil
+                else { return }
+                vc.view.endEditing(true)
+                UIView.animate(withDuration: 0.2, delay: 0, options: .transitionCrossDissolve, animations: {
+                    vc.view.alpha = 0
+                    vc.view.transform = vc.view.transform.scaledBy(x: 0.1, y: 0.1)
+                }) { _ in
+                    vc.dismiss(animated: false)
+                }
             }.disposed(by: disposeBag)
         
         startDatePicker.rx.datePickerIsEmpty
             .bind(to: startDateIsEmpty)
             .disposed(by: disposeBag)
         
-        startDatePicker.rx.selectedDate
-            .asSignal(onErrorSignalWith: .empty())
-            .emit { _ in
-                guard let vc = AppHelpers.getTopViewController() else { return }
-                vc.view.endEditing(true)
+        startDatePicker.rx.datePickerIsEmpty
+            .distinctUntilChanged()
+            .withUnretained(self)
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { owner, _ in
+                owner.startDatePicker.resignFirstResponder()
+                owner.endDatePicker.becomeFirstResponder()
             }.disposed(by: disposeBag)
+        
     }
     
     /// EndDatePicker 바인딩 메소드
@@ -182,6 +206,7 @@ private extension ModalDateView {
                 
                 owner.endDate = date
                 owner.endDatePicker.configureDatePicker(date: date)
+                owner.endDatePicker.updateTextField(date: date)
                 
                 guard let startDate = owner.startDate,
                       startDate > date
@@ -189,19 +214,31 @@ private extension ModalDateView {
                 
                 owner.startDate = date
                 owner.startDatePicker.configureDatePicker(date: date)
+                owner.startDatePicker.updateTextField(date: date)
                 
+            }.disposed(by: disposeBag)
+        
+        endDatePicker.rx.selectedDate
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { _ in
+                guard let vc = AppHelpers.getTopViewController(),
+                      vc as? ModalViewController == nil,
+                      vc as? MainViewController == nil,
+                      vc as? CustomTabBarController == nil
+                else { return }
+                vc.view.endEditing(true)
+                UIView.animate(withDuration: 0.2, delay: 0, options: .transitionCrossDissolve, animations: {
+                    vc.view.alpha = 0
+                    vc.view.transform = vc.view.transform.scaledBy(x: 0.1, y: 0.1)
+                }) { _ in
+                    vc.dismiss(animated: false)
+                }
             }.disposed(by: disposeBag)
         
         endDatePicker.rx.datePickerIsEmpty
             .bind(to: endDateIsEmpty)
             .disposed(by: disposeBag)
-        
-        endDatePicker.rx.selectedDate
-            .asSignal(onErrorSignalWith: .empty())
-            .emit { _ in
-                guard let vc = AppHelpers.getTopViewController() else { return }
-                vc.view.endEditing(true)
-            }.disposed(by: disposeBag)
+
     }
     
 }
