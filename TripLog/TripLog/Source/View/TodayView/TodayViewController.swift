@@ -14,6 +14,8 @@ final class TodayViewController: UIViewController {
     private let deleteExpenseTrigger = PublishRelay<IndexPath>()
     fileprivate let totalAmountRelay = PublishRelay<Int>()
     
+    private let filterTapRelay = PublishRelay<Void>()
+    
     // MARK: - Properties
     
     private let viewModel: TodayViewModel
@@ -31,7 +33,6 @@ final class TodayViewController: UIViewController {
         $0.textColor = UIColor(named: "textPrimary")
     }
         
-    // 도움말 버튼
     // 도움말 버튼 (원형으로 만들기)
     private let helpButton = UIButton(type: .system).then {
         $0.setTitle("?", for: .normal)
@@ -42,19 +43,26 @@ final class TodayViewController: UIViewController {
         $0.applyCornerRadius(12)
     }
 
-    // "오늘 사용 금액" 라벨
-    private let totalLabel = UILabel().then {
-        $0.text = "오늘 사용 금액"
-        $0.font = UIFont.SCDream(size: .body, weight: .medium)
+    // "필터" 라벨
+    private let filterLabel = UILabel().then {
+        $0.text = "필터"
+        $0.font = UIFont.SCDream(size: .headline, weight: .medium)
         $0.textColor = UIColor(named: "textPrimary")
     }
-    
-    // 총 금액 표시 라벨
-    private let totalAmountLabel = UILabel().then {
-        $0.text = "0 원"
-        $0.font = UIFont.SCDream(size: .body, weight: .bold)
-        $0.textColor = UIColor.Personal.normal
+    // 필터 이미지
+    private let filterIcon = UIImageView().then {
+        $0.image = UIImage(named: "filterIcon")?.withRenderingMode(.alwaysOriginal)
+        $0.contentMode = .scaleAspectFit
+        $0.snp.makeConstraints { $0.size.equalTo(16) } // 아이콘 크기 조정
+        $0.tintColor = .red
     }
+    
+    private let filterStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.alignment = .trailing
+        $0.spacing = 4
+    }
+    
     
     // 지출 내역을 표시할 테이블 뷰
     private let tableView = UITableView(frame: .zero, style: .grouped).then {
@@ -64,7 +72,7 @@ final class TodayViewController: UIViewController {
         $0.showsVerticalScrollIndicator = false
         $0.rowHeight = 96
         $0.clipsToBounds = true
-//        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
+        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
         $0.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         $0.allowsSelection = true
         $0.allowsMultipleSelection = false
@@ -81,23 +89,22 @@ final class TodayViewController: UIViewController {
     }
     
     // ✅ RxDataSources 사용을 위한 데이터소스 정의
-        private lazy var dataSource = RxTableViewSectionedReloadDataSource<TodaySectionModel>(
-            configureCell: { _, tableView, indexPath, expense in
-                let cell = tableView.dequeueReusableCell(withIdentifier: ExpenseCell.identifier, for: indexPath) as! ExpenseCell
-                cell.configure(
-                    //date: Date.formattedDateDotString(from: expense.expenseDate),
-                    title: expense.note,
-                    category: expense.category,
-                    amount: "\(expense.amount.formattedCurrency(currencyCode: expense.country))",
-                    exchangeRate: "\(NumberFormatter.formattedString(from: expense.caculatedAmount.rounded())) 원",
-                    payment: expense.payment
-                )
-                return cell
-            },
-            titleForHeaderInSection: { dataSource, index in
-                return dataSource.sectionModels[index].date // ✅ 섹션 헤더로 날짜 표시
-            }
-        )
+    private lazy var dataSource = RxTableViewSectionedReloadDataSource<TodaySectionModel>(
+        configureCell: { _, tableView, indexPath, expense in
+            let cell = tableView.dequeueReusableCell(withIdentifier: ExpenseCell.identifier, for: indexPath) as! ExpenseCell
+            cell.configure(
+                title: expense.note,
+                category: expense.category,
+                amount: "\(expense.amount.formattedCurrency(currencyCode: expense.country))",
+                exchangeRate: "\(NumberFormatter.formattedString(from: expense.caculatedAmount.rounded())) 원",
+                payment: expense.payment
+            )
+            return cell
+        },
+        titleForHeaderInSection: { dataSource, index in
+            return dataSource.sectionModels[index].date // ✅ 섹션 헤더로 날짜 표시
+        }
+    )
     
     // MARK: - Initializer
     
@@ -155,14 +162,11 @@ private extension TodayViewController {
             $0.alignment = .center
         }
         
-        let totalStackView = UIStackView(arrangedSubviews: [totalLabel, totalAmountLabel]).then {
-            $0.axis = .vertical
-            $0.alignment = .trailing
-            $0.spacing = 4
-        }
+        filterStackView.addArrangedSubview(filterLabel)
+        filterStackView.addArrangedSubview(filterIcon)
         
         topStackView.addArrangedSubview(headerStackView)
-        topStackView.addArrangedSubview(totalStackView)
+        topStackView.addArrangedSubview(filterStackView)
         topStackView.do {
             $0.axis = .horizontal
             $0.spacing = 8
@@ -188,7 +192,7 @@ private extension TodayViewController {
         }
         
         tableView.snp.makeConstraints {
-            $0.top.equalTo(topStackView.snp.bottom)
+            $0.top.equalTo(topStackView.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(8)
             $0.bottom.equalToSuperview()
             
@@ -229,22 +233,26 @@ private extension TodayViewController {
         
         let output = viewModel.transform(input: input)
         
+        let tapGesture = UITapGestureRecognizer()
+        filterStackView.addGestureRecognizer(tapGesture)
+        filterStackView.isUserInteractionEnabled = true
+        
+        tapGesture.rx.event
+            .map { _ in }
+            .bind(to: filterTapRelay)
+            .disposed(by: disposeBag)
+        // 필터 이벤트
+        filterTapRelay
+            .subscribe (onNext:{
+                print("필터 활성화")
+            })
+            .disposed(by: disposeBag)
+        
+        
         output.expenses
             .asDriver(onErrorDriveWith: .empty())
             .drive(tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
-        
-        // ✅ `totalAmountLabel`에 바인딩하여 UI 반영
-        output.expenses
-            .map { sections -> String in
-                let totalExpense = sections.flatMap { $0.items }
-                    .reduce(0) { $0 + Int($1.caculatedAmount.rounded()) }
-                return NumberFormatter.wonFormat(totalExpense)
-            }
-            .asObservable()
-            .bind(to: totalAmountLabel.rx.text)
-            .disposed(by: disposeBag)
-        
         
         output.expenses
             .withUnretained(self)
@@ -262,21 +270,21 @@ private extension TodayViewController {
             }.disposed(by: disposeBag)
         
         // ✅ `modelSelected` 수정: SectionModel을 고려하여 데이터 선택
-                tableView.rx.modelSelected(MyCashBookModel.self)
-                    .withUnretained(self)
-                    .flatMap { owner, data in
-                        let exchangeRate = owner.getTodayExchangeRate()
-                        return ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: exchangeRate))
-                            .compactMap { $0 as? MyCashBookModel }
-                    }
-                    .asSignal(onErrorSignalWith: .empty())
-                    .withUnretained(self)
-                    .emit { owner, data in
-                        CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: data.id, data: data)
-                        owner.fetchTrigger.accept(owner.cashBookID)
-                        owner.totalAmountRelay.accept(owner.getTotalAmount())
-                    }
-                    .disposed(by: disposeBag)
+        tableView.rx.modelSelected(MyCashBookModel.self)
+            .withUnretained(self)
+            .flatMap { owner, data in
+                let exchangeRate = owner.getTodayExchangeRate()
+                return ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: exchangeRate))
+                    .compactMap { $0 as? MyCashBookModel }
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, data in
+                CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: data.id, data: data)
+                owner.fetchTrigger.accept(owner.cashBookID)
+                owner.totalAmountRelay.accept(owner.getTotalAmount())
+            }
+            .disposed(by: disposeBag)
         
         // 🔹 모달 표시 바인딩 (RxSwift 적용)
         floatingButton.rx.tap
@@ -384,7 +392,7 @@ extension TodayViewController: UITableViewDelegate {
     
     /// ✅ "삭제" 버튼을 이미지로 생성하는 메서드 (cornerRadius 적용)
     private func createDeleteButtonImage() -> UIImage? {
-        let size = CGSize(width: 70, height: 108) // ✅ 버튼 크기 설정
+        let size = CGSize(width: 70, height: 90) // ✅ 버튼 크기 설정
         let cornerRadius: CGFloat = 16 // ✅ 원하는 radius 값 설정
         let renderer = UIGraphicsImageRenderer(size: size)
         
