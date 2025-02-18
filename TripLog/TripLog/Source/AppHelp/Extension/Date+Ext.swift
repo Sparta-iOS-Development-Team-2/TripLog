@@ -14,11 +14,6 @@ extension Date {
         dateFormatter.dateFormat = "yyyyMMdd"
         return dateFormatter.string(from: date)
     }
-    static func formattedDateDotString(from date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy.MM.dd"
-        return dateFormatter.string(from: date)
-    }
     
     static func getPreviousDate(from dateString: String) -> String? {
         let dateFormatter = DateFormatter()
