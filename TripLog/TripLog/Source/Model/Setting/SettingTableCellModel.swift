@@ -7,6 +7,8 @@
 
 import UIKit
 import Then
+import RxSwift
+import RxCocoa
 
 /// 설정탭에서 사용할 테이블뷰의 Cell Model
 struct SettingTableCellModel {
@@ -39,6 +41,13 @@ struct SettingTableCellModel {
         ),
         
         SettingTableCellModel(
+            icon: UIImage(named: "playInfo") ?? UIImage(),
+            title: "사용 방법",
+            extraView: nil,
+            action: showOnboarding
+        ),
+        
+        SettingTableCellModel(
             icon: UIImage(named: "versionIcon") ?? UIImage(),
             title: "버전 \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")",
             extraView: nil,
@@ -51,6 +60,7 @@ struct SettingTableCellModel {
 // MARK: - SettingTableCellModel Private Method
 
 private extension SettingTableCellModel {
+    private static let disposeBag = DisposeBag()
     
     /// 토글 스위치를 구현하는 메소드
     /// - Returns: UISwitch
@@ -103,5 +113,20 @@ private extension SettingTableCellModel {
         }
         
         debugPrint("앱스토어 이동")
+    }
+    
+    static func showOnboarding() {
+        OnboardingManager.showOnboardingView()
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { vc in
+                UIView.animate(withDuration: 0.3, animations: {
+                    vc.view.alpha = 0
+                }) { _ in
+                    vc.removeFromParent()
+                    vc.view.removeFromSuperview()
+                }
+                // "시작하기" 버튼을 눌렀는지 여부로 첫 실행 여부 판정
+                UserDefaults.standard.set(false, forKey: "isFirstLaunch")
+            }.disposed(by: disposeBag)
     }
 }
