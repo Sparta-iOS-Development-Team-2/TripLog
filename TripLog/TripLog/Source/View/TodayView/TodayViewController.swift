@@ -439,12 +439,12 @@ extension TodayViewController: UITableViewDelegate {
         
         let label = UILabel().then {
             $0.text = sectionData.date.formattedDate()
-            $0.textColor = .darkGray
+            $0.textColor = UIColor(named: "textPrimary")
             $0.font = UIFont.SCDream(size: .caption, weight: .medium)
         }
         
         let separatorView = UIView().then {
-            $0.backgroundColor = .lightGray  // 구분선 색상
+            $0.backgroundColor = UIColor.CustomColors.Text.textPlaceholder // 구분선 색상
         }
 
         headerView.addSubview(label)
