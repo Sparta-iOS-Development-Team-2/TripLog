@@ -16,7 +16,7 @@ import RxCocoa
 class MainViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
-
+    
     private let mainVC = CustomTabBarController()
     
     // MARK: - UI Compnents
@@ -50,10 +50,15 @@ class MainViewController: UIViewController {
         setupUI()
         
         Task {
-            do {
-                try await SyncManager.shared.syncCoreDataToFirestore()
-            } catch {
-                debugPrint(error)
+            if CoreDataManager.shared.fetch(type: CurrencyEntity.self).isEmpty {
+                do {
+                    try await SyncManager.shared.syncCoreDataToFirestore()
+                } catch {
+                    debugPrint(error)
+                }
+            } else {
+                _ = CoreDataManager.shared.fetch(type: CurrencyEntity.self,
+                                                 predicate: Date.formattedDateString(from: Date()))
             }
         }
     }
@@ -151,7 +156,7 @@ private extension MainViewController {
                 
                 self.showOnboardingView()
                 
-            // view 애니메이션 종료 후 동작
+                // view 애니메이션 종료 후 동작
             }, completion: { _ in
                 [self.lottieAnimationView,
                  self.launchImageView,
