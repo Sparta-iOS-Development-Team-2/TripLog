@@ -51,6 +51,7 @@ final class CategoryViewCell: UICollectionViewCell {
             self.category.font = .SCDream(size: .headline, weight: .bold)
             self.category.textColor = .white
             self.category.layer.borderColor = .none
+            self.category.layer.borderWidth = 0
             self.category.backgroundColor = .CustomColors.Accent.blue
         }
     }
