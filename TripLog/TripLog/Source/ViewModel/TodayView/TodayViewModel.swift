@@ -63,6 +63,7 @@ final class TodayViewModel: ViewModelType {
         return Output(deleteExpenseTrigger: deleteExpenseTrigger, expenses: expensesRelay)
     }
     
+    /// 섹션에서 탐색
     private func filteredExpenseData(for indexPath: IndexPath) -> MyCashBookModel {
         let currentSections = self.expensesRelay.value
         
@@ -81,6 +82,7 @@ final class TodayViewModel: ViewModelType {
         return sectionExpenses[indexPath.row]
     }
 
+    /// 날짜대로 그룹화 최신날짜가 상단으로 오게 설정
     private func groupByDate(_ expenses: [MyCashBookModel]) -> [TodaySectionModel] {
         let groupedDictionary = Dictionary(grouping: expenses) { Date.formattedDateString(from: $0.expenseDate) }
         

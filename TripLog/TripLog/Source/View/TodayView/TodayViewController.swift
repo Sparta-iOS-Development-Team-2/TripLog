@@ -54,7 +54,6 @@ final class TodayViewController: UIViewController {
         $0.image = UIImage(named: "filterIcon")?.withRenderingMode(.alwaysOriginal)
         $0.contentMode = .scaleAspectFit
         $0.snp.makeConstraints { $0.size.equalTo(16) } // 아이콘 크기 조정
-        $0.tintColor = .red
     }
     
     private let filterStackView = UIStackView().then {
@@ -362,7 +361,7 @@ extension TodayViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
-        // ✅ "삭제" 버튼을 위한 UIView를 UIImage로 변환
+        // "삭제" 버튼을 위한 UIView를 UIImage로 변환
         let deleteImage = createDeleteButtonImage()
         
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
@@ -381,7 +380,7 @@ extension TodayViewController: UITableViewDelegate {
             alert.showAlert(.alert)
         }
         
-        deleteAction.image = deleteImage // ✅ "삭제" 버튼을 이미지로 설정
+        deleteAction.image = deleteImage // "삭제" 버튼을 이미지로 설정
         deleteAction.backgroundColor = UIColor.CustomColors.Background.detailBackground
         
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
@@ -390,34 +389,34 @@ extension TodayViewController: UITableViewDelegate {
         return configuration
     }
     
-    /// ✅ "삭제" 버튼을 이미지로 생성하는 메서드 (cornerRadius 적용)
+    /// "삭제" 버튼을 이미지로 생성하는 메서드 (cornerRadius 적용)
     private func createDeleteButtonImage() -> UIImage? {
-        let size = CGSize(width: 70, height: 90) // ✅ 버튼 크기 설정
-        let cornerRadius: CGFloat = 16 // ✅ 원하는 radius 값 설정
+        let size = CGSize(width: 70, height: 90) // 버튼 크기 설정
+        let cornerRadius: CGFloat = 16 // 원하는 radius 값 설정
         let renderer = UIGraphicsImageRenderer(size: size)
         
         return renderer.image { context in
             let rect = CGRect(origin: .zero, size: size)
             
-            // ✅ 둥근 모서리를 적용한 경로 생성
+            // 둥근 모서리를 적용한 경로 생성
             let path = UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius)
             
-            // ✅ 클리핑 적용 (둥근 모서리 적용을 위해 필요)
+            // 클리핑 적용 (둥근 모서리 적용을 위해 필요)
             context.cgContext.addPath(path.cgPath)
             context.cgContext.clip()
             
-            // ✅ 배경 색 적용
+            // 배경 색 적용
             UIColor.red.setFill()
             context.fill(rect)
             
-            // ✅ 텍스트 속성 설정
+            // 텍스트 속성 설정
             let text = "삭제"
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 16, weight: .bold),
                 .foregroundColor: UIColor.white
             ]
             
-            // ✅ 텍스트 위치 조정 후 그리기
+            // 텍스트 위치 조정 후 그리기
             let textSize = text.size(withAttributes: attributes)
             let textRect = CGRect(
                 x: (size.width - textSize.width) / 2,
@@ -436,7 +435,7 @@ extension TodayViewController: UITableViewDelegate {
         let sectionData = dataSource.sectionModels[section]
         
         let headerView = UIView()
-        headerView.backgroundColor = .clear  // ✅ 배경을 투명하게 설정
+        headerView.backgroundColor = .clear  // 배경을 투명하게 설정
         
         let label = UILabel().then {
             $0.text = sectionData.date.formattedDate()
@@ -445,7 +444,7 @@ extension TodayViewController: UITableViewDelegate {
         }
         
         let separatorView = UIView().then {
-            $0.backgroundColor = .lightGray  // ✅ 구분선 색상
+            $0.backgroundColor = .lightGray  // 구분선 색상
         }
 
         headerView.addSubview(label)
@@ -457,10 +456,10 @@ extension TodayViewController: UITableViewDelegate {
         }
 
         separatorView.snp.makeConstraints { make in
-            make.leading.equalTo(label.snp.trailing).offset(8)  // ✅ Label 오른쪽에 위치
-            make.trailing.equalToSuperview().inset(8)  // ✅ 오른쪽 마진 추가
-            make.centerY.equalTo(label.snp.centerY)  // ✅ Label과 나란히 정렬
-            make.height.equalTo(1)  // ✅ 실선을 얇게 설정
+            make.leading.equalTo(label.snp.trailing).offset(8)  // Label 오른쪽에 위치
+            make.trailing.equalToSuperview().inset(8)  // 오른쪽 마진 추가
+            make.centerY.equalTo(label.snp.centerY)  // Label과 나란히 정렬
+            make.height.equalTo(1)  // 실선을 얇게 설정
         }
         
         return headerView

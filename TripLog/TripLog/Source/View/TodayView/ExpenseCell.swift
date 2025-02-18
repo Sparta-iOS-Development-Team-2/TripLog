@@ -10,10 +10,6 @@ final class ExpenseCell: UITableViewCell {
         $0.applyBoxStyle()
     }
 
-//    private let dateLabel = UILabel().then {
-//        $0.font = UIFont.SCDream(size: .caption, weight: .regular)
-//    }
-
     private let titleLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .display, weight: .medium)
     }
