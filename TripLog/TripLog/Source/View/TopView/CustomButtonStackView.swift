@@ -39,7 +39,7 @@ final class TopCustomButtonStackView: UIStackView {
     }
 
     private func setupButtons() {
-        configureButton(todayExpenseButton, title: "오늘 지출")
+        configureButton(todayExpenseButton, title: "지출 내역")
         configureButton(calendarButton, title: "캘린더")
 
         // 스택 뷰에 버튼 추가
