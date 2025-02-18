@@ -214,6 +214,7 @@ final class CalendarViewController: UIViewController {
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
                 owner.calendarViewModel.loadExpenseData()
                 owner.updateTotalAmount.accept(owner.getTotalAmount())
+                UserDefaults.standard.set(data.country, forKey: "lastSelectedCurrency")
             }
             .disposed(by: disposeBag)
         

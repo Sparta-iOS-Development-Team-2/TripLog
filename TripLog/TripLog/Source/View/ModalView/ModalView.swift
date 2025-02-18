@@ -286,6 +286,10 @@ private extension ModalView {
                 self.expenseDate = data.date
                 self.exchangeRate = data.exchangeRate
                 
+                if let country = UserDefaults.standard.string(forKey: "lastSelectedCurrency") {
+                    forthSection.configureAmountView(amount: nil, country: country)
+                }
+                
                 secondSection.rx.textFieldIsEmpty
                     .bind(to: firstTextFieldIsEmpty)
                     .disposed(by: disposeBag)

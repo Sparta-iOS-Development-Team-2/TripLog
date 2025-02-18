@@ -260,6 +260,7 @@ private extension TodayViewController {
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
                 owner.fetchTrigger.accept(owner.cashBookID)
                 owner.totalAmountRelay.accept(owner.getTotalAmount())
+                UserDefaults.standard.set(data.country, forKey: "lastSelectedCurrency")
             }.disposed(by: disposeBag)
         
         // ✅ Rx 방식으로 delegate 설정
