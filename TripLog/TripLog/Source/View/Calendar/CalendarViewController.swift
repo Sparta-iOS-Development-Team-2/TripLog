@@ -17,6 +17,10 @@ import SnapKit
 /// - FSCalendar를 사용한 날짜 선택 및 데이터 표시
 /// - 다크모드 대응 및 그림자 최적화
 final class CalendarViewController: UIViewController {
+    
+    private var startDate = Date()
+    private var endDate = Date()
+    
     // MARK: - UI Components
     /// 전체 컨텐츠를 스크롤 가능하게 하는 스크롤 뷰
     private lazy var scrollView = UIScrollView().then {
@@ -80,6 +84,7 @@ final class CalendarViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         calendarView.calendar.select(Date())
+        setupTripPlan(cashBookID: calendarViewModel.cashBookID)
         setupBindings()
     }
     
@@ -167,7 +172,7 @@ final class CalendarViewController: UIViewController {
         return totalExpense
     }
     
-        private func checkDateAlert(date: String) -> Observable<Void> {
+    private func checkDateAlert(date: String) -> Observable<Void> {
             return Observable.create { observer in
                 let alert = AlertManager(
                     title: "환율 정보 안내",
@@ -182,6 +187,17 @@ final class CalendarViewController: UIViewController {
                 return Disposables.create()
             }
         }
+
+    private func setupTripPlan(cashBookID: UUID) {
+        guard
+            let cashBook = CoreDataManager.shared.fetch(type: CashBookEntity.self, predicate: cashBookID).first,
+            let start = cashBook.departure,
+            let end = cashBook.homecoming
+        else { return }
+        
+        self.startDate = start.formattedStringToDate()
+        self.endDate = end.formattedStringToDate()
+    }
 
     
     // MARK: - Calendar Setup
@@ -269,6 +285,7 @@ final class CalendarViewController: UIViewController {
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
                 owner.calendarViewModel.loadExpenseData()
                 owner.updateTotalAmount.accept(owner.getTotalAmount())
+                UserDefaults.standard.set(data.country, forKey: "lastSelectedCurrency")
             }
             .disposed(by: disposeBag)
         
@@ -307,7 +324,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         
         return cell
     }
-    
+        
     /// 셀의 날짜 레이블을 설정하는 메서드
     /// - Parameters:
     ///   - cell: 설정할 캘린더 커스텀 셀
@@ -347,7 +364,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     ///   - calendar: 현재 FSCalendar 인스턴스
     private func configureCellAppearance(_ cell: CalendarCustomCell, for date: Date, in calendar: FSCalendar) {
         if calendar.selectedDate == date {
-            configureSelectedCell(cell)
+            configureSelectedCell(cell, for: date)
         } else {
             configureUnselectedCell(cell, for: date)
         }
@@ -355,12 +372,22 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     
     /// 선택된 셀의 스타일을 설정하는 메서드
     /// - Parameter cell: 스타일을 적용할 셀
-    private func configureSelectedCell(_ cell: CalendarCustomCell) {
-        cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
-        cell.contentView.layer.cornerRadius = 10
-        cell.contentView.layer.masksToBounds = true
-        cell.titleLabel.textColor = .white
-        cell.expenseLabel.textColor = .white
+    private func configureSelectedCell(_ cell: CalendarCustomCell, for date: Date) {
+        if date >= startDate && date <= endDate {
+            cell.backgroundColor = .CustomColors.Accent.blue.withAlphaComponent(0.2)
+            cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
+            cell.contentView.layer.cornerRadius = 10
+            cell.contentView.layer.masksToBounds = true
+            cell.titleLabel.textColor = .white
+            cell.expenseLabel.textColor = .white
+        } else {
+            cell.backgroundColor = .clear
+            cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
+            cell.contentView.layer.cornerRadius = 10
+            cell.contentView.layer.masksToBounds = true
+            cell.titleLabel.textColor = .white
+            cell.expenseLabel.textColor = .white
+        }
     }
     
     /// 선택되지 않은 셀의 스타일을 설정하는 메서드
@@ -368,11 +395,21 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     ///   - cell: 스타일을 적용할 셀
     ///   - date: 셀의 날짜
     private func configureUnselectedCell(_ cell: CalendarCustomCell, for date: Date) {
-        let isToday = Calendar.current.isDateInToday(date)
-        cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
-        cell.expenseLabel.textColor = .red
-        cell.contentView.layer.cornerRadius = 0
-        cell.contentView.backgroundColor = .clear
+        if date >= startDate && date <= endDate {
+            let isToday = Calendar.current.isDateInToday(date)
+            cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
+            cell.expenseLabel.textColor = .red
+            cell.contentView.layer.cornerRadius = 0
+            cell.contentView.backgroundColor = .CustomColors.Accent.blue.withAlphaComponent(0.2)
+            cell.backgroundColor = .clear
+        } else {
+            let isToday = Calendar.current.isDateInToday(date)
+            cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
+            cell.expenseLabel.textColor = .red
+            cell.contentView.layer.cornerRadius = 0
+            cell.contentView.backgroundColor = .clear
+            cell.backgroundColor = .clear
+        }
     }
     
     /// 셀 선택되었을 때 호출되는 메서드
@@ -383,6 +420,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         self.selectedDate.accept(date)
     }
+
 }
 
 extension CalendarViewController: UITableViewDelegate {

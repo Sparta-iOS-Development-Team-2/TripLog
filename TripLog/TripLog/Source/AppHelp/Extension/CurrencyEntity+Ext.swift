@@ -46,8 +46,17 @@ extension CurrencyEntity: CoreDataManagable {
         var result = [CurrencyEntity]()
         var resultType: CurrencyRateResultType = .isEmpty
         var retryCount = 0
-                
-        guard var searchDate = predicate as? String else { return [] }
+        
+        guard var searchDate = predicate as? String else {
+            do {
+                let results = try context.fetch(request)
+                debugPrint("CurrencyEntity fetchCount: \(results.count)")
+                return results
+            } catch {
+                debugPrint("오류 발생: \(error)")
+                return []
+            }
+        }
         
         while retryCount < 15 {
             // 검색 조건이 있을 때 동작

@@ -21,4 +21,12 @@ extension String {
         }
         return self
     }
+    
+    func formattedStringToDate() -> Date {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        formatter.locale = Locale(identifier: "ko_KR")
+        
+        return formatter.date(from: self) ?? Date()
+    }
 }
