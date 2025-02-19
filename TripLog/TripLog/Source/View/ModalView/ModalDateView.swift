@@ -166,6 +166,10 @@ private extension ModalDateView {
             .withUnretained(self)
             .asSignal(onErrorSignalWith: .empty())
             .emit { owner, _ in
+                if let modalVC = AppHelpers.getTopViewController() as? ModalViewController {
+                    modalVC.view.endEditing(true)
+                }
+                
                 guard let vc = AppHelpers.getTopViewController(),
                       vc as? ModalViewController == nil,
                       vc as? MainViewController == nil,
@@ -221,6 +225,10 @@ private extension ModalDateView {
         endDatePicker.rx.selectedDate
             .asSignal(onErrorSignalWith: .empty())
             .emit { _ in
+                if let modalVC = AppHelpers.getTopViewController() as? ModalViewController {
+                    modalVC.view.endEditing(true)
+                }
+                
                 guard let vc = AppHelpers.getTopViewController(),
                       vc as? ModalViewController == nil,
                       vc as? MainViewController == nil,
