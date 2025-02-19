@@ -115,6 +115,7 @@ final class ModalViewModel: ViewModelType {
             return .error(NSError(domain: "no top view controller", code: -1))
         }
         
+        vc.view.endEditing(true)
         let padding: CGFloat = window.safeAreaInsets.bottom == 0 ? 25 : 0
         
         let categoryVC = CategoryViewController(category)
