@@ -14,8 +14,8 @@ final class FilterViewModel: ViewModelType {
     /// - selectedPayment : 지출 방법 선택
     /// - selectedCategory : 카테고리 선택
     struct Input {
-        let selectedPayment: PublishRelay<String>
-        let selectedCategory: PublishRelay<String>
+        let selectedPayment: BehaviorRelay<String>
+        let selectedCategory: BehaviorRelay<String>
     }
     /// - selectedPayment : 선택된 지출 방법
     /// - selectedCategory : 선택된 카테고리
@@ -48,7 +48,7 @@ final class FilterViewModel: ViewModelType {
                 self.dismissTriggerRelay.accept(())
             }).disposed(by: disposeBag)
         
-        // 데이터 전달
+        // 데이터 전달(behaviorRelay로 저장
         input.selectedPayment
             .bind(to: selectedPaymentRelay)
             .disposed(by: disposeBag)

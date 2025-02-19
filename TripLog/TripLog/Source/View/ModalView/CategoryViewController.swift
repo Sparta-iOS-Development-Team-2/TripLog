@@ -23,7 +23,7 @@ final class CategoryViewController: UIViewController {
     
     private let categoryData: [String] = [
         "식비", "교통", "숙소", "쇼핑",
-        "의료", "통신", "여가/취미", "기타"
+        "의료", "통신", "여가", "기타"
     ]
     
     private let selectedCategory: String

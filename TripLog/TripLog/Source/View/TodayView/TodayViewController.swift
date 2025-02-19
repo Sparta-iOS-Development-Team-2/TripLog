@@ -10,9 +10,12 @@ final class TodayViewController: UIViewController {
     // MARK: - Rx Properties
     
     private let disposeBag = DisposeBag()
-    private let fetchTrigger = PublishRelay<UUID>()
-    private let deleteExpenseTrigger = PublishRelay<IndexPath>()
+    private lazy var fetchTrigger =  BehaviorRelay<(String,String, UUID)>(value: ("전체", "전체", cashBookID) )
+    private let deleteExpenseTrigger = PublishRelay<(IndexPath, String, String)>()
     fileprivate let totalAmountRelay = PublishRelay<Int>()
+    
+
+    
     
     private let filterTapRelay = PublishRelay<Void>()
     
@@ -115,7 +118,8 @@ final class TodayViewController: UIViewController {
     }
     
     func updateTodayConsumption() {
-        fetchTrigger.accept(cashBookID)
+        let data = (fetchTrigger.value.0, fetchTrigger.value.1, cashBookID)
+        fetchTrigger.accept(data)
     }
 }
 
@@ -131,7 +135,8 @@ private extension TodayViewController {
         bind()
         
         // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
-        fetchTrigger.accept(cashBookID)
+        let data = (fetchTrigger.value.0, fetchTrigger.value.1, cashBookID)
+        fetchTrigger.accept(data)
     }
     
     // 🔹 UI 요소 추가
@@ -198,21 +203,45 @@ private extension TodayViewController {
         }
     }
     
+    func showFilterView() {
+        guard self.presentedViewController == nil else { return }
+        let filterVC = FilterViewController(fetchTrigger.value.0, fetchTrigger.value.1)
+        let dismissSignal = filterVC.rx.deallocated
+        
+        filterVC.modalPresentationStyle = .formSheet
+        filterVC.sheetPresentationController?.preferredCornerRadius = 12
+        filterVC.sheetPresentationController?.detents = [.custom(resolver: { _ in 360 })]
+        filterVC.sheetPresentationController?.prefersGrabberVisible = true
+        
+        filterVC.rx.sendFilterCondition
+            .take(until: dismissSignal)
+            .withUnretained(self)
+            .map{ owner, data -> (String, String, UUID) in
+                return (data.0, data.1, owner.cashBookID )
+            }
+            .bind(to: fetchTrigger)
+            .disposed(by: disposeBag)
+        
+        present(filterVC, animated: true)
+    }
+    
     // Rx 바인딩 메소드
     func bind() {
         
         let input: TodayViewModel.Input = .init(fetchTrigger: fetchTrigger,
-                                                deleteExpenseTrigger: deleteExpenseTrigger)
+                                                deleteExpenseTrigger: deleteExpenseTrigger
+                                            
+        )
         
         let output = viewModel.transform(input: input)
         
         // 필터 이벤트
         filterButton.rx.tap
-            .subscribe(onNext:{
-                print("필터 활성화 입니다")
-            })
-
-            .disposed(by: disposeBag)
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, _ in
+                owner.showFilterView()
+            }.disposed(by: disposeBag)
         
         output.expenses
             .asDriver(onErrorDriveWith: .empty())
@@ -227,13 +256,6 @@ private extension TodayViewController {
             }
             .disposed(by: disposeBag)
         
-        output.deleteExpenseTrigger
-            .withUnretained(self)
-            .asSignal(onErrorSignalWith: .empty())
-            .emit { owner, _ in
-                owner.fetchTrigger.accept(owner.cashBookID)
-            }.disposed(by: disposeBag)
-        
         // ✅ `modelSelected` 수정: SectionModel을 고려하여 데이터 선택
         tableView.rx.modelSelected(MyCashBookModel.self)
             .withUnretained(self)
@@ -246,7 +268,8 @@ private extension TodayViewController {
             .withUnretained(self)
             .emit { owner, data in
                 CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: data.id, data: data)
-                owner.fetchTrigger.accept(owner.cashBookID)
+                let fetchData = (owner.fetchTrigger.value.0, owner.fetchTrigger.value.1, owner.cashBookID)
+                owner.fetchTrigger.accept(fetchData)
                 owner.totalAmountRelay.accept(owner.getTotalAmount())
             }
             .disposed(by: disposeBag)
@@ -263,7 +286,8 @@ private extension TodayViewController {
             .withUnretained(self)
             .emit { owner, data in
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
-                owner.fetchTrigger.accept(owner.cashBookID)
+                let fetchData = (owner.fetchTrigger.value.0, owner.fetchTrigger.value.1, owner.cashBookID)
+                owner.fetchTrigger.accept(fetchData)
                 owner.totalAmountRelay.accept(owner.getTotalAmount())
                 UserDefaults.standard.set(data.country, forKey: "lastSelectedCurrency")
             }.disposed(by: disposeBag)
@@ -324,7 +348,9 @@ extension TodayViewController: UITableViewDelegate {
                                      cancelTitle: "취소",
                                      destructiveTitle: "삭제")
             {
-                self.deleteExpenseTrigger.accept(indexPath)
+                let data = (indexPath, self.fetchTrigger.value.0
+                            , self.fetchTrigger.value.1)
+                self.deleteExpenseTrigger.accept(data)
                 self.totalAmountRelay.accept(self.getTotalAmount())
                 completionHandler(true)
             }

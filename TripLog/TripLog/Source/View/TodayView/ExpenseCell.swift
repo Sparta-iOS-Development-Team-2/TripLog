@@ -116,9 +116,8 @@ final class ExpenseCell: UITableViewCell {
 
         let paymentStatus = payment ? "카드" : "현금"
 
-//        dateLabel.text = date
         titleLabel.text = title
-        categoryLabel.text = "\(category) / \(paymentStatus)"
+        categoryLabel.text = "\(paymentStatus) / \(category)"
         amountLabel.text = amount
         exchangeRateLabel.text = exchangeRate
     }

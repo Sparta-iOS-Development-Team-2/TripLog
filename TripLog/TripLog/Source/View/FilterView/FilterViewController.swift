@@ -30,15 +30,21 @@ class FilterViewController: UIViewController {
     private let viewModel = FilterViewModel()
     
     // 선택한 데이터로 방출
-    private let sendPayment = PublishRelay<String>()
-    private let sendCategory = PublishRelay<String>()
+    private let sendPayment = BehaviorRelay<String>(value: "전체")
+    private let sendCategory = BehaviorRelay<String>(value: "전체")
+    
+    fileprivate lazy var sendFilterCondition: Observable<(String, String)> = {
+        return Observable.combineLatest(self.sendPayment, self.sendCategory)
+            .map { ($0, $1) }
+            .share(replay: 1, scope: .whileConnected)
+    }()
     
     private let paymentWaySection: String = "지출 방법"
     private let paymentWay: [String] = ["전체", "현금", "카드"]
     private let categorySetction: String = "카테고리"
     private let category: [String] = ["전체",
                                       "식비", "교통", "숙소", "쇼핑",
-                                      "의료", "통신", "여가/취미", "기타"]
+                                      "의료", "통신", "여가", "기타"]
     
     // 선택한 데이터를 저장
     private var selectedCellIndexPaths: [Int: IndexPath] = [:]
@@ -90,6 +96,9 @@ class FilterViewController: UIViewController {
     // 필터 초기 데이터는 "전체"로 고정
     init(_ selectedPayment: String = "전체", _ selectedCategory: String = "전체") {
         super.init(nibName: nil, bundle: nil)
+        
+        self.sendPayment.accept(selectedPayment)
+        self.sendCategory.accept(selectedCategory)
         
         if let paymentIndex = paymentWay.firstIndex(of: selectedPayment) {
             selectedCellIndexPaths[0] = IndexPath(item: paymentIndex, section: 0)
@@ -375,4 +384,10 @@ private extension FilterViewController {
         return section
     }
     
+}
+
+extension Reactive where Base: FilterViewController {
+    var sendFilterCondition: Observable<(String,String)> {
+        return base.sendFilterCondition
+    }
 }
