@@ -61,8 +61,7 @@ extension Date {
         }
     }
     
-    /// 날짜 계산 메서드(coreData의 rateDate값 사용)
-    /// 추후 사용시 CalculateDate.calculateDate()로 사용
+    /// 날짜 계산 메서드(YY.MM.DD)
     static func caculateDateNumber() -> String {
 
         let todayDate = Date.formattedDateString(from: Date())

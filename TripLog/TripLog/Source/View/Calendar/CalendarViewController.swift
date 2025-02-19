@@ -167,6 +167,22 @@ final class CalendarViewController: UIViewController {
         return totalExpense
     }
     
+    private func checkDateAlert(date: String) -> Observable<Void> {
+        return Observable.create { observer in
+            let alert = AlertManager(
+                title: "환율 정보 안내",
+                message: "미래 날짜의 환율이 없어 \(date) 환율로 계산됩니다.",
+                cancelTitle: "취소",
+                activeTitle: "확인"
+            ) {
+                observer.onNext(())
+                observer.onCompleted()
+            }
+            alert.showAlert(.alert)
+            return Disposables.create()
+        }
+    }
+    
     // MARK: - Calendar Setup
     
     // CalendarViewModel 바인딩
@@ -176,7 +192,7 @@ final class CalendarViewController: UIViewController {
             nextButtonTapped: customHeaderView.rx.nextButtonTapped,
             addButtonTapped: expenseListView.rx.addButtondTapped,
             didSelected: selectedDate
-            )
+        )
         
         let output = calendarViewModel.transform(input: input)
         
@@ -190,20 +206,15 @@ final class CalendarViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
+        // 미래 날짜에 대한 알럿과 모달 처리 스트림
         output.addButtonTapped
             .withUnretained(self)
-            .flatMap { owner, date -> Observable<MyCashBookModel?> in
+            .flatMap { owner, date in
                 if date > Date() {
-                    // 미래 날짜인 경우 알럿 표시
-                    return Observable.create { observer in
-                        let dateStatus = Date.caculateDateNumber()
-                        let alert = AlertManager(
-                            title: "환율 정보 안내",
-                            message: "미래 날짜의 환율이 없어 \(dateStatus) 환율로 계산됩니다.",
-                            cancelTitle: "취소",
-                            activeTitle: "확인"
-                        ) {
-                            let checkDate: (_ date: Date) -> Date = { date in
+                    let dateStatus = Date.caculateDateNumber()
+                    return owner.checkDateAlert(date: dateStatus)
+                        .flatMap { _ -> Observable<MyCashBookModel?> in
+                            let checkDate: (Date) -> Date = { date in
                                 return Date() < date ? Date() : date
                             }
                             
@@ -212,24 +223,15 @@ final class CalendarViewController: UIViewController {
                                 predicate: Date.formattedDateString(from: checkDate(date))
                             )
                             
-                            ModalViewManager.showModal(state: .createNewConsumption(data: .init(
+                            return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
                                 cashBookID: owner.calendarViewModel.cashBookID,
                                 date: date,
                                 exchangeRate: rates
                             )))
                             .compactMap { $0 as? MyCashBookModel }
-                            .subscribe(onNext: { model in
-                                observer.onNext(model)
-                                observer.onCompleted()
-                            })
-                            .disposed(by: owner.disposeBag)
                         }
-                        alert.showAlert(.alert)
-                        return Disposables.create()
-                    }
                 } else {
-                    // 현재나 과거 날짜인 경우 바로 모달 표시
-                    let checkDate: (_ date: Date) -> Date = { date in
+                    let checkDate: (Date) -> Date = { date in
                         return Date() < date ? Date() : date
                     }
                     
@@ -255,6 +257,7 @@ final class CalendarViewController: UIViewController {
                 owner.updateTotalAmount.accept(owner.getTotalAmount())
             }
             .disposed(by: disposeBag)
+        
         
         // expense 지출내역 데이터 채우기
         output.expenses
