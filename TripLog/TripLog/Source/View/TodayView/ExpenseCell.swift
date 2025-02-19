@@ -10,12 +10,12 @@ final class ExpenseCell: UITableViewCell {
         $0.applyBoxStyle()
     }
 
-    private let dateLabel = UILabel().then {
-        $0.font = UIFont.SCDream(size: .caption, weight: .regular)
-    }
-
     private let titleLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .display, weight: .medium)
+        $0.numberOfLines = 1  // ✅ 한 줄로 제한
+        $0.lineBreakMode = .byTruncatingTail  // ✅ 너무 길면 "..." 표시
+        $0.setContentCompressionResistancePriority(.defaultLow, for: .horizontal) // ✅ 자동으로 축소되도록 설정
+        $0.setContentHuggingPriority(.defaultHigh, for: .horizontal) // ✅ 다른 뷰가 확장될 수 있도록 설정
     }
 
     private let categoryLabel = UILabel().then {
@@ -26,6 +26,10 @@ final class ExpenseCell: UITableViewCell {
     private let amountLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
         $0.textAlignment = .right
+        $0.numberOfLines = 1  // ✅ 한 줄만 표시
+        $0.lineBreakMode = .byTruncatingTail  // ✅ 너무 길면 "..." 표시
+        $0.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal) // ✅ 크기가 줄어들지 않도록 설정
+        $0.setContentHuggingPriority(.defaultLow, for: .horizontal) // ✅ 다른 뷰가 확장될 수 있도록 설정
     }
 
     private let exchangeRateLabel = UILabel().then {
@@ -54,7 +58,7 @@ final class ExpenseCell: UITableViewCell {
 
         contentView.addSubview(containerView)
 
-        [dateLabel, titleLabel, categoryLabel, amountLabel, exchangeRateLabel].forEach {
+        [titleLabel, categoryLabel, amountLabel, exchangeRateLabel].forEach {
             containerView.addSubview($0)
         }
 
@@ -76,15 +80,23 @@ final class ExpenseCell: UITableViewCell {
         containerView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(8)
         }
-
-        dateLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(16)
-            $0.top.equalToSuperview().offset(16)
-            $0.height.equalTo(16)
+        
+        titleLabel.snp.makeConstraints {
+            $0.leading.equalToSuperview()
+            $0.trailing.lessThanOrEqualTo(amountLabel.snp.leading).offset(-8) // ✅ amountLabel과 겹치지 않도록 설정
+        }
+        
+        amountLabel.snp.makeConstraints {
+            $0.trailing.equalToSuperview()
+            $0.width.lessThanOrEqualTo(150) // ✅ 최대 너비 100pt 제한
         }
 
+        exchangeRateLabel.snp.makeConstraints{
+            $0.width.lessThanOrEqualTo(150)
+        }
+        
         firstRowStackView.snp.makeConstraints {
-            $0.top.equalTo(dateLabel.snp.bottom).offset(4) // ✅ 여백 추가
+            $0.top.equalToSuperview().offset(16) // ✅ 여백 추가
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(24)
         }
@@ -100,11 +112,11 @@ final class ExpenseCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(date: String, title: String, category: String, amount: String, exchangeRate: String, payment: Bool) {
+    func configure(title: String, category: String, amount: String, exchangeRate: String, payment: Bool) {
 
         let paymentStatus = payment ? "카드" : "현금"
 
-        dateLabel.text = date
+//        dateLabel.text = date
         titleLabel.text = title
         categoryLabel.text = "\(category) / \(paymentStatus)"
         amountLabel.text = amount
