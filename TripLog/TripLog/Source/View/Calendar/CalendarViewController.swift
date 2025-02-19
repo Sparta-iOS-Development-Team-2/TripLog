@@ -167,21 +167,22 @@ final class CalendarViewController: UIViewController {
         return totalExpense
     }
     
-    private func checkDateAlert(date: String) -> Observable<Void> {
-        return Observable.create { observer in
-            let alert = AlertManager(
-                title: "환율 정보 안내",
-                message: "미래 날짜의 환율이 없어 \(date) 환율로 계산됩니다.",
-                cancelTitle: "취소",
-                activeTitle: "확인"
-            ) {
-                observer.onNext(())
-                observer.onCompleted()
+        private func checkDateAlert(date: String) -> Observable<Void> {
+            return Observable.create { observer in
+                let alert = AlertManager(
+                    title: "환율 정보 안내",
+                    message: "미래 날짜의 환율이 없어 \(date) 환율로 계산됩니다.",
+                    cancelTitle: "취소",
+                    activeTitle: "확인"
+                ) {
+                    observer.onNext(())
+                    observer.onCompleted()
+                }
+                alert.showAlert(.alert)
+                return Disposables.create()
             }
-            alert.showAlert(.alert)
-            return Disposables.create()
         }
-    }
+
     
     // MARK: - Calendar Setup
     
@@ -206,57 +207,71 @@ final class CalendarViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
-        // 미래 날짜에 대한 알럿과 모달 처리 스트림
+        // 미래 날짜 스트림
         output.addButtonTapped
             .withUnretained(self)
+            .filter { _, date in date > Date() }
             .flatMap { owner, date in
-                if date > Date() {
-                    let dateStatus = Date.caculateDateNumber()
-                    return owner.checkDateAlert(date: dateStatus)
-                        .flatMap { _ -> Observable<MyCashBookModel?> in
-                            let checkDate: (Date) -> Date = { date in
-                                return Date() < date ? Date() : date
-                            }
-                            
-                            let rates = CoreDataManager.shared.fetch(
-                                type: CurrencyEntity.self,
-                                predicate: Date.formattedDateString(from: checkDate(date))
-                            )
-                            
-                            return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
-                                cashBookID: owner.calendarViewModel.cashBookID,
-                                date: date,
-                                exchangeRate: rates
-                            )))
-                            .compactMap { $0 as? MyCashBookModel }
+                let dateStatus = Date.caculateDateNumber()
+                
+                return owner.checkDateAlert(date: dateStatus)
+                    .flatMap { _ in
+                        let checkDate: (Date) -> Date = { date in
+                            return Date() < date ? Date() : date
                         }
-                } else {
-                    let checkDate: (Date) -> Date = { date in
-                        return Date() < date ? Date() : date
+                        
+                        let rates = CoreDataManager.shared.fetch(
+                            type: CurrencyEntity.self,
+                            predicate: Date.formattedDateString(from: checkDate(date))
+                        )
+                        
+                        return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
+                            cashBookID: owner.calendarViewModel.cashBookID,
+                            date: date,
+                            exchangeRate: rates
+                        )))
+                        .compactMap { $0 as? MyCashBookModel }
                     }
-                    
-                    let rates = CoreDataManager.shared.fetch(
-                        type: CurrencyEntity.self,
-                        predicate: Date.formattedDateString(from: checkDate(date))
-                    )
-                    
-                    return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
-                        cashBookID: owner.calendarViewModel.cashBookID,
-                        date: date,
-                        exchangeRate: rates
-                    )))
-                    .compactMap { $0 as? MyCashBookModel }
-                }
             }
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, data in
-                guard let data = data else { return }
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
                 owner.calendarViewModel.loadExpenseData()
                 owner.updateTotalAmount.accept(owner.getTotalAmount())
             }
             .disposed(by: disposeBag)
+
+        // 현재/과거 날짜 스트림
+        output.addButtonTapped
+            .withUnretained(self)
+            .filter { _, date in date <= Date() }
+            .flatMap { owner, date in
+                let checkDate: (Date) -> Date = { date in
+                    return Date() < date ? Date() : date
+                }
+                
+                let rates = CoreDataManager.shared.fetch(
+                    type: CurrencyEntity.self,
+                    predicate: Date.formattedDateString(from: checkDate(date))
+                )
+                
+                return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
+                    cashBookID: owner.calendarViewModel.cashBookID,
+                    date: date,
+                    exchangeRate: rates
+                )))
+                .compactMap { $0 as? MyCashBookModel }
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, data in
+                CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
+                owner.calendarViewModel.loadExpenseData()
+                owner.updateTotalAmount.accept(owner.getTotalAmount())
+            }
+            .disposed(by: disposeBag)
+        
         
         
         // expense 지출내역 데이터 채우기
