@@ -43,24 +43,18 @@ final class TodayViewController: UIViewController {
         $0.applyCornerRadius(12)
     }
 
-    // "필터" 라벨
-    private let filterLabel = UILabel().then {
-        $0.text = "필터"
-        $0.font = UIFont.SCDream(size: .headline, weight: .medium)
-        $0.textColor = UIColor(named: "textPrimary")
+    // 필터 버튼 (UILabel + UIImageView 포함)
+    private let filterButton = UIButton(type: .system).then {
+        $0.setTitle("필터", for: .normal)
+        $0.setTitleColor(UIColor.CustomColors.Text.textPrimary, for: .normal)
+        $0.titleLabel?.font = UIFont.SCDream(size: .headline, weight: .medium)
+        $0.setImage(UIImage(named: "filterIcon")?.withRenderingMode(.alwaysOriginal), for: .normal)
+        
+        $0.semanticContentAttribute = .forceRightToLeft // 아이콘을 텍스트 오른쪽에 배치
+        $0.tintColor = .black // 아이콘 색상 적용 (필요에 따라 변경)
+        $0.contentHorizontalAlignment = .trailing // 우측 정렬
     }
-    // 필터 이미지
-    private let filterIcon = UIImageView().then {
-        $0.image = UIImage(named: "filterIcon")?.withRenderingMode(.alwaysOriginal)
-        $0.contentMode = .scaleAspectFit
-        $0.snp.makeConstraints { $0.size.equalTo(16) } // 아이콘 크기 조정
-    }
-    
-    private let filterStackView = UIStackView().then {
-        $0.axis = .horizontal
-        $0.alignment = .trailing
-        $0.spacing = 4
-    }
+
     
     
     // 지출 내역을 표시할 테이블 뷰
@@ -161,11 +155,8 @@ private extension TodayViewController {
             $0.alignment = .center
         }
         
-        filterStackView.addArrangedSubview(filterLabel)
-        filterStackView.addArrangedSubview(filterIcon)
-        
         topStackView.addArrangedSubview(headerStackView)
-        topStackView.addArrangedSubview(filterStackView)
+        topStackView.addArrangedSubview(filterButton)
         topStackView.do {
             $0.axis = .horizontal
             $0.spacing = 8
@@ -232,21 +223,12 @@ private extension TodayViewController {
         
         let output = viewModel.transform(input: input)
         
-        let tapGesture = UITapGestureRecognizer()
-        filterStackView.addGestureRecognizer(tapGesture)
-        filterStackView.isUserInteractionEnabled = true
-        
-        tapGesture.rx.event
-            .map { _ in }
-            .bind(to: filterTapRelay)
-            .disposed(by: disposeBag)
         // 필터 이벤트
-        filterTapRelay
-            .subscribe (onNext:{
-                print("필터 활성화")
+        filterButton.rx.tap
+            .subscribe(onNext:{
+                print("필터 활성화 입니다")
             })
             .disposed(by: disposeBag)
-        
         
         output.expenses
             .asDriver(onErrorDriveWith: .empty())
@@ -450,16 +432,16 @@ extension TodayViewController: UITableViewDelegate {
         headerView.addSubview(label)
         headerView.addSubview(separatorView)
 
-        label.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(8)
-            make.leading.equalToSuperview().offset(8)
+        label.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(8)
+            $0.leading.equalToSuperview().offset(8)
         }
 
-        separatorView.snp.makeConstraints { make in
-            make.leading.equalTo(label.snp.trailing).offset(8)  // Label 오른쪽에 위치
-            make.trailing.equalToSuperview().inset(8)  // 오른쪽 마진 추가
-            make.centerY.equalTo(label.snp.centerY)  // Label과 나란히 정렬
-            make.height.equalTo(1)  // 실선을 얇게 설정
+        separatorView.snp.makeConstraints {
+            $0.leading.equalTo(label.snp.trailing).offset(8)  // Label 오른쪽에 위치
+            $0.trailing.equalToSuperview().inset(8)  // 오른쪽 마진 추가
+            $0.centerY.equalTo(label.snp.centerY)  // Label과 나란히 정렬
+            $0.height.equalTo(1)  // 실선을 얇게 설정
         }
         
         return headerView
