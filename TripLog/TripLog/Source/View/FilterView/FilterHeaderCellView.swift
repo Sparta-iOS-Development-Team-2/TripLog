@@ -26,6 +26,7 @@ final class FilterHeaderCellView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// setupUI 설정
     private func setupUI() {
         addSubview(titleLabel)
         
@@ -34,6 +35,9 @@ final class FilterHeaderCellView: UICollectionReusableView {
         }
     }
     
+    /// 셀 구성
+    /// - parameter :
+    ///  - title : 모델에 있는 데이터로 셀 구현
     func configure(with title: String) {
         titleLabel.text = title
     }

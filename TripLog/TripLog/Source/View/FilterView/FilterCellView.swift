@@ -12,6 +12,7 @@ import Then
 final class FilterCellView: UICollectionViewCell {
     static let id: String = "FilterCellView"
 
+    // 카테고리 버튼(셀)
     private let category = UILabel().then {
         $0.font = .SCDream(size: .headline, weight: .medium)
         $0.numberOfLines = 1
@@ -32,10 +33,13 @@ final class FilterCellView: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
  
+    /// 셀 구성
+    /// - parameter : 모델에 있는 데이터로 셀 구현
     func configureCell(title: String) {
         category.text = title
     }
-
+    
+    /// 선택된 셀의 강조
     func selectedCell() {
         DispatchQueue.main.async {
             self.category.font = .SCDream(size: .headline, weight: .medium)
@@ -45,6 +49,7 @@ final class FilterCellView: UICollectionViewCell {
         }
     }
 
+    /// 선택이 해제된 셀로 변경
     func resetCell() {
         DispatchQueue.main.async {
             self.category.font = .SCDream(size: .headline, weight: .medium)
@@ -58,20 +63,23 @@ final class FilterCellView: UICollectionViewCell {
 
 private extension FilterCellView {
 
+    /// setupUI 설정
     func setupUI() {
         configureSelf()
         setupLayout()
     }
 
+    /// configureSelf 설정
     func configureSelf() {
         self.backgroundColor = .clear
         self.addSubview(category)
     }
 
+    /// setupLayout 설정
     func setupLayout() {
         category.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.width.equalTo(80)
+            $0.width.equalTo(75)
             $0.height.equalTo(32)
         }
     }

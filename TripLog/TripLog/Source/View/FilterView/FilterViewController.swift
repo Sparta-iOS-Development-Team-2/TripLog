@@ -29,6 +29,7 @@ class FilterViewController: UIViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = FilterViewModel()
     
+    // 선택한 데이터로 방출
     private let sendPayment = PublishRelay<String>()
     private let sendCategory = PublishRelay<String>()
     
@@ -39,6 +40,7 @@ class FilterViewController: UIViewController {
                                       "식비", "교통", "숙소", "쇼핑",
                                       "의료", "통신", "여가/취미", "기타"]
     
+    // 선택한 데이터를 저장
     private var selectedPayment: String
     private var selectedCategory: String
     private var selectedCellIndexPaths: [Int: IndexPath] = [:]
@@ -82,7 +84,8 @@ class FilterViewController: UIViewController {
         super.viewDidLoad()
         
         setupUI()
-        configureSelf()
+        setupConstraint()
+        configureModal()
         bind()
     }
     
@@ -104,15 +107,27 @@ class FilterViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 }
- 
+
+//MARK: - Private Method
 private extension FilterViewController {
     
-    /// setupUI
+    /// setupUI 설정
     func setupUI() {
         view.backgroundColor = UIColor.CustomColors.Background.background
-        [ filterViewTitle, closeButton ].forEach { topHorizontalStackView.addArrangedSubview($0) }
-        [ topHorizontalStackView, collectionView ].forEach {view.addSubview($0) }
         
+        [
+            filterViewTitle,
+            closeButton
+        ].forEach { topHorizontalStackView.addArrangedSubview($0) }
+        
+        [
+            topHorizontalStackView,
+            collectionView
+        ].forEach { view.addSubview($0) }
+    }
+    
+    /// setupConstraint 설정
+    func setupConstraint() {
         topHorizontalStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
             $0.horizontalEdges.equalToSuperview().inset(24)
@@ -130,13 +145,14 @@ private extension FilterViewController {
         }
     }
     
-    /// 
+    /// 데이터 바인딩
     func bind() {
         let input = FilterViewModel.Input(selectedPayment: sendPayment,
                                           selectedCategory: sendCategory)
         
         let output = viewModel.transform(input: input)
         
+        // 카테고리 선택을 마쳤을 시 모달 닫기
         output.dismissTrigger
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
@@ -145,6 +161,7 @@ private extension FilterViewController {
             }
             .disposed(by: disposeBag)
         
+        // 닫기 버튼으로 눌렀을 시 모달 닫기
         closeButton.rx.tap
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
@@ -153,8 +170,13 @@ private extension FilterViewController {
             }.disposed(by: disposeBag)
     }
     
-    // 모달 설정
-    func configureSelf() {
+}
+
+//MARK: - Modal 설정
+private extension FilterViewController {
+    
+    /// Filter Modal 설정
+    func configureModal() {
         self.modalPresentationStyle = .formSheet
         self.sheetPresentationController?.preferredCornerRadius = 12
         self.sheetPresentationController?.detents = [.custom(resolver: { _ in 330 })]
@@ -163,74 +185,27 @@ private extension FilterViewController {
     
 }
 
+//MARK: - CollectionView 설정
 extension FilterViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
-    // 섹션의 갯수
+    /// 섹션의 갯수 설정
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return SectionLayoutKind.allCases.count
     }
     
-    // 셀을 선택 했을 때
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let sectionKind = SectionLayoutKind(rawValue: indexPath.section) else { return }
-        
-        // 이전 셀 데이터
-        if let previousIndexPath = selectedCellIndexPaths[indexPath.section],
-           let previousCell = collectionView.cellForItem(at: previousIndexPath) as? FilterCellView {
-            previousCell.resetCell()
-        }
-        
-        selectedCellIndexPaths[indexPath.section] = indexPath
-        
-        if let selectedCell = collectionView.cellForItem(at: indexPath) as? FilterCellView {
-            selectedCell.selectedCell()
-        }
+    /// 각 섹션이 가지고 있는 아이템의 수
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        guard let sectionKind = SectionLayoutKind(rawValue: section) else { return 0 }
         
         switch sectionKind {
         case .paymentWays:
-            selectedPayment = paymentWay[indexPath.item]
-            sendPayment.accept(paymentWay[indexPath.item])
-            print(selectedPayment)
+            return paymentWay.count
         case .categories:
-            selectedCategory = category[indexPath.item]
-            sendCategory.accept(category[indexPath.item])
-            print(selectedCategory)
+            return category.count
         }
-        
-        print("\(selectedPayment), \(selectedCategory)")
     }
     
-    func closeFilter() {
-        self.dismiss(animated: true, completion: nil)
-    }
-    
-    // 셀 구현
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilterCellView.id, for: indexPath) as? FilterCellView
-        else { return UICollectionViewCell() }
-        guard let sectionKind = SectionLayoutKind(rawValue: indexPath.section) else { return cell }
-        
-        if let selectedIndexPath = selectedCellIndexPaths[indexPath.section],
-           selectedIndexPath == indexPath {
-            cell.selectedCell()
-        } else {
-            cell.resetCell()
-        }
-        
-        let title: String
-        
-        switch sectionKind {
-        case .paymentWays:
-            title = paymentWay[indexPath.item]
-        case .categories:
-            title = category[indexPath.item]
-        }
-        
-        cell.configureCell(title: title)
-        return cell
-    }
-    
-    //
+    /// 섹션 헤더 설정
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader else {
             return UICollectionReusableView()
@@ -260,23 +235,67 @@ extension FilterViewController: UICollectionViewDelegate, UICollectionViewDataSo
         return headerView
     }
     
-    
-    // 섹션이 가지고 있는 아이템의 수
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let sectionKind = SectionLayoutKind(rawValue: section) else { return 0 }
+    /// CollectionView Cell 설정
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilterCellView.id, for: indexPath) as? FilterCellView
+        else { return UICollectionViewCell() }
+        guard let sectionKind = SectionLayoutKind(rawValue: indexPath.section) else { return cell }
+        
+        if let selectedIndexPath = selectedCellIndexPaths[indexPath.section],
+           selectedIndexPath == indexPath {
+            cell.selectedCell()
+        } else {
+            cell.resetCell()
+        }
+        
+        let title: String
         
         switch sectionKind {
         case .paymentWays:
-            return paymentWay.count
+            title = paymentWay[indexPath.item]
         case .categories:
-            return category.count
+            title = category[indexPath.item]
+        }
+        
+        cell.configureCell(title: title)
+        return cell
+    }
+    
+    /// 셀을 선택 했을 때 동작
+    /// - 이전 셀 데이터 선택해제
+    /// - 새로운 셀 선택 후 강조
+    /// - 선택된 데이터 전달
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let sectionKind = SectionLayoutKind(rawValue: indexPath.section) else { return }
+        
+        if let previousIndexPath = selectedCellIndexPaths[indexPath.section],
+           let previousCell = collectionView.cellForItem(at: previousIndexPath) as? FilterCellView {
+            previousCell.resetCell()
+        }
+        
+        selectedCellIndexPaths[indexPath.section] = indexPath
+        
+        if let selectedCell = collectionView.cellForItem(at: indexPath) as? FilterCellView {
+            selectedCell.selectedCell()
+        }
+        
+        // 각 섹션에 해당하는 선택된 데이터 값을 뷰모델로 방출
+        switch sectionKind {
+        case .paymentWays:
+            selectedPayment = paymentWay[indexPath.item]
+            sendPayment.accept(paymentWay[indexPath.item])
+        case .categories:
+            selectedCategory = category[indexPath.item]
+            sendCategory.accept(category[indexPath.item])
         }
     }
     
 }
 
-extension FilterViewController {
-    // collectionView 레이아웃
+//MARK: - CollectionView Layout
+private extension FilterViewController {
+    
+    /// collectionView 레이아웃
     func filterCollectionViewLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
             
@@ -284,6 +303,7 @@ extension FilterViewController {
             
             let section: NSCollectionLayoutSection?
             
+            // 각 섹션별로 layout 설정
             switch sectionKind {
             case .paymentWays:
                 section = self.setPaymentWayLayout(
@@ -293,6 +313,7 @@ extension FilterViewController {
                 section = self.setCategoryLayout()
             }
             
+            // 섹션 헤더 Layout 설정
             if let section = section {
                 let headerSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
@@ -313,7 +334,7 @@ extension FilterViewController {
         
     }
     
-    // 지출 방법 레이아웃
+    /// 지출 방법 Layout 설정
     func setPaymentWayLayout(groupItemCount: Int, groupCount: Int) -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize( widthDimension: .fractionalWidth(0.25),
                                                heightDimension: .fractionalHeight(1.0))
@@ -330,7 +351,7 @@ extension FilterViewController {
         return section
     }
     
-    // 카테고리 레이아웃
+    // 카테고리 Layout 설정
     func setCategoryLayout() -> NSCollectionLayoutSection {
         var groups: [NSCollectionLayoutGroup] = []
         
@@ -359,6 +380,5 @@ extension FilterViewController {
         section.orthogonalScrollingBehavior = .none
         return section
     }
-    
     
 }
