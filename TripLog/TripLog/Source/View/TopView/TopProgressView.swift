@@ -43,8 +43,8 @@ final class TopProgressView: UIView {
     }
 
     func setBudget(_ budget: Int) {
-        budgetAmount = budget
-        budgetLabel.text = "예산: \(NumberFormatter.wonFormat(budgetAmount))"
+        budgetAmount = budget == 0 ? 1 : budget
+        budgetLabel.text = "예산: \(NumberFormatter.wonFormat(budget))"
     }
 
     private func bindExpense() {
@@ -54,7 +54,8 @@ final class TopProgressView: UIView {
             .drive { owner, expense in
 
                 // ✅ 3. 잔액 계산 및 출력
-                let balance = owner.budgetAmount - expense
+                let checkBudget = owner.budgetLabel.text == "예산: 0 원"
+                let balance = checkBudget ? 0 - expense : owner.budgetAmount - expense
                 owner.balanceRelay.accept(balance)
                 debugPrint("✅ budgetAmount: \(owner.budgetAmount), balance 계산 값: \(balance)")
 
