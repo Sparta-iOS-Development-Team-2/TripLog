@@ -253,6 +253,15 @@ private extension TodayViewController {
             .asDriver(onErrorDriveWith: .empty())
             .drive { owner, expenses in
                 owner.updateEmptyState(isEmpty: expenses.isEmpty)
+                if owner.fetchTrigger.value.0 != "전체" && owner.fetchTrigger.value.1 != "전체" {
+                    owner.headerTitleLabel.text = "\(owner.fetchTrigger.value.0) / \(owner.fetchTrigger.value.1) 내역"
+                } else if owner.fetchTrigger.value.0 == "전체" && owner.fetchTrigger.value.1 != "전체" {
+                    owner.headerTitleLabel.text = "\(owner.fetchTrigger.value.1) 내역"
+                } else if owner.fetchTrigger.value.0 != "전체" && owner.fetchTrigger.value.1 == "전체" {
+                    owner.headerTitleLabel.text = "\(owner.fetchTrigger.value.0) 내역"
+                } else {
+                    owner.headerTitleLabel.text = "전체 내역"
+                }
             }
             .disposed(by: disposeBag)
         
