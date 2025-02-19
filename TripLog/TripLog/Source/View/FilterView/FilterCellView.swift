@@ -45,6 +45,7 @@ final class FilterCellView: UICollectionViewCell {
             self.category.font = .SCDream(size: .headline, weight: .medium)
             self.category.textColor = .white
             self.category.layer.borderColor = .none
+            self.category.layer.borderWidth = 0
             self.category.backgroundColor = .CustomColors.Accent.blue
         }
     }
@@ -55,6 +56,7 @@ final class FilterCellView: UICollectionViewCell {
             self.category.font = .SCDream(size: .headline, weight: .medium)
             self.category.textColor = .CustomColors.Text.textSecondary
             self.category.layer.borderColor = UIColor.CustomColors.Text.textSecondary.cgColor
+            self.category.layer.borderWidth = 1
             self.category.backgroundColor = .CustomColors.Background.background
         }
     }
