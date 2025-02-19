@@ -41,8 +41,6 @@ class FilterViewController: UIViewController {
                                       "의료", "통신", "여가/취미", "기타"]
     
     // 선택한 데이터를 저장
-    private var selectedPayment: String
-    private var selectedCategory: String
     private var selectedCellIndexPaths: [Int: IndexPath] = [:]
     
     private let filterViewTitle = UILabel().then {
@@ -91,8 +89,6 @@ class FilterViewController: UIViewController {
     
     // 필터 초기 데이터는 "전체"로 고정
     init(_ selectedPayment: String = "전체", _ selectedCategory: String = "전체") {
-        self.selectedPayment = selectedPayment
-        self.selectedCategory = selectedCategory
         super.init(nibName: nil, bundle: nil)
         
         if let paymentIndex = paymentWay.firstIndex(of: selectedPayment) {
@@ -282,10 +278,8 @@ extension FilterViewController: UICollectionViewDelegate, UICollectionViewDataSo
         // 각 섹션에 해당하는 선택된 데이터 값을 뷰모델로 방출
         switch sectionKind {
         case .paymentWays:
-            selectedPayment = paymentWay[indexPath.item]
             sendPayment.accept(paymentWay[indexPath.item])
         case .categories:
-            selectedCategory = category[indexPath.item]
             sendCategory.accept(category[indexPath.item])
         }
     }
