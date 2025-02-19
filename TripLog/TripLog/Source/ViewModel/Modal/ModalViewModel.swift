@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
+import RxKeyboard
 
 /// 모달 뷰 컨트롤러의 비즈니스 로직 담당 뷰 모델
 final class ModalViewModel: ViewModelType {
@@ -29,6 +30,8 @@ final class ModalViewModel: ViewModelType {
     }
     
     let disposeBag = DisposeBag()
+    
+    private var keyboardHeight: CGFloat = 0
     
     private let modalDismiss = PublishRelay<Void>()
     private let cashBookActive = PublishRelay<(Bool, ModalView.ModalCashBookData)>()
@@ -98,6 +101,11 @@ final class ModalViewModel: ViewModelType {
             }
             .disposed(by: disposeBag)
         
+        RxKeyboard.instance.visibleHeight
+            .drive { [weak self] instanceHeight in
+                self?.keyboardHeight = instanceHeight
+            }.disposed(by: disposeBag)
+        
         return Output(
             modalDismiss: self.modalDismiss,
             cashBookActive: self.cashBookActive,
@@ -114,8 +122,7 @@ final class ModalViewModel: ViewModelType {
         else {
             return .error(NSError(domain: "no top view controller", code: -1))
         }
-        
-        vc.view.endEditing(true)
+                
         let padding: CGFloat = window.safeAreaInsets.bottom == 0 ? 25 : 0
         
         let categoryVC = CategoryViewController(category)
@@ -136,7 +143,7 @@ final class ModalViewModel: ViewModelType {
         categoryVC.didMove(toParent: vc)
         
         UIView.animate(withDuration: 0.2, delay: 0, options: .curveLinear) {
-            categoryVC.view.frame.origin.y -= 190 - padding
+            categoryVC.view.frame.origin.y -= 190 - padding + self.keyboardHeight
             vc.view.layoutIfNeeded()
         }
         

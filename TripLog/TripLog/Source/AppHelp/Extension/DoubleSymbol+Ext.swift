@@ -45,9 +45,6 @@ extension Double {
         // ✅ 천 단위 구분자를 쉼표(`,`)로 설정
         formatter.groupingSeparator = ","
         
-        // ✅ 소수점 대신 쉼표(`,`) 사용
-        formatter.decimalSeparator = ","
-        
         // ✅ 소수점 자리수 설정
         if self.truncatingRemainder(dividingBy: 1) == 0 {
             formatter.maximumFractionDigits = 0  // 정수일 때 소수점 제거
@@ -62,7 +59,7 @@ extension Double {
         
         // ✅ 최종 포맷된 문자열 반환
         if let formattedString = formatter.string(from: NSNumber(value: self)) {
-            return formattedString.replacingOccurrences(of: ".", with: ",")
+            return formattedString
         } else {
             return "\(symbol) \(self)"
         }

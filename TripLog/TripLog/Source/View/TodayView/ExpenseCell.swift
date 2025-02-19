@@ -83,16 +83,11 @@ final class ExpenseCell: UITableViewCell {
         
         titleLabel.snp.makeConstraints {
             $0.leading.equalToSuperview()
-            $0.trailing.lessThanOrEqualTo(amountLabel.snp.leading).offset(-8) // ✅ amountLabel과 겹치지 않도록 설정
+            $0.width.equalTo(150).priority(.low)
         }
         
         amountLabel.snp.makeConstraints {
             $0.trailing.equalToSuperview()
-            $0.width.lessThanOrEqualTo(150) // ✅ 최대 너비 100pt 제한
-        }
-
-        exchangeRateLabel.snp.makeConstraints{
-            $0.width.lessThanOrEqualTo(150)
         }
         
         firstRowStackView.snp.makeConstraints {
