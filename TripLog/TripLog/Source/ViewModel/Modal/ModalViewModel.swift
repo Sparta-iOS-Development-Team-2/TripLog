@@ -108,17 +108,20 @@ final class ModalViewModel: ViewModelType {
     
     private func showCategoryModal(_ category: String) -> Observable<String> {
         guard let vc = AppHelpers.getTopViewController(),
-              vc as? ModalViewController != nil
+              vc as? ModalViewController != nil,
+              let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first
         else {
             return .error(NSError(domain: "no top view controller", code: -1))
         }
+        
+        let padding: CGFloat = window.safeAreaInsets.bottom == 0 ? 25 : 0
         
         let categoryVC = CategoryViewController(category)
         let dismissSignal = categoryVC.rx.deallocated.map { _ in "" }
         
         if vc.children.last as? CategoryViewController != nil {
             vc.children.last?.removeFromParent()
-            debugPrint(vc.children.last)
         }
         
         vc.addChild(categoryVC)
@@ -126,13 +129,13 @@ final class ModalViewModel: ViewModelType {
         categoryVC.view.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview()
             $0.top.equalTo(vc.view.snp.bottom)
-            $0.height.equalTo(190)
+            $0.height.equalTo(190 - padding)
         }
         vc.view.layoutIfNeeded()
         categoryVC.didMove(toParent: vc)
         
         UIView.animate(withDuration: 0.2, delay: 0, options: .curveLinear) {
-            categoryVC.view.frame.origin.y -= 190
+            categoryVC.view.frame.origin.y -= 190 - padding
             vc.view.layoutIfNeeded()
         }
         
