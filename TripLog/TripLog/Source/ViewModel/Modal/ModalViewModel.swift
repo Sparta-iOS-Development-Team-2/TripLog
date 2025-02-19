@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SnapKit
 import RxSwift
 import RxCocoa
 
@@ -17,12 +18,14 @@ final class ModalViewModel: ViewModelType {
         let cashBookActiveButtonTapped: PublishRelay<ModalView.ModalCashBookData>
         let consumptionActiveButtonTapped: PublishRelay<ModalView.ModalConsumptionData>
         let sectionIsEmpty: Observable<Bool>
+        let categoryButtonTapped: PublishRelay<String>
     }
     
     struct Output {
         let modalDismiss: PublishRelay<Void>
         let cashBookActive: PublishRelay<(Bool, ModalView.ModalCashBookData)>
         let consumptionActive: PublishRelay<(Bool, ModalView.ModalConsumptionData)>
+        let categoryViewDismissed: PublishRelay<String>
     }
     
     let disposeBag = DisposeBag()
@@ -30,8 +33,9 @@ final class ModalViewModel: ViewModelType {
     private let modalDismiss = PublishRelay<Void>()
     private let cashBookActive = PublishRelay<(Bool, ModalView.ModalCashBookData)>()
     private let consumptionActive = PublishRelay<(Bool, ModalView.ModalConsumptionData)>()
+    private let showCategoryModal = PublishRelay<String>()
     
-    private var textFieldIsEmpty: Bool?
+    private var ModelSectionIsEmpty: Bool?
     
     /// input을 output으로 변환해주는 메소드
     /// - Parameter input:
@@ -50,7 +54,7 @@ final class ModalViewModel: ViewModelType {
             .withUnretained(self)
             .emit { owner, data in
                 
-                guard let isEmpty = owner.textFieldIsEmpty else { return }
+                guard let isEmpty = owner.ModelSectionIsEmpty else { return }
                 owner.cashBookActive.accept((isEmpty, data))
                 
             }.disposed(by: disposeBag)
@@ -60,7 +64,7 @@ final class ModalViewModel: ViewModelType {
             .withUnretained(self)
             .emit { owner, data in
                 
-                guard let isEmpty = owner.textFieldIsEmpty else { return }
+                guard let isEmpty = owner.ModelSectionIsEmpty else { return }
                 owner.consumptionActive.accept((isEmpty, data))
                 
             }.disposed(by: disposeBag)
@@ -79,14 +83,63 @@ final class ModalViewModel: ViewModelType {
             .withUnretained(self)
             .emit { owner, isEmpty in
                 
-                owner.textFieldIsEmpty = isEmpty
+                owner.ModelSectionIsEmpty = isEmpty
                 
             }.disposed(by: disposeBag)
+        
+        input.categoryButtonTapped
+            .withUnretained(self)
+            .flatMap { owner, category in
+                owner.showCategoryModal(category)
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { [weak self] category in
+                self?.showCategoryModal.accept(category)
+            }
+            .disposed(by: disposeBag)
         
         return Output(
             modalDismiss: self.modalDismiss,
             cashBookActive: self.cashBookActive,
-            consumptionActive: self.consumptionActive
+            consumptionActive: self.consumptionActive,
+            categoryViewDismissed: self.showCategoryModal
         )
     }
+    
+    private func showCategoryModal(_ category: String) -> Observable<String> {
+        guard let vc = AppHelpers.getTopViewController(),
+              vc as? ModalViewController != nil,
+              let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first
+        else {
+            return .error(NSError(domain: "no top view controller", code: -1))
+        }
+        
+        let padding: CGFloat = window.safeAreaInsets.bottom == 0 ? 25 : 0
+        
+        let categoryVC = CategoryViewController(category)
+        let dismissSignal = categoryVC.rx.deallocated.map { _ in "" }
+        
+        if vc.children.last as? CategoryViewController != nil {
+            vc.children.last?.removeFromParent()
+        }
+        
+        vc.addChild(categoryVC)
+        vc.view.addSubview(categoryVC.view)
+        categoryVC.view.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.top.equalTo(vc.view.snp.bottom)
+            $0.height.equalTo(190 - padding)
+        }
+        vc.view.layoutIfNeeded()
+        categoryVC.didMove(toParent: vc)
+        
+        UIView.animate(withDuration: 0.2, delay: 0, options: .curveLinear) {
+            categoryVC.view.frame.origin.y -= 190 - padding
+            vc.view.layoutIfNeeded()
+        }
+        
+        return categoryVC.rx.selectedCell.take(until: dismissSignal)
+    }
+    
 }

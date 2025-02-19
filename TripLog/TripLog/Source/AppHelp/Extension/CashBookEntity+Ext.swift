@@ -75,7 +75,7 @@ extension CashBookEntity: CoreDataManagable {
         let request: NSFetchRequest<CashBookEntity> = CashBookEntity.fetchRequest()
         let element = CashBookElement()
         
-        guard let predicate = predicate as? String else {
+        guard let predicate = predicate as? UUID else {
             // 검색 조건이 없을 때 동작
             do {
                 let result = try context.fetch(request)
@@ -88,7 +88,7 @@ extension CashBookEntity: CoreDataManagable {
         }
         
         // 검색 조건이 있을 때 동작
-        request.predicate = NSPredicate(format: "\(element.tripName) == %@", predicate)
+        request.predicate = NSPredicate(format: "\(element.id) == %@", predicate as CVarArg)
         do {
             let result = try context.fetch(request)
             for item in result {

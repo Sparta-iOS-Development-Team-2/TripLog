@@ -78,6 +78,15 @@ final class OnboardingView: UIView {
         $0.layer.cornerRadius = 16
     }
     
+    private lazy var pageControl = UIPageControl().then {
+        $0.backgroundColor = .clear
+        $0.currentPage = 0
+        $0.numberOfPages = infoData.count
+        $0.currentPageIndicatorTintColor = .CustomColors.Accent.blue
+        $0.pageIndicatorTintColor = .CustomColors.Accent.blue.withAlphaComponent(0.5)
+        $0.direction = .leftToRight
+    }
+    
     // MARK: - Initializer
     
     override init(frame: CGRect) {
@@ -110,6 +119,7 @@ final class OnboardingView: UIView {
             self.activeButton.setTitle(buttonTitle, for: .normal)
             self.skipButton.isHidden = self.currentPage == self.infoData.count - 1 ? true : false
             self.setupInfoLabel()
+            self.pageControl.currentPage = self.currentPage
             self.layoutIfNeeded()
         }
     }
@@ -146,7 +156,7 @@ private extension OnboardingView {
     
     func configureSelf() {
         backgroundColor = .CustomColors.Background.background
-        [imageView, infoTextView, infoLabel, activeButton, skipButton].forEach { addSubview($0) }
+        [imageView, infoTextView, pageControl, infoLabel, activeButton, skipButton].forEach { addSubview($0) }
     }
     
     func setupLayout() {
@@ -164,9 +174,15 @@ private extension OnboardingView {
             $0.height.equalTo(280 - padding)
         }
         
+        pageControl.snp.makeConstraints {
+            $0.top.equalTo(infoTextView).inset(8)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(16)
+        }
+        
         infoLabel.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview()
-            $0.top.equalTo(infoTextView).offset(40)
+            $0.top.equalTo(pageControl.snp.bottom).offset(24)
             $0.height.equalTo(50)
         }
         
