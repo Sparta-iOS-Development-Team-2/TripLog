@@ -60,4 +60,21 @@ extension Date {
             return "\(calculateDate)일 전"
         }
     }
+    
+    /// 날짜 계산 메서드(YY.MM.DD)
+    static func caculateDateNumber() -> String {
+
+        let todayDate = Date.formattedDateString(from: Date())
+        
+        guard let fetchRateDate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayDate).first,
+              let rateDate = fetchRateDate.rateDate,
+              let currencyDate = Formatter.rateDateValue(rateDate)
+        else {
+            return ""
+        }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yy.MM.dd"
+        return dateFormatter.string(from: currencyDate)
+    }
 }
