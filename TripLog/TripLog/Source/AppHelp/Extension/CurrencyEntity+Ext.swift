@@ -46,8 +46,17 @@ extension CurrencyEntity: CoreDataManagable {
         var result = [CurrencyEntity]()
         var resultType: CurrencyRateResultType = .isEmpty
         var retryCount = 0
-                
-        guard var searchDate = predicate as? String else { return [] }
+        
+        guard var searchDate = predicate as? String else {
+            do {
+                let results = try context.fetch(request)
+                debugPrint("CurrencyEntity fetchCount: \(results.count)")
+                return results
+            } catch {
+                debugPrint("오류 발생: \(error)")
+                return []
+            }
+        }
         
         while retryCount < 15 {
             // 검색 조건이 있을 때 동작
@@ -60,16 +69,23 @@ extension CurrencyEntity: CoreDataManagable {
                     // 데이터 자체가 없을 때(생성하기)
                 case .isEmpty:
                     retryCount += 1
-                    FireStoreManager.shared.generateCurrencyRate(date: searchDate) {
-                        Task {
-                            debugPrint("\(searchDate) 데이터 생성")
-                            do {
-                                try await SyncManager.shared.syncCoreDataToFirestore()
-                                debugPrint("동기화 완료") // 동기화 완료가 좀 느리게 동작함
-                            } catch {
-                                debugPrint("\(searchDate)데이터 생성 후 데이터 동기화 실패")
+                    FireStoreManager.shared.generateCurrencyRate(date: searchDate) { result in
+                        switch result {
+                        case true:
+                            Task {
+                                debugPrint("\(searchDate) 데이터 생성")
+                                do {
+                                    try await SyncManager.shared.syncCoreDataToFirestore()
+                                    debugPrint("동기화 완료") // 동기화 완료가 좀 느리게 동작함
+                                } catch {
+                                    debugPrint("\(searchDate)데이터 생성 후 데이터 동기화 실패")
+                                }
                             }
+                        case false:
+                            searchDate = Date.getPreviousDate(from: searchDate) ?? searchDate
+                            debugPrint("API 통신 실패")
                         }
+                        
                     }
                     continue
                     

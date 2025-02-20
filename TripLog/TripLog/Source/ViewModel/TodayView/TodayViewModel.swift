@@ -3,119 +3,101 @@ import RxSwift
 import RxCocoa
 import CoreData
 
-final class TodayViewModel {
+final class TodayViewModel: ViewModelType {
     
-    // **Input (사용자 액션)**
     struct Input {
-        let fetchTrigger: PublishRelay<UUID> // 특정 cashBookID에 대한 데이터 요청
-        let addExpenseTrigger: PublishRelay<MyCashBookModel> // 지출 추가 요청
-        let deleteExpenseTrigger: PublishRelay<Int> // 특정 인덱스의 지출 삭제 요청
-        let showAddExpenseModalTrigger: PublishRelay<Void> // 모달 표시 요청
+        let fetchTrigger: BehaviorRelay<(String, String, UUID)>
+        let deleteExpenseTrigger: PublishRelay<(IndexPath, String, String)>
     }
     
-    // **Output (UI 업데이트)**
     struct Output {
-        let expenses: Driver<[MyCashBookModel]>
-        let totalAmount: Driver<String>
-        let showAddExpenseModal: Signal<Void>
+        let expenses: BehaviorRelay<[TodaySectionModel]>
     }
     
-    // **Relay (데이터 관리)**
-    private let expensesRelay = BehaviorRelay<[MyCashBookModel]>(value: [])
-    private let totalAmountRelay = BehaviorRelay<String>(value: "0 원")
-    private let showAddExpenseModalRelay = PublishRelay<Void>()
-    let totalExpenseRelay = BehaviorRelay<Int>(value: 0)
-    
-    private let disposeBag = DisposeBag()
-    
-    // ✅ Input과 Output을 늦게 초기화하기 위해 lazy 사용
-    lazy var input: Input = {
-        return Input(
-            fetchTrigger: fetchTrigger,
-            addExpenseTrigger: addExpenseTrigger,
-            deleteExpenseTrigger: deleteExpenseTrigger,
-            showAddExpenseModalTrigger: showAddExpenseModalTrigger
-        )
-    }()
-    
-    lazy var output: Output = {
-        return Output(
-            expenses: expensesRelay.asDriver(),
-            totalAmount: totalAmountRelay.asDriver(),
-            showAddExpenseModal: showAddExpenseModalRelay.asSignal()
-        )
-    }()
-    
-    // ✅ 먼저 Rx 트리거들을 선언 (순서 중요!)
-    private let fetchTrigger = PublishRelay<UUID>()
-    private let addExpenseTrigger = PublishRelay<MyCashBookModel>()
-    private let deleteExpenseTrigger = PublishRelay<Int>()
-    private let showAddExpenseModalTrigger = PublishRelay<Void>()
-
-    init(cashBookID: UUID) {
-        // ✅ 특정 cashBookID의 데이터 가져오기
-        fetchTrigger
-            .flatMapLatest { cashBookID -> Observable<[MyCashBookModel]> in
-                let entities = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: cashBookID)
-                
-                let convertedData = entities.map { entity in
-                    MyCashBookModel(
-                        amount: entity.amount,
-                        cashBookID: entity.cashBookID ?? cashBookID,
-                        caculatedAmount: entity.caculatedAmount,
-                        category: entity.category ?? "기타",
-                        country: entity.country ?? "USD",
-                        expenseDate: entity.expenseDate ?? Date(),
-                        id: entity.id ?? UUID(),
-                        note: entity.note ?? "지출",
-                        payment: entity.payment
+    let disposeBag = DisposeBag()
+    private let expensesRelay = BehaviorRelay<[TodaySectionModel]>(value: [])
+    private let deleteExpenseTrigger = PublishRelay<Void>()
+        
+    func transform(input: Input) -> Output {
+        
+        input.fetchTrigger
+            .withUnretained(self)
+            .map { owner, data -> [TodaySectionModel] in
+                let isCardPayment = data.0 == "카드"
+                let entities = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: data.2)
+                let expense = entities.map {
+                    MyCashBookModel(amount: $0.amount,
+                                    cashBookID: $0.cashBookID ?? data.2,
+                                    caculatedAmount: $0.caculatedAmount,
+                                    category: $0.category ?? "",
+                                    country: $0.country ?? "",
+                                    expenseDate: $0.expenseDate ?? Date(),
+                                    id: $0.id ?? UUID(),
+                                    note: $0.note ?? "",
+                                    payment: $0.payment
                     )
                 }
-                
-                return Observable.just(convertedData)
+                    
+                if data.0 == "전체" && data.1 == "전체" {
+                    return owner.groupByDate(expense)
+                } else if data.0 != "전체" && data.1 == "전체" {
+                    let filterExpense = expense.filter{ $0.payment == isCardPayment }
+                    return owner.groupByDate(filterExpense)
+                } else if data.0 == "전체" && data.1 != "전체" {
+                    let filterExpense = expense.filter{ $0.category == data.1 }
+                    return owner.groupByDate(filterExpense)
+                } else {
+                    let filterExpense = expense.filter{ $0.payment == isCardPayment && $0.category == data.1 }
+                    return owner.groupByDate(filterExpense)
+                }
             }
-            .bind(to: expensesRelay)
+            .asDriver(onErrorJustReturn: [])
+            .drive(expensesRelay)
             .disposed(by: disposeBag)
         
-        // ✅ 총 사용 금액 계산
-        expensesRelay
-            .map { expenses in
-                expenses.reduce(0) { $0 + Int($1.amount) } // ✅ `Int` 값 반환
-            }
-            .bind(to: totalExpenseRelay) // ✅ `Int` 타입으로 바인딩 성공
-            .disposed(by: disposeBag)
-        
-        // ✅ 지출 추가 처리 (저장 후 자동으로 fetchTrigger 실행)
-        addExpenseTrigger
-            .subscribe(onNext: { [weak self] expense in
-                guard let self = self else { return }
-                CoreDataManager.shared.save(type: MyCashBookEntity.self, data: expense)
-                self.fetchTrigger.accept(expense.cashBookID) // ✅ 저장 후 다시 불러오기
-            })
-            .disposed(by: disposeBag)
-        
-        // 🔹 지출 삭제 처리 (삭제 후 fetchTrigger 호출)
-        deleteExpenseTrigger
-            .subscribe(onNext: { [weak self] index in
-                guard let self = self else { return }
-
-                // ✅ 현재 데이터 배열에서 인덱스로 `UUID` 찾기
-                let currentExpenses = self.expensesRelay.value
-                guard index < currentExpenses.count else { return } // ✅ 유효한 인덱스인지 확인
+        input.deleteExpenseTrigger
+            .withUnretained(self)
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { owner, data in
+                let deleteData = owner.filteredExpenseData(for: data.0)
                 
-                let targetExpense = currentExpenses.filter { Calendar.current.isDate($0.expenseDate, inSameDayAs: Date()) }[index] // ✅ 인덱스로 요소 가져오기
-
-                // ✅ CoreData에서 삭제
-                CoreDataManager.shared.delete(type: MyCashBookEntity.self, entityID: targetExpense.id)
-
-                // ✅ 최신 데이터 다시 불러오기
-                self.fetchTrigger.accept(targetExpense.cashBookID)
-            })
+                CoreDataManager.shared.delete(type: MyCashBookEntity.self, entityID: deleteData.id)
+                input.fetchTrigger.accept((data.1, data.2, deleteData.cashBookID))
+            }
             .disposed(by: disposeBag)
         
-        // ✅ 모달 표시 트리거
-        showAddExpenseModalTrigger
-            .bind(to: showAddExpenseModalRelay)
-            .disposed(by: disposeBag)
+        return Output( expenses: expensesRelay )
+    }
+    
+    /// 섹션에서 탐색
+    private func filteredExpenseData(for indexPath: IndexPath) -> MyCashBookModel {
+        let currentSections = self.expensesRelay.value
+        
+        guard indexPath.section < currentSections.count else {
+            print("⚠️ 잘못된 섹션: \(indexPath.section)")
+            return MyCashBookModel(amount: 0, cashBookID: UUID(), caculatedAmount: 0, category: "", country: "", expenseDate: Date(), note: "", payment: false)
+        }
+
+        let sectionExpenses = currentSections[indexPath.section].items
+
+        guard indexPath.row < sectionExpenses.count else {
+            print("⚠️ 잘못된 인덱스: \(indexPath.row)")
+            return MyCashBookModel(amount: 0, cashBookID: UUID(), caculatedAmount: 0, category: "", country: "", expenseDate: Date(), note: "", payment: false)
+        }
+
+        return sectionExpenses[indexPath.row]
+    }
+
+    /// 날짜대로 그룹화 최신날짜가 상단으로 오게 설정
+    private func groupByDate(_ expenses: [MyCashBookModel]) -> [TodaySectionModel] {
+        let groupedDictionary = Dictionary(grouping: expenses) {
+            Date.formattedDateString(from: $0.expenseDate) }
+        
+        let sortedGroupedDictionary = groupedDictionary.mapValues { expenses in
+            expenses.sorted(by: { $0.expenseDate > $1.expenseDate })
+        }
+        
+        return sortedGroupedDictionary.map { TodaySectionModel(date: $0.key, items: $0.value) }
+            .sorted { $0.date > $1.date }
     }
 }

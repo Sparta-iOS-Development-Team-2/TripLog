@@ -1,7 +1,27 @@
 {
   "images" : [
     {
-      "filename" : "Item.png",
+      "filename" : "settinIcon1.png",
+      "idiom" : "iphone"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "light"
+        }
+      ],
+      "filename" : "settinIcon1 1.png",
+      "idiom" : "iphone"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "settinIcon2.png",
       "idiom" : "iphone"
     }
   ],

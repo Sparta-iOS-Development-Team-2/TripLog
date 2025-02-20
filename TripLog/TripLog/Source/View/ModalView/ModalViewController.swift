@@ -65,6 +65,7 @@ final class ModalViewController: UIViewController {
         
         self.view.layer.shadowPath = self.view.shadowPath()
     }
+
 }
 
 // MARK: - UI Setting Method
@@ -85,7 +86,8 @@ private extension ModalViewController {
             cancelButtonTapped: self.modalView.rx.cancelButtonTapped,
             cashBookActiveButtonTapped: self.modalView.rx.cashBookActiveButtonTapped,
             consumptionActiveButtonTapped: self.modalView.rx.consumptionActiveButtonTapped,
-            sectionIsEmpty: self.modalView.rx.checkBlankOfSections
+            sectionIsEmpty: self.modalView.rx.checkBlankOfSections,
+            categoryButtonTapped: self.modalView.rx.categoryButtonTapped
         )
         
         let output = viewModel.transform(input: input)
@@ -96,9 +98,8 @@ private extension ModalViewController {
             .emit { owner, data in
                 
                 guard !data.0 else {
-                    guard let vc = AppHelpers.getTopViewController() else { return }
                     let alert = AlertManager(title: "알림", message: "모든 내용을 정확히 입력해주세요", cancelTitle: "확인")
-                    alert.showAlert(on: vc, .alert)
+                    alert.showAlert(.alert)
                     return
                 }
                 
@@ -120,9 +121,8 @@ private extension ModalViewController {
             .emit { owner, data in
                 
                 guard !data.0 else {
-                    guard let vc = AppHelpers.getTopViewController() else { return }
                     let alert = AlertManager(title: "알림", message: "모든 내용을 정확히 입력해주세요", cancelTitle: "확인")
-                    alert.showAlert(on: vc, .alert)
+                    alert.showAlert(.alert)
                     return
                 }
                 
@@ -147,7 +147,16 @@ private extension ModalViewController {
             .emit { owner, _ in
                 owner.dismiss(animated: true)
             }.disposed(by: disposeBag)
+        
+        output.categoryViewDismissed
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, category in
+                owner.modalView.configureCategoryView(category)
+            }.disposed(by: disposeBag)
+        
     }
+
 }
 
 // MARK: - Reactive Extension
@@ -161,5 +170,12 @@ extension Reactive where Base: ModalViewController {
     // 모달뷰에서 입력된 지출 정보를 전달하는 옵저버블
     var sendConsumptionData: PublishRelay<MyCashBookModel> {
         return base.consumptionActiveButtonTapped
+    }
+}
+
+// 사용하는 뷰컨트롤러에 추가를 해주셔야 popover기능을 아이폰에서 정상적으로 사용 가능합니다.
+extension ModalViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
     }
 }

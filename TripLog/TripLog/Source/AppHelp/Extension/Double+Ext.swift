@@ -10,7 +10,8 @@ import Foundation
 extension Double {
     var formattedWithFormatter: String {
         let formatter = NumberFormatter()
-        formatter.numberStyle = .none
+        formatter.numberStyle = .decimal
+        formatter.usesSignificantDigits = false
         formatter.minimumFractionDigits = 0
         formatter.maximumFractionDigits = 2
         return formatter.string(from: NSNumber(value: self)) ?? "\(self)"

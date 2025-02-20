@@ -40,18 +40,10 @@ final class TripLogSummaryView: UIView {
     }
     
     /// ✅ 여행 정보를 설정하는 메서드
-    func configure(subtitle: String, date: String, budget: String, todayVC: TodayViewController) {
+    func configure(subtitle: String, date: String, budget: Int, amount: Int) {
         titleDateView.configure(subtitle: subtitle, date: date)
-        bindToProgressView(todayVC: todayVC, budget: budget)
-    }
-    
-    /// ✅ ProgressView와 TodayViewController 연결
-    private func bindToProgressView(todayVC: TodayViewController, budget: String) {
         progressView.setBudget(budget)
-        
-        todayVC.onTotalAmountUpdated = { [weak self] totalAmount in
-            self?.progressView.expense.accept(totalAmount)
-        }
+        progressView.expense.accept(amount)
     }
     
     private func setupLayout() {

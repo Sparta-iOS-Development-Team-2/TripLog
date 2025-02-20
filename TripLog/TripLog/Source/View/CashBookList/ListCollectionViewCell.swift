@@ -21,6 +21,12 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.adjustsFontSizeToFitWidth = true
     }
     
+    private let noteImageView = UIImageView().then {
+        $0.backgroundColor = .clear
+        $0.contentMode = .scaleAspectFit
+        $0.image = .cbPin
+    }
+    
     private let noteLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
         $0.textColor = .Dark.base
@@ -31,6 +37,17 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.adjustsFontSizeToFitWidth = true
     }
     
+    private let noteStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.spacing = 5
+    }
+    
+    private let budgetImageView = UIImageView().then {
+        $0.backgroundColor = .clear
+        $0.contentMode = .scaleAspectFit
+        $0.image = .cbCoin
+    }
+    
     private let budgetLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
         $0.textColor = .Dark.base
@@ -39,12 +56,28 @@ final class ListCollectionViewCell: UICollectionViewCell {
         $0.backgroundColor = .clear
     }
     
+    private let budgetStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.spacing = 5
+    }
+    
+    private let periodImageView = UIImageView().then {
+        $0.backgroundColor = .clear
+        $0.contentMode = .scaleAspectFit
+        $0.image = .cbAriplan
+    }
+    
     private let periodLabel = UILabel().then {
         $0.font = UIFont.SCDream(size: .body, weight: .regular)
         $0.textColor = .Dark.base
         $0.numberOfLines = 1
         $0.textAlignment = .left
         $0.backgroundColor = .clear
+    }
+    
+    private let periodStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.spacing = 5
     }
     
     private let verticalStackView = UIStackView().then {
@@ -95,9 +128,24 @@ private extension ListCollectionViewCell {
         contentView.applyBoxStyle()
         
         [
-            noteLabel,
-            budgetLabel,
+            noteImageView,
+            noteLabel
+        ].forEach { noteStackView.addArrangedSubview($0) }
+        
+        [
+            budgetImageView,
+            budgetLabel
+        ].forEach { budgetStackView.addArrangedSubview($0) }
+        
+        [
+            periodImageView,
             periodLabel
+        ].forEach { periodStackView.addArrangedSubview($0) }
+        
+        [
+            noteStackView,
+            budgetStackView,
+            periodStackView
         ].forEach { verticalStackView.addArrangedSubview($0) }
         
         [
@@ -115,22 +163,23 @@ private extension ListCollectionViewCell {
         }
         
         verticalStackView.snp.makeConstraints {
-            $0.top.equalTo(tripNameLabel.snp.bottom).offset(8)
+            $0.top.equalTo(tripNameLabel.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.bottom.equalToSuperview().offset(-20)
         }
         
-        noteLabel.snp.makeConstraints {
-            $0.height.equalTo(20)
+        noteImageView.snp.makeConstraints {
+            $0.width.height.equalTo(16)
         }
         
-        budgetLabel.snp.makeConstraints {
-            $0.height.equalTo(20)
+        budgetImageView.snp.makeConstraints {
+            $0.width.height.equalTo(16)
         }
         
-        periodLabel.snp.makeConstraints {
-            $0.height.equalTo(20)
+        periodImageView.snp.makeConstraints {
+            $0.width.height.equalTo(16)
         }
+
     }
     
     /// 셀 재사용 시 리셋 메서드
@@ -150,8 +199,8 @@ extension ListCollectionViewCell {
     func configureCell(data: CashBookModel) {
         tripNameLabel.text = data.tripName
         noteLabel.text = data.note
-        budgetLabel.text = "💰 \(NumberFormatter.wonFormat(Int(data.budget)))"
-        periodLabel.text = "🗓️ \(Formatter.dateFormat(data.departure)) - \(Formatter.dateFormat(data.homecoming))"
+        budgetLabel.text = "\(NumberFormatter.wonFormat(Int(data.budget)))"
+        periodLabel.text = "\(Formatter.dateFormat(data.departure)) - \(Formatter.dateFormat(data.homecoming))"
     }
     
 }

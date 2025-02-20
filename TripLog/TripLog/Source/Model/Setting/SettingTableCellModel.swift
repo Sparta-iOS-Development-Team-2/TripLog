@@ -7,6 +7,8 @@
 
 import UIKit
 import Then
+import RxSwift
+import RxCocoa
 
 /// 설정탭에서 사용할 테이블뷰의 Cell Model
 struct SettingTableCellModel {
@@ -39,8 +41,15 @@ struct SettingTableCellModel {
         ),
         
         SettingTableCellModel(
+            icon: UIImage(named: "playInfo") ?? UIImage(),
+            title: "사용 방법",
+            extraView: nil,
+            action: showOnboarding
+        ),
+        
+        SettingTableCellModel(
             icon: UIImage(named: "versionIcon") ?? UIImage(),
-            title: "버전 1.0.0",
+            title: "버전 \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")",
             extraView: nil,
             action: nil
         )
@@ -51,6 +60,7 @@ struct SettingTableCellModel {
 // MARK: - SettingTableCellModel Private Method
 
 private extension SettingTableCellModel {
+    private static let disposeBag = DisposeBag()
     
     /// 토글 스위치를 구현하는 메소드
     /// - Returns: UISwitch
@@ -59,7 +69,7 @@ private extension SettingTableCellModel {
         let isDarkMode = UserDefaults.standard.object(forKey: "isDarkModeEnabled") == nil ? UITraitCollection.current.userInterfaceStyle == .dark : UserDefaults.standard.bool(forKey: "isDarkModeEnabled")
         toggleSwitch.isOn = isDarkMode
         toggleSwitch.thumbTintColor = .CustomColors.Background.detailBackground
-        toggleSwitch.onTintColor = .Personal.normal
+        toggleSwitch.onTintColor = .CustomColors.Accent.blue
                 
         return toggleSwitch
     }
@@ -74,7 +84,6 @@ private extension SettingTableCellModel {
     
     /// 문의 기능을 Alert으로 구현한 메소드
     static func inquiry() {
-        guard let view = AppHelpers.getTopViewController() else { return }
         let alert = AlertManager(
             title: "문의하기",
             message: "이메일: jeffap324@gmail.com\n구글폼 문의는 아래 버튼을 눌러주세요!",
@@ -89,7 +98,7 @@ private extension SettingTableCellModel {
                 }
             }
         
-        alert.showAlert(on: view, .alert)
+        alert.showAlert(.alert)
     }
     
     /// 앱스토어 링크로 이동하는 메소드
@@ -104,5 +113,20 @@ private extension SettingTableCellModel {
         }
         
         debugPrint("앱스토어 이동")
+    }
+    
+    static func showOnboarding() {
+        OnboardingManager.showOnboardingView()
+            .asSignal(onErrorSignalWith: .empty())
+            .emit { vc in
+                UIView.animate(withDuration: 0.3, animations: {
+                    vc.view.alpha = 0
+                }) { _ in
+                    vc.removeFromParent()
+                    vc.view.removeFromSuperview()
+                }
+                // "시작하기" 버튼을 눌렀는지 여부로 첫 실행 여부 판정
+                UserDefaults.standard.set(false, forKey: "isFirstLaunch")
+            }.disposed(by: disposeBag)
     }
 }

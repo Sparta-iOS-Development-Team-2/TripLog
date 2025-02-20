@@ -35,14 +35,14 @@ struct PopoverManager {
     ///      return .none
     ///     }
     /// ```
-    static func showPopover(on vc: UIViewController,
-                            from sourceView: UIView,
+    static func showPopover(from sourceView: UIView,
                             title: String,
                             subTitle: String,
                             width: Int,
                             height: Int,
-                            arrow: UIPopoverArrowDirection) {
-        
+                            arrow: UIPopoverArrowDirection)
+    {
+        guard let vc = AppHelpers.getTopViewController() else { return }
         let popoverVC = PopoverViewController()
         popoverVC.modalPresentationStyle = .popover
         popoverVC.preferredContentSize = CGSize(width: width , height: height)

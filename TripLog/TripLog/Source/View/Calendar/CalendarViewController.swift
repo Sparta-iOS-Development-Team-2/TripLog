@@ -17,6 +17,10 @@ import SnapKit
 /// - FSCalendar를 사용한 날짜 선택 및 데이터 표시
 /// - 다크모드 대응 및 그림자 최적화
 final class CalendarViewController: UIViewController {
+    
+    private var startDate = Date()
+    private var endDate = Date()
+    
     // MARK: - UI Components
     /// 전체 컨텐츠를 스크롤 가능하게 하는 스크롤 뷰
     private lazy var scrollView = UIScrollView().then {
@@ -72,7 +76,7 @@ final class CalendarViewController: UIViewController {
     // MARK: - Properties
     /// 날짜별 지출 데이터를 저장하는 딕셔너리
     private let selectedDate = PublishRelay<Date>()
-    fileprivate let updateTotalAmount = PublishRelay<String>()
+    fileprivate let updateTotalAmount = PublishRelay<Int>()
     private let disposeBag = DisposeBag()
     
     // MARK: - View Lifecycle
@@ -80,6 +84,7 @@ final class CalendarViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         calendarView.calendar.select(Date())
+        setupTripPlan(cashBookID: calendarViewModel.cashBookID)
         setupBindings()
     }
     
@@ -167,6 +172,34 @@ final class CalendarViewController: UIViewController {
         return totalExpense
     }
     
+    private func checkDateAlert(date: String) -> Observable<Void> {
+            return Observable.create { observer in
+                let alert = AlertManager(
+                    title: "환율 정보 안내",
+                    message: "미래 날짜의 환율이 없어 \(date) 환율로 계산됩니다.",
+                    cancelTitle: "취소",
+                    activeTitle: "확인"
+                ) {
+                    observer.onNext(())
+                    observer.onCompleted()
+                }
+                alert.showAlert(.alert)
+                return Disposables.create()
+            }
+        }
+
+    private func setupTripPlan(cashBookID: UUID) {
+        guard
+            let cashBook = CoreDataManager.shared.fetch(type: CashBookEntity.self, predicate: cashBookID).first,
+            let start = cashBook.departure,
+            let end = cashBook.homecoming
+        else { return }
+        
+        self.startDate = start.formattedStringToDate()
+        self.endDate = end.formattedStringToDate()
+    }
+
+    
     // MARK: - Calendar Setup
     
     // CalendarViewModel 바인딩
@@ -176,7 +209,7 @@ final class CalendarViewController: UIViewController {
             nextButtonTapped: customHeaderView.rx.nextButtonTapped,
             addButtonTapped: expenseListView.rx.addButtondTapped,
             didSelected: selectedDate
-            )
+        )
         
         let output = calendarViewModel.transform(input: input)
         
@@ -190,26 +223,73 @@ final class CalendarViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
+        // 미래 날짜 스트림
         output.addButtonTapped
             .withUnretained(self)
+            .filter { _, date in date > Date() }
             .flatMap { owner, date in
+                let dateStatus = Date.caculateDateNumber()
                 
-                let rates = CoreDataManager.shared.fetch(
-                    type: CurrencyEntity.self,
-                    predicate: Date.formattedDateString(from: date)
-                )
-                
-                return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.calendarViewModel.cashBookID, date: date, exchangeRate: rates)))
-                    .compactMap {
-                        $0 as? MyCashBookModel
+                return owner.checkDateAlert(date: dateStatus)
+                    .flatMap { _ in
+                        let checkDate: (Date) -> Date = { date in
+                            return Date() < date ? Date() : date
+                        }
+                        
+                        let rates = CoreDataManager.shared.fetch(
+                            type: CurrencyEntity.self,
+                            predicate: Date.formattedDateString(from: checkDate(date))
+                        )
+                        
+                        return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
+                            cashBookID: owner.calendarViewModel.cashBookID,
+                            date: date,
+                            exchangeRate: rates
+                        )))
+                        .compactMap { $0 as? MyCashBookModel }
                     }
             }
             .asSignal(onErrorSignalWith: .empty())
-            .emit { [weak self] data in
+            .withUnretained(self)
+            .emit { owner, data in
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
-                self?.calendarViewModel.loadExpenseData()
+                owner.calendarViewModel.loadExpenseData()
+                owner.updateTotalAmount.accept(owner.getTotalAmount())
             }
             .disposed(by: disposeBag)
+
+        // 현재/과거 날짜 스트림
+        output.addButtonTapped
+            .withUnretained(self)
+            .filter { _, date in date <= Date() }
+            .flatMap { owner, date in
+                let checkDate: (Date) -> Date = { date in
+                    return Date() < date ? Date() : date
+                }
+                
+                let rates = CoreDataManager.shared.fetch(
+                    type: CurrencyEntity.self,
+                    predicate: Date.formattedDateString(from: checkDate(date))
+                )
+                
+                return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
+                    cashBookID: owner.calendarViewModel.cashBookID,
+                    date: date,
+                    exchangeRate: rates
+                )))
+                .compactMap { $0 as? MyCashBookModel }
+            }
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, data in
+                CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
+                owner.calendarViewModel.loadExpenseData()
+                owner.updateTotalAmount.accept(owner.getTotalAmount())
+                UserDefaults.standard.set(data.country, forKey: "lastSelectedCurrency")
+            }
+            .disposed(by: disposeBag)
+        
+        
         
         // expense 지출내역 데이터 채우기
         output.expenses
@@ -218,7 +298,6 @@ final class CalendarViewController: UIViewController {
             .drive { owner, data in
                 owner.calendarView.calendar.reloadData()
                 owner.expenseListView.configure(date: data.date, expenses: data.data, balance: data.balance)
-                owner.updateTotalAmount.accept("\(owner.getTotalAmount())")
             }
             .disposed(by: disposeBag)
     }
@@ -245,7 +324,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         
         return cell
     }
-    
+        
     /// 셀의 날짜 레이블을 설정하는 메서드
     /// - Parameters:
     ///   - cell: 설정할 캘린더 커스텀 셀
@@ -285,7 +364,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     ///   - calendar: 현재 FSCalendar 인스턴스
     private func configureCellAppearance(_ cell: CalendarCustomCell, for date: Date, in calendar: FSCalendar) {
         if calendar.selectedDate == date {
-            configureSelectedCell(cell)
+            configureSelectedCell(cell, for: date)
         } else {
             configureUnselectedCell(cell, for: date)
         }
@@ -293,12 +372,22 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     
     /// 선택된 셀의 스타일을 설정하는 메서드
     /// - Parameter cell: 스타일을 적용할 셀
-    private func configureSelectedCell(_ cell: CalendarCustomCell) {
-        cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
-        cell.contentView.layer.cornerRadius = 10
-        cell.contentView.layer.masksToBounds = true
-        cell.titleLabel.textColor = .white
-        cell.expenseLabel.textColor = .white
+    private func configureSelectedCell(_ cell: CalendarCustomCell, for date: Date) {
+        if date >= startDate && date <= endDate {
+            cell.backgroundColor = .CustomColors.Accent.blue.withAlphaComponent(0.2)
+            cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
+            cell.contentView.layer.cornerRadius = 10
+            cell.contentView.layer.masksToBounds = true
+            cell.titleLabel.textColor = .white
+            cell.expenseLabel.textColor = .white
+        } else {
+            cell.backgroundColor = .clear
+            cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
+            cell.contentView.layer.cornerRadius = 10
+            cell.contentView.layer.masksToBounds = true
+            cell.titleLabel.textColor = .white
+            cell.expenseLabel.textColor = .white
+        }
     }
     
     /// 선택되지 않은 셀의 스타일을 설정하는 메서드
@@ -306,11 +395,21 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     ///   - cell: 스타일을 적용할 셀
     ///   - date: 셀의 날짜
     private func configureUnselectedCell(_ cell: CalendarCustomCell, for date: Date) {
-        let isToday = Calendar.current.isDateInToday(date)
-        cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
-        cell.expenseLabel.textColor = .red
-        cell.contentView.layer.cornerRadius = 0
-        cell.contentView.backgroundColor = .clear
+        if date >= startDate && date <= endDate {
+            let isToday = Calendar.current.isDateInToday(date)
+            cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
+            cell.expenseLabel.textColor = .red
+            cell.contentView.layer.cornerRadius = 0
+            cell.contentView.backgroundColor = .CustomColors.Accent.blue.withAlphaComponent(0.2)
+            cell.backgroundColor = .clear
+        } else {
+            let isToday = Calendar.current.isDateInToday(date)
+            cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
+            cell.expenseLabel.textColor = .red
+            cell.contentView.layer.cornerRadius = 0
+            cell.contentView.backgroundColor = .clear
+            cell.backgroundColor = .clear
+        }
     }
     
     /// 셀 선택되었을 때 호출되는 메서드
@@ -321,6 +420,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         self.selectedDate.accept(date)
     }
+
 }
 
 extension CalendarViewController: UITableViewDelegate {
@@ -339,10 +439,11 @@ extension CalendarViewController: UITableViewDelegate {
                 destructiveTitle: "삭제"
             ) {
                 self.calendarViewModel.deleteExpense(id: expense.id)
+                self.updateTotalAmount.accept(self.getTotalAmount())
             }
             
-            alert.showAlert(on: self, .alert)
             completion(true)
+            alert.showAlert(.alert)
         }
         
         return UISwipeActionsConfiguration(actions: [deleteAction])
@@ -352,13 +453,19 @@ extension CalendarViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let expenses = calendarViewModel.expensesForDate(date: calendarViewModel.selectedDate)
         let expense = expenses[indexPath.row]
-        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date.formattedDateString(from: expense.expenseDate))
+        let checkDate: (_ date: Date) -> Date = { date in
+            return Date() < date ? Date() : date
+        }
+        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date.formattedDateString(from: checkDate(expense.expenseDate)))
         
         ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: rates))
             .compactMap { $0 as? MyCashBookModel }
-            .subscribe(onNext: { [weak self] updatedExpense in
-                self?.calendarViewModel.updateExpense(updatedExpense)
-            })
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, updatedExpense in
+                owner.calendarViewModel.updateExpense(updatedExpense)
+                owner.updateTotalAmount.accept(owner.getTotalAmount())
+            }
             .disposed(by: disposeBag)
         
         tableView.deselectRow(at: indexPath, animated: true)
@@ -366,7 +473,7 @@ extension CalendarViewController: UITableViewDelegate {
 }
 
 extension Reactive where Base: CalendarViewController {
-    var updateTotalAmount: PublishRelay<String> {
+    var updateTotalAmount: PublishRelay<Int> {
         return base.updateTotalAmount
     }
 }

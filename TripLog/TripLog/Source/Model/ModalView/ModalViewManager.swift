@@ -33,17 +33,23 @@ enum ModalViewManager {
     ///
     /// ``ModalViewState``
     static func showModal(state: ModalViewState) -> Observable<EntityDataSendable> {
-        guard let view = AppHelpers.getTopViewController() else {
+        guard let view = AppHelpers.getTopViewController(),
+              view.presentedViewController == nil
+        else {
             return .error(NSError(domain: "No top view controller", code: -1))
         }
         
         let modalVC = ModalViewController(state: state)
+        
+        let dismissSignal = modalVC.rx.deallocated.map { _ in EntityDataSendable?.none }
+        
         view.present(modalVC, animated: true)
         
         return Observable<EntityDataSendable>.merge(
             modalVC.rx.sendCashBookData.map { $0 as EntityDataSendable },
             modalVC.rx.sendConsumptionData.map { $0 as EntityDataSendable }
         )
+        .take(until: dismissSignal)
     }
     
 }

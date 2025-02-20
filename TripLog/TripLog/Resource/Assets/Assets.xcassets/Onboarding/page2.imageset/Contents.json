@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "Light Page2.png",
+      "filename" : "Light Page1.png",
       "idiom" : "universal"
     },
     {
@@ -11,7 +11,7 @@
           "value" : "light"
         }
       ],
-      "filename" : "Light Page2 1.png",
+      "filename" : "Light Page1 1.png",
       "idiom" : "universal"
     },
     {
@@ -21,7 +21,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Dark Page2.png",
+      "filename" : "Dark Page1.png",
       "idiom" : "universal"
     }
   ],

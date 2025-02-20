@@ -39,7 +39,7 @@ final class TopCustomButtonStackView: UIStackView {
     }
 
     private func setupButtons() {
-        configureButton(todayExpenseButton, title: "오늘 지출")
+        configureButton(todayExpenseButton, title: "지출 내역")
         configureButton(calendarButton, title: "캘린더")
 
         // 스택 뷰에 버튼 추가
@@ -72,8 +72,8 @@ final class TopCustomButtonStackView: UIStackView {
         let todayFontWeight: UIFont.Weight = isTodaySelected ? .bold : .medium
         let calendarFontWeight: UIFont.Weight = isTodaySelected ? .medium : .bold
 
-        todayExpenseButton.setTitleColor(isTodaySelected ? UIColor.Personal.normal : UIColor.CustomColors.Text.textSecondary, for: .normal)
-        calendarButton.setTitleColor(isTodaySelected ? UIColor.CustomColors.Text.textSecondary : UIColor.Personal.normal, for: .normal)
+        todayExpenseButton.setTitleColor(isTodaySelected ? .CustomColors.Accent.blue : UIColor.CustomColors.Text.textSecondary, for: .normal)
+        calendarButton.setTitleColor(isTodaySelected ? UIColor.CustomColors.Text.textSecondary : .CustomColors.Accent.blue, for: .normal)
 
         todayExpenseButton.titleLabel?.font = UIFont.SCDream(size: .display, weight: todayFontWeight)
         calendarButton.titleLabel?.font = UIFont.SCDream(size: .display, weight: calendarFontWeight)

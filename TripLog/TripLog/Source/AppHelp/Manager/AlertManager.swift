@@ -15,7 +15,7 @@ import UIKit
  // 기본적인 Alert 사용 방법
  let alert = AlertManager(title: "알림", message: "저장하시겠습니까?", cancelTitle: "취소")
  
- alert.showAlert(on: self, .alert)
+ alert.showAlert(.alert)
  ```
  */
 struct AlertManager {
@@ -79,7 +79,8 @@ struct AlertManager {
     /// - Parameters:
     ///   - view: Alert을 present 할 뷰 컨트롤러
     ///   - style: AlertViewController Style
-    func showAlert(on view: UIViewController, _ style: UIAlertController.Style) {
+    func showAlert(_ style: UIAlertController.Style) {
+        guard let view = AppHelpers.getTopViewController() else { return }
         let alert = UIAlertController(title: self.title, message: self.message, preferredStyle: style)
         alert.addAction(UIAlertAction(title: self.cancelTitle, style: .cancel))
         
