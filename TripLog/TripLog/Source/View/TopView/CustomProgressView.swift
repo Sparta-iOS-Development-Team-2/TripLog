@@ -59,7 +59,7 @@ final class CustomProgressView: UIView {
         let progressValue = min(max(value, 0), 1) // 값이 0~1 사이를 벗어나지 않도록 제한
         self.progressValue = progressValue // ✅ 값 저장
 
-        let newWidth = self.bounds.width * progressValue
+        let newWidth = progressValue < 0.07 ? self.bounds.width * 0.07 : self.bounds.width * progressValue
 
         debugPrint("🔹 Progress bar width update: \(newWidth), View width: \(self.bounds.width)")
 
