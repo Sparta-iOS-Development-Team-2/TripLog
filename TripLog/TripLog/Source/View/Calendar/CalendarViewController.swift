@@ -377,14 +377,25 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
             cell.backgroundColor = .CustomColors.Accent.blue.withAlphaComponent(0.2)
             cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
             cell.contentView.layer.cornerRadius = 10
-            cell.contentView.layer.masksToBounds = true
+            cell.contentView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
             cell.titleLabel.textColor = .white
             cell.expenseLabel.textColor = .white
+            if date == startDate {
+                cell.layer.cornerRadius = 10
+                cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMinXMinYCorner]
+            } else if date == endDate {
+                cell.layer.cornerRadius = 10
+                cell.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner]
+            } else {
+                cell.layer.cornerRadius = 0
+            }
+            
         } else {
             cell.backgroundColor = .clear
+            cell.layer.cornerRadius = 0
             cell.contentView.backgroundColor = UIColor.CustomColors.Accent.blue
             cell.contentView.layer.cornerRadius = 10
-            cell.contentView.layer.masksToBounds = true
+            cell.contentView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
             cell.titleLabel.textColor = .white
             cell.expenseLabel.textColor = .white
         }
@@ -397,14 +408,20 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     private func configureUnselectedCell(_ cell: CalendarCustomCell, for date: Date) {
         if date >= startDate && date <= endDate {
             let isToday = Calendar.current.isDateInToday(date)
-            cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
+            cell.dateLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
             cell.expenseLabel.textColor = .red
-            cell.contentView.layer.cornerRadius = 0
             cell.contentView.backgroundColor = .CustomColors.Accent.blue.withAlphaComponent(0.2)
             cell.backgroundColor = .clear
+            if date == startDate {
+                cell.contentView.layer.cornerRadius = 10
+                cell.contentView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMinXMinYCorner]
+            } else if date == endDate {
+                cell.contentView.layer.cornerRadius = 10
+                cell.contentView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner]
+            }
         } else {
             let isToday = Calendar.current.isDateInToday(date)
-            cell.titleLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
+            cell.dateLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
             cell.expenseLabel.textColor = .red
             cell.contentView.layer.cornerRadius = 0
             cell.contentView.backgroundColor = .clear
