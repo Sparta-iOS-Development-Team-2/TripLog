@@ -8,7 +8,7 @@
 
 **🔗Figma**: [Figma](https://www.figma.com/design/X6Lpqz7xRJ7zH5FgbcqDvI/%EC%B5%9C%EC%A2%85%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-2%EC%A1%B0-%EC%99%80%EC%9D%B4%EC%96%B4-%ED%94%84%EB%A0%88%EC%9E%84?node-id=0-1&p=f&t=kL471GHADO3N4ebX-0)
 
-**🔗Reperance**: // 환율 API 링크
+**🔗Reperance**: [한국수출입은행](https://www.koreaexim.go.kr/ir/HPHKIR020M01?apino=2&viewtype=C&searchselect=&searchword=)
 
 ***
 
