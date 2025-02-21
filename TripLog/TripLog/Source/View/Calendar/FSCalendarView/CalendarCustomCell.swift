@@ -19,7 +19,6 @@ final class CalendarCustomCell: FSCalendarCell {
     public let dateLabel = UILabel().then {
         $0.font = .SCDream(size: .caption, weight: .medium)
         $0.textAlignment = .center
-        $0.textColor = UIColor.CustomColors.Text.textPrimary
     }
     
     /// 해당 일자 지출 금액 라벨
@@ -82,19 +81,10 @@ final class CalendarCustomCell: FSCalendarCell {
     /// - 텍스트, 텍스트 컬러, 배경색, 코너 반경 등을 기본값으로 재설정
     private func resetState() {
         dateLabel.text = nil
-        dateLabel.textColor = UIColor.CustomColors.Text.textPrimary
         expenseLabel.text = nil
         expenseLabel.textColor = .red
         contentView.backgroundColor = .clear
         contentView.layer.cornerRadius = 0
     }
-    
-    // MARK: - Trait Collection
-    /// 다크모드 변경 등 trait collection이 변경될 때 호출되는 메서드
-    /// - Parameter previousTraitCollection: 이전 trait collection 정보
-    /// - 다크모드에 따른 텍스트 컬러 업데이트
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        dateLabel.textColor = UIColor.CustomColors.Text.textPrimary
-    }
+
 }

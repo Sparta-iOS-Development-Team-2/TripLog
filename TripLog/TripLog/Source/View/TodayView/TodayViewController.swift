@@ -13,10 +13,6 @@ final class TodayViewController: UIViewController {
     private lazy var fetchTrigger =  BehaviorRelay<(String,String, UUID)>(value: ("전체", "전체", cashBookID) )
     private let deleteExpenseTrigger = PublishRelay<(IndexPath, String, String)>()
     fileprivate let totalAmountRelay = PublishRelay<Int>()
-    
-
-    
-    
     private let filterTapRelay = PublishRelay<Void>()
     
     // MARK: - Properties
@@ -34,6 +30,24 @@ final class TodayViewController: UIViewController {
         $0.text = "전체 내역"
         $0.font = UIFont.SCDream(size: .display, weight: .bold)
         $0.textColor = UIColor(named: "textPrimary")
+    }
+    
+    private let filterText = UILabel().then {
+        $0.text = "전체 지출액"
+        $0.font = .SCDream(size: .headline, weight: .medium)
+        $0.textColor = .CustomColors.Accent.blue
+        $0.numberOfLines = 1
+        $0.textAlignment = .left
+    }
+    
+    private let amountLabel = UILabel().then {
+        $0.text = "0 원"
+        $0.font = .SCDream(size: .headline, weight: .medium)
+        $0.textColor = .CustomColors.Accent.blue
+        $0.numberOfLines = 1
+        $0.textAlignment = .right
+        $0.minimumScaleFactor = 0.5
+        $0.lineBreakMode = .byTruncatingTail
     }
 
     // 필터 버튼 (UILabel + UIImageView 포함)
@@ -157,6 +171,8 @@ private extension TodayViewController {
         }
         
         view.addSubview(topStackView)
+        view.addSubview(filterText)
+        view.addSubview(amountLabel)
         view.addSubview(tableView)
         view.addSubview(floatingButton) // ✅ 추가
     }
@@ -169,8 +185,20 @@ private extension TodayViewController {
             $0.leading.trailing.equalToSuperview().inset(16)
         }
         
+        filterText.snp.makeConstraints {
+            $0.top.equalTo(topStackView.snp.bottom).offset(8)
+            $0.leading.equalTo(topStackView)
+            $0.height.equalTo(16)
+        }
+        
+        amountLabel.snp.makeConstraints {
+            $0.top.equalTo(topStackView.snp.bottom).offset(8)
+            $0.trailing.equalTo(topStackView)
+            $0.height.equalTo(16)
+        }
+        
         tableView.snp.makeConstraints {
-            $0.top.equalTo(topStackView.snp.bottom).offset(16)
+            $0.top.equalTo(amountLabel.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(8)
             $0.bottom.equalToSuperview()
             
@@ -253,14 +281,15 @@ private extension TodayViewController {
             .asDriver(onErrorDriveWith: .empty())
             .drive { owner, expenses in
                 owner.updateEmptyState(isEmpty: expenses.isEmpty)
+                owner.amountLabel.text = owner.getFilterTotalAmount(expenses) + " 원"
                 if owner.fetchTrigger.value.0 != "전체" && owner.fetchTrigger.value.1 != "전체" {
-                    owner.headerTitleLabel.text = "\(owner.fetchTrigger.value.0) / \(owner.fetchTrigger.value.1) 내역"
+                    owner.filterText.text = "\(owner.fetchTrigger.value.0) / \(owner.fetchTrigger.value.1)"
                 } else if owner.fetchTrigger.value.0 == "전체" && owner.fetchTrigger.value.1 != "전체" {
-                    owner.headerTitleLabel.text = "\(owner.fetchTrigger.value.1) 내역"
+                    owner.filterText.text = "\(owner.fetchTrigger.value.1)"
                 } else if owner.fetchTrigger.value.0 != "전체" && owner.fetchTrigger.value.1 == "전체" {
-                    owner.headerTitleLabel.text = "\(owner.fetchTrigger.value.0) 내역"
+                    owner.filterText.text = "\(owner.fetchTrigger.value.0)"
                 } else {
-                    owner.headerTitleLabel.text = "전체 내역"
+                    owner.filterText.text = ""
                 }
             }
             .disposed(by: disposeBag)
@@ -333,6 +362,15 @@ private extension TodayViewController {
         return totalExpense
     }
     
+    func getFilterTotalAmount(_ data: [TodaySectionModel]) -> String {
+        let datas = data.map { $0.items }
+        var totalAmount: Double = 0
+        datas.forEach { data in
+            totalAmount += data.map { $0.caculatedAmount.rounded() }.reduce(0) { $0 + $1 }
+        }
+        
+        return totalAmount.formattedWithFormatter
+    }
 }
 
 // MARK: - TableView Delegate Method

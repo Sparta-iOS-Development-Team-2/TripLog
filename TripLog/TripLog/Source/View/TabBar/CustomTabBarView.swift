@@ -91,15 +91,9 @@ final class TabBarView: UIView {
     func addButtonDisable(_ disable: Bool) {
         switch disable {
         case true:
-            UIView.animate(withDuration: 0.3) {
-                self.tabBarAddButton.transform = CGAffineTransform.identity
-            }
             tabBarAddButton.isEnabled = true
             tabBarAddButton.backgroundColor = .CustomColors.Accent.blue
         case false:
-            UIView.animate(withDuration: 0.3) {
-                self.tabBarAddButton.transform = self.tabBarAddButton.transform.rotated(by: .pi / 4)
-            }
             tabBarAddButton.isEnabled = false
             tabBarAddButton.backgroundColor = UIColor.CustomColors.Text.textSecondary
         }
