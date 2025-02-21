@@ -1,6 +1,6 @@
 # 트립록(TripLog)
 
-![Thumbnail](https://github.com/user-attachments/assets/592492a2-55f8-41e1-bb98-530088e155cc)
+<img width="1280" alt="Thumbnail2" src="https://github.com/user-attachments/assets/04c83cb5-64ef-4e58-b0a2-65c10e9b8e7d" />
 
 **🎯프로젝트 목적**: 해외여행/출장 시 환율을 적용하여 지출을 관리하고 분석하는 가계부 앱
 
@@ -52,22 +52,41 @@
 ## 📱 Preview
 
 ### LightMode
-| Launch | Main | CashBook List |
+| Launch | Onboarding | Main |
 | :-: | :-: | :-: |
-| ![Simulator Screenshot - iPhone 16 - 2025-02-06 at 20 57 51](https://github.com/user-attachments/assets/4e32dfc6-5aa1-4cbd-bb40-de82cd84ffea) | ![Simulator Screenshot - iPhone 16 - 2025-02-06 at 20 57 54](https://github.com/user-attachments/assets/7813c32b-5169-4711-9696-e6947bfaf83d) | ![Simulator Screenshot - iPhone 16 - 2025-02-06 at 20 59 36](https://github.com/user-attachments/assets/88200973-82d3-4a95-a9c8-4869070f85e9) |
-| Add CashBook | Today Expense | Calendar |
-| ![Simulator Screenshot - iPhone 16 - 2025-02-06 at 20 58 02](https://github.com/user-attachments/assets/9c66a3a8-3956-41a2-b5f7-1da8d8eff31c) | ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 45 17](https://github.com/user-attachments/assets/45b6f3b2-ffb3-4bf9-b6fb-8a589b874b19) | ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 45 26](https://github.com/user-attachments/assets/0c6c3670-b862-4f96-9346-668b85454bd9) |
-| Add Today Expense | Add by Date Expense | Setting |
-| ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 44 51](https://github.com/user-attachments/assets/ac831dad-d346-46fc-bae3-967793da3195) | ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 46 36](https://github.com/user-attachments/assets/3c81f80e-f8b8-449d-9cec-fc26b0754669) | ![Simulator Screenshot - iPhone 16 - 2025-02-06 at 20 57 57](https://github.com/user-attachments/assets/e788ff0c-15a5-41b9-a9bc-6e22f5ed2d4e) |
+| ![Simulator Screenshot - iPhone 16 - 2025-02-06 at 20 57 51](https://github.com/user-attachments/assets/4e32dfc6-5aa1-4cbd-bb40-de82cd84ffea) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 29 33](https://github.com/user-attachments/assets/86b463d5-e949-4e12-868c-5b370e80789a) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 21 15](https://github.com/user-attachments/assets/cb65cfdb-fceb-4b89-b1d7-f34e521b2c61) |
+| Add CashBook | Total Expense | Calendar |
+| ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 22 52](https://github.com/user-attachments/assets/30a572a5-dc99-48ba-bacb-103ec200ae8a) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 23 04](https://github.com/user-attachments/assets/7ff3cb55-aefa-4c50-9b09-847a49be28a5) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 23 16](https://github.com/user-attachments/assets/084e7564-b112-4516-9c52-ea914abb517f) |
+| Add Expense | Select Filter | Setting |
+| ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 25 39](https://github.com/user-attachments/assets/96d89d96-268d-4570-88ee-839a2ed50a91) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 25 43](https://github.com/user-attachments/assets/6e929691-0531-4e8e-a0d1-e896014182de) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 32 42](https://github.com/user-attachments/assets/f07e9ff3-766c-4a79-9e2a-0ccb74535a12) |
 
 ### DarkMode
-| Launch | Main | CashBook List |
+| Launch | Onboarding | Main |
 | :-: | :-: | :-: |
-| ![Simulator Screenshot - iPhone 16 - 2025-02-06 at 20 57 51](https://github.com/user-attachments/assets/2bb44571-3c43-4d31-bb26-4c9a9b258c87) |![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 48 53](https://github.com/user-attachments/assets/5446251d-8ff7-44ce-a8b4-92f565891d61) | ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 48 11](https://github.com/user-attachments/assets/ad697fa1-95c1-45f9-a52d-1e38f9905d0a) |
-| Add CashBook | Today Expense | Calendar |
-| ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 48 15](https://github.com/user-attachments/assets/df632993-aa12-4187-9b2a-3d70f997102e) | ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 48 27](https://github.com/user-attachments/assets/bc1ebb61-d01a-41ec-b428-b5cc969854cb) | ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 48 43](https://github.com/user-attachments/assets/dddf447a-0e0b-4a83-8844-afea5eac8004) |
-| Add Today Expense | Add by Date Expense | Setting |
-| ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 48 39](https://github.com/user-attachments/assets/58a9cd52-6237-4a47-bab3-a113512806c9) | ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 48 47](https://github.com/user-attachments/assets/9c1a3f3d-ed87-42e1-be2d-a34674e1492a) | ![Simulator Screenshot - iPhone 16 - 2025-02-07 at 10 48 18](https://github.com/user-attachments/assets/4c090128-6db5-4eae-b7d0-425630464975) |
+| ![Simulator Screenshot - iPhone 16 - 2025-02-06 at 20 57 51](https://github.com/user-attachments/assets/2bb44571-3c43-4d31-bb26-4c9a9b258c87) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 35 53](https://github.com/user-attachments/assets/f72f2b79-18c6-4448-b861-0c8b1601c34d) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 35 59](https://github.com/user-attachments/assets/6ac6476a-6350-4881-8aa8-b2a3fd9e7f1c) |
+| Add CashBook | Total Expense | Calendar |
+| ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 36 11](https://github.com/user-attachments/assets/992a0bb5-f136-41de-96eb-dfe6a602684e) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 36 17](https://github.com/user-attachments/assets/b45ca50e-1279-4302-a4d9-2ddf5180f9c2) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 36 23](https://github.com/user-attachments/assets/b656c250-5aa4-4611-a372-6fc1c09b76b1) |
+| Add Expense | Select Filter | Setting |
+| ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 36 31](https://github.com/user-attachments/assets/a4485377-7622-4d90-8648-3e71b93bbd84) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 36 35](https://github.com/user-attachments/assets/226979e6-ffb7-416d-a489-ca1a64c2700d) | ![Simulator Screenshot - iPhone 16 - 2025-02-21 at 10 36 41](https://github.com/user-attachments/assets/a0686d25-5b20-4d59-8e55-c8f3c54a608c) |
+
+***
+
+## 💡 주요 기능
+
+### 1. 여행별로 나만의 가계부 생성하기
+여행별로 가계부를 생성하여 지출을 더욱 효율적으로 관리할 수 있습니다.
+
+### 2. 오늘의 지출내역 추가/수정/삭제 하기
+지출 방법, 지출 내용, 카테고리, 금액을 입력하여 간편하게 지출 내역을 추가할 수 있습니다.
+
+### 3. 캘린더를 통해 원하는 날짜에 지출을 추가/수정/삭제 하기
+캘린더에서 여행 일정은 강조되고, 날짜별로 지출 내역을 확인하고 관리할 수 있습니다.
+
+### 4. 지출 내역 추가시 통화를 선택하여 자동으로 환율 계산하기
+지출 내역을 추가할 때 통화를 선택하면 환율을 불러와 원화로 자동 계산이 이루어집니다.
+
+### 5. 프로그레스바를 통해 전체 지출 내역 한 눈에 확인하기
+한 가계부에서 총 얼마를 사용했는지 예산과 비교하여 그래프로 표현됩니다.
 
 ***
 
@@ -143,18 +162,6 @@ Title: [Type] 제목
 
 ## 스크린샷(선택)
 ```
-
-### 5. 커밋 컨벤션
-
-  - ✨ `[feat]` 새로운 기능 추가
-  - 🐛 `[fix]` 버그 수정
-  - 📝 `[docs]` 문서 수정
-  - 💄 `[style]` 코드 포맷팅, 세미콜론 누락, 코드 변경이 없는 경우
-  - ♻️ `[refactor]` 코드 리팩토링
-  - ✅ `[test]` 테스트 코드 추가/수정
-  - 🎨 `[chore]` 빌드 업무 수정, 패키지 매니저 수정
-  - 🔧 `[conf]` 설정 파일 수정
-  - 🚀 `[deploy]` 배포 관련 수정
    
 ***
 
@@ -167,15 +174,5 @@ Title: [Type] 제목
 ### 프로젝트 구조도
 <img width="1000" alt="최종 프로젝트 2조 브레인 스토밍" src="https://github.com/user-attachments/assets/d227948c-164e-4556-b4b8-d51649fc6b7b" />
 
-
-***
-
-## 💡 주요 기능
-
-1. 해외여행/출장 시 사용할 가계부 생성하기
-
-2. 오늘의 지출 내역 추가/수정하기
-
-3. 전체 지출내역 관리하기
 
 ***
