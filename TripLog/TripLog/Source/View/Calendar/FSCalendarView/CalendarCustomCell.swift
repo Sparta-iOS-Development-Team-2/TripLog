@@ -19,7 +19,6 @@ final class CalendarCustomCell: FSCalendarCell {
     public let dateLabel = UILabel().then {
         $0.font = .SCDream(size: .caption, weight: .medium)
         $0.textAlignment = .center
-        //        $0.textColor = UIColor.CustomColors.Text.textPrimary
     }
     
     /// 해당 일자 지출 금액 라벨
@@ -87,4 +86,5 @@ final class CalendarCustomCell: FSCalendarCell {
         contentView.backgroundColor = .clear
         contentView.layer.cornerRadius = 0
     }
+
 }
