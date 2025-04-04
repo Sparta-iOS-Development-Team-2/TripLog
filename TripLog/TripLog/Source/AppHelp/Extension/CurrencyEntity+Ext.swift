@@ -70,8 +70,11 @@ extension CurrencyEntity: CoreDataManagable {
                         result.sort(by: { Int($0.rateDate ?? "") ?? 0 > Int($1.rateDate ?? "") ?? 0 })
                         debugPrint("✅ 데이터 연동 성공!")
                         
+                        return result
+                        
                     } catch {
                         debugPrint("❌ Firestore 연동 실패", error.localizedDescription)
+                        return result
                     }
                 }
                 
@@ -80,9 +83,7 @@ extension CurrencyEntity: CoreDataManagable {
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            debugPrint("✨ result를 반환합니다 ✨")
-        }
+        debugPrint("✨ result를 반환합니다 ✨")
         
         return result
     }

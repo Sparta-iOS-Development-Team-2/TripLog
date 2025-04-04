@@ -50,17 +50,21 @@ class MainViewController: UIViewController {
         setupUI()
         
         Task {
-            if CoreDataManager.shared.fetch(type: CurrencyEntity.self).isEmpty {
-                do {
-                    try await SyncManager.shared.syncCoreDataToFirestore()
-                } catch {
-                    debugPrint(error)
-                }
-            } else {
-                _ = CoreDataManager.shared.fetch(type: CurrencyEntity.self,
-                                                 predicate: Date.formattedDateString(from: Date()))
-            }
+            try await SyncManager.shared.syncCoreDataToFirestore()
         }
+        
+//        Task {
+//            if CoreDataManager.shared.fetch(type: CurrencyEntity.self).isEmpty {
+//                do {
+//                    try await SyncManager.shared.syncCoreDataToFirestore()
+//                } catch {
+//                    debugPrint(error)
+//                }
+//            } else {
+//                _ = CoreDataManager.shared.fetch(type: CurrencyEntity.self,
+//                                                 predicate: Date.formattedDateString(from: Date()))
+//            }
+//        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
