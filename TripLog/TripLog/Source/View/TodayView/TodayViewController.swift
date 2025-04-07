@@ -371,6 +371,7 @@ private extension TodayViewController {
         
         return totalAmount.formattedWithFormatter
     }
+
 }
 
 // MARK: - TableView Delegate Method

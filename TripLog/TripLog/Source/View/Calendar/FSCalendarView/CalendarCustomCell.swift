@@ -86,5 +86,4 @@ final class CalendarCustomCell: FSCalendarCell {
         contentView.backgroundColor = .clear
         contentView.layer.cornerRadius = 0
     }
-
 }

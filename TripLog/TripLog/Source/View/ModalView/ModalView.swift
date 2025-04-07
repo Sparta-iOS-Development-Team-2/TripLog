@@ -206,6 +206,7 @@ private extension ModalView {
     /// - Returns: 환율을 적용한 원화
     func exchangeRateCalculation(_ country: String, _ amount: Double) -> Double {
         guard let currency = exchangeRate?.filter({ $0.currencyCode?.prefix(3) ?? "" == country }).first else { return 0 }
+        debugPrint("🗓️ 현재 적용된 환율 날짜:", currency.rateDate ?? "nil")
         
         var result: Double = 0
         
