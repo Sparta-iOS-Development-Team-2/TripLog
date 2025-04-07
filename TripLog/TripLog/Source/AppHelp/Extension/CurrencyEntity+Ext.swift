@@ -42,83 +42,50 @@ extension CurrencyEntity: CoreDataManagable {
     /// - Returns: 검색결과(특정 검색 결과)
     static func fetch(context: NSManagedObjectContext, predicate: Any? = nil) -> [Entity] {
         let request: NSFetchRequest<CurrencyEntity> = CurrencyEntity.fetchRequest()
-        let element = CurrencyElement()
         var result = [CurrencyEntity]()
-        var resultType: CurrencyRateResultType = .isEmpty
-        var retryCount = 0
         
-        guard var searchDate = predicate as? String else {
-            do {
-                let results = try context.fetch(request)
-                debugPrint("CurrencyEntity fetchCount: \(results.count)")
-                return results
-            } catch {
-                debugPrint("오류 발생: \(error)")
-                return []
-            }
+        do {
+            result = try context.fetch(request)
+            result.sort(by: { Int($0.rateDate ?? "") ?? 0 > Int($1.rateDate ?? "") ?? 0 })
+        } catch {
+            debugPrint("코어 데이터 load 실패", error.localizedDescription)
+            return []
         }
         
-        while retryCount < 15 {
-            // 검색 조건이 있을 때 동작
-            request.predicate = NSPredicate(format: "\(element.rateDate) == %@", searchDate)
-            do {
-                result = try context.fetch(request)
-                resultType = checkResult(result)
-                
-                switch resultType {
-                    // 데이터 자체가 없을 때(생성하기)
-                case .isEmpty:
-                    retryCount += 1
-                    FireStoreManager.shared.generateCurrencyRate(date: searchDate) { result in
-                        switch result {
-                        case true:
-                            Task {
-                                debugPrint("\(searchDate) 데이터 생성")
-                                do {
-                                    try await SyncManager.shared.syncCoreDataToFirestore()
-                                    debugPrint("동기화 완료") // 동기화 완료가 좀 느리게 동작함
-                                } catch {
-                                    debugPrint("\(searchDate)데이터 생성 후 데이터 동기화 실패")
-                                }
-                            }
-                        case false:
-                            searchDate = Date.getPreviousDate(from: searchDate) ?? searchDate
-                            debugPrint("API 통신 실패")
-                        }
+        guard let searchDate = predicate as? String,
+              result.filter({ $0.rateDate == searchDate }).isEmpty
+        else {
+            debugPrint("✨ 환율 데이터 있음, 현재 최신 환율 데이터 날짜:", result.first?.rateDate ?? "nil")
+            return result
+        }
+
+        
+        // 검색 조건이 있을 경우
+        FireStoreManager.shared.generateCurrencyRate(date: searchDate) { isSuccess in
+            if isSuccess {
+                Task {
+                    do {
+                        try await SyncManager.shared.syncCoreDataToFirestore()
+                        result = try context.fetch(request)
+                        result.sort(by: { Int($0.rateDate ?? "") ?? 0 > Int($1.rateDate ?? "") ?? 0 })
+                        debugPrint("✅ 데이터 연동 성공!")
                         
+                        return result
+                        
+                    } catch {
+                        debugPrint("❌ Firestore 연동 실패", error.localizedDescription)
+                        return result
                     }
-                    continue
-                    
-                    // 데이터에 내용이 없을 때(검색일자 감소)
-                case .noData:
-                    retryCount += 1
-                    // 검색 조건을 수정하거나 사용자에게 알림
-                    debugPrint("검색날짜 변경 전: \(searchDate)")
-                    searchDate = Date.getPreviousDate(from: searchDate) ?? searchDate
-                    debugPrint("검색날짜 변경 후: ->\(searchDate)")
-                    continue
-                    
-                    // 정상 데이터 확인
-                case .success:
-                    debugPrint("정상 값 찾음: \(searchDate)")
-                    return result // 반복문 종료
                 }
-            } catch {
-                debugPrint("오류 발생: \(error)")
-                return []
+                
+            } else {
+                debugPrint("❌ API 통신 실패")
             }
         }
         
-        func checkResult(_ result: [CurrencyEntity?]) -> CurrencyRateResultType {
-            if result.isEmpty {
-                return .isEmpty
-            } else if result.first??.currencyCode == nil {
-                return .noData
-            } else {
-                return .success
-            }
-        }
-        return []
+        debugPrint("✨ result를 반환합니다 ✨")
+        
+        return result
     }
     
     /// (사용X)
