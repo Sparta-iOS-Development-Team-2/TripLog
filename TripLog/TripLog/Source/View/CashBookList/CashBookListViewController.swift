@@ -13,6 +13,8 @@ import RxSwift
 
 final class CashBookListViewController: UIViewController {
     
+    weak var coordinator: MainCoordinator?
+    
     private let disposeBag = DisposeBag()
     private let addCellView = AddCellView()
     private let viewModel = CashBookListViewModel()
@@ -42,6 +44,7 @@ final class CashBookListViewController: UIViewController {
     
     // RxdataSource(animated)
     typealias DataSource = RxCollectionViewSectionedAnimatedDataSource<SectionOfListCellData>
+    
     private let dataSource: DataSource = {
         let animationConfiguration = AnimationConfiguration(
             insertAnimation: .bottom,
@@ -66,6 +69,16 @@ final class CashBookListViewController: UIViewController {
     }()
     
     //MARK: - Initializer
+    init(coordinator: MainCoordinator) {
+        self.coordinator = coordinator
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -182,7 +195,7 @@ private extension CashBookListViewController {
             .subscribe(onNext: { [weak self] selectedItem in
                 guard let self = self else { return }
                 let data = self.getData(selectedItem)
-                self.navigationController?.pushViewController(TopViewController(cashBook: data), animated: true)
+                self.coordinator?.pushDetailViewController(data)
             })
             .disposed(by: disposeBag)
     }
