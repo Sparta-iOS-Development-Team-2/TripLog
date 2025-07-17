@@ -258,7 +258,6 @@ private extension TodayViewController {
         
         let input: TodayViewModel.Input = .init(fetchTrigger: fetchTrigger,
                                                 deleteExpenseTrigger: deleteExpenseTrigger
-                                            
         )
         
         let output = viewModel.transform(input: input)

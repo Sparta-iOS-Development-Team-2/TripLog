@@ -22,12 +22,13 @@ final class TripSwitcherView: UIView {
         showTodayView() // 초기값: todayView 보이게 설정
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     private func setupLayout() {
-        [todayView, calendarView].forEach {
+        [calendarView, todayView].forEach {
             addSubview($0)
             $0.snp.makeConstraints { $0.edges.equalToSuperview() }
         }
@@ -35,13 +36,17 @@ final class TripSwitcherView: UIView {
 
     /// ✅ `todayView` 표시, `calendarView` 숨김
     func showTodayView() {
-        todayView.isHidden = false
-        calendarView.isHidden = true
+        UIView.animate(withDuration: 0.3) {
+            self.todayView.alpha = 1
+            self.calendarView.alpha = 0
+        }
     }
 
     /// ✅ `calendarView` 표시, `todayView` 숨김
     func showCalendarView() {
-        todayView.isHidden = true
-        calendarView.isHidden = false
+        UIView.animate(withDuration: 0.3) {
+            self.todayView.alpha = 0
+            self.calendarView.alpha = 1
+        }
     }
 }

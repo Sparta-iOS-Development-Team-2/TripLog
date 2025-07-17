@@ -14,7 +14,7 @@ import RxCocoa
 /// 🔹 여행 요약 정보를 표시하는 뷰 (타이틀, 날짜, 예산, 진행 상태, 버튼 포함)
 final class TripLogSummaryView: UIView {
     
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
     
     private let switcherView: TripSwitcherView
     
@@ -35,8 +35,13 @@ final class TripLogSummaryView: UIView {
         setupButtonActions()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        disposeBag = DisposeBag()
     }
     
     /// ✅ 여행 정보를 설정하는 메서드

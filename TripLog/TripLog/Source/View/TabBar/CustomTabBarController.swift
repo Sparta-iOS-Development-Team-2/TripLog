@@ -19,10 +19,20 @@ final class CustomTabBarController: UIViewController {
     private let customTabBar = TabBarView()
     
     // 텝바에 들어가는 화면 선언
-    private let cashBookVC = CashBookListViewController()
+    private let cashBookVC: CashBookListViewController
     private let settingVC = SettingViewController()
     
     //MARK: - Initializer
+    init(coordinator: MainCoordinator) {
+        self.cashBookVC = .init(coordinator: coordinator)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         

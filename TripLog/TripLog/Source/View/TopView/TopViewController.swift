@@ -7,7 +7,7 @@ import RxDataSources
 
 final class TopViewController: UIViewController {
     
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
     
     fileprivate let todayViewController: TodayViewController
     fileprivate let calendarViewController: CalendarViewController
@@ -28,6 +28,7 @@ final class TopViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
