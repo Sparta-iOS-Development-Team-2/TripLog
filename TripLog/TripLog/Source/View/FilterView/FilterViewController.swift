@@ -135,7 +135,7 @@ private extension FilterViewController {
     func setupConstraint() {
         topHorizontalStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
         }
         
         closeButton.snp.makeConstraints {
@@ -145,7 +145,7 @@ private extension FilterViewController {
         
         collectionView.snp.makeConstraints {
             $0.top.equalTo(topHorizontalStackView.snp.bottom).offset(8)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
     }

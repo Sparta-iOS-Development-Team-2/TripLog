@@ -65,7 +65,7 @@ private extension LaunchViewController {
         }
         
         lottieAnimationView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(self.view.bounds.height)
             $0.bottom.equalToSuperview().inset(50)
         }

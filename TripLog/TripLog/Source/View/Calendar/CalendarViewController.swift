@@ -160,7 +160,7 @@ final class CalendarViewController: UIViewController {
         }
         
         expenseListView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview()
+            $0.directionalHorizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
     }

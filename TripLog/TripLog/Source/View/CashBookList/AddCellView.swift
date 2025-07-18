@@ -54,7 +54,7 @@ private extension AddCellView {
     func setupConstraints() {
         addNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(20)
         }
         

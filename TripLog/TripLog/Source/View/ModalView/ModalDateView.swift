@@ -128,7 +128,7 @@ private extension ModalDateView {
         
         datePickerStack.snp.makeConstraints {
             $0.top.equalTo(title.snp.bottom).offset(8)
-            $0.bottom.horizontalEdges.equalToSuperview()
+            $0.bottom.directionalHorizontalEdges.equalToSuperview()
         }
     }
     
