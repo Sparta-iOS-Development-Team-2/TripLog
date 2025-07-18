@@ -5,12 +5,12 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-final class TopViewController: UIViewController {
+final class CashBookDetailViewController: UIViewController {
     
     private var disposeBag = DisposeBag()
     
-    fileprivate let todayViewController: TodayViewController
-    fileprivate let calendarViewController: CalendarViewController
+    private let todayViewController: TodayViewController
+    private let calendarViewController: CalendarViewController
     
     private lazy var switcherView: TripSwitcherView = {
         return TripSwitcherView(todayView: todayViewController.view, calendarView: calendarViewController.view)
@@ -105,7 +105,7 @@ final class TopViewController: UIViewController {
 }
 
 // 사용하는 뷰컨트롤러에 추가를 해주셔야 popover기능을 아이폰에서 정상적으로 사용 가능합니다.
-extension TopViewController: UIPopoverPresentationControllerDelegate {
+extension CashBookDetailViewController: UIPopoverPresentationControllerDelegate {
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
         return .none
     }
