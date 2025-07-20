@@ -75,6 +75,7 @@ final class MainCoordinator: Coordinator {
     }
     
     func pushDetailViewController(_ item: CashBookModel) {
-        nav.pushViewController(CashBookDetailViewController(cashBook: item), animated: true)
+        let vc = CashBookDetailViewController(cashBook: item)
+        nav.pushViewController(vc, animated: true)
     }
 }

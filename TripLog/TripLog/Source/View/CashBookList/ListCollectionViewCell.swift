@@ -158,14 +158,14 @@ private extension ListCollectionViewCell {
     func setupConstraints() {
         tripNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
-            $0.directionalHorizontalEdges.equalTo(contentView.snp.directionalHorizontalEdges).inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(20)
         }
         
         verticalStackView.snp.makeConstraints {
             $0.top.equalTo(tripNameLabel.snp.bottom).offset(16)
-            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
-            $0.bottom.equalToSuperview().offset(-20)
+            $0.directionalHorizontalEdges.equalTo(tripNameLabel)
+            $0.bottom.equalToSuperview().inset(20)
         }
         
         noteImageView.snp.makeConstraints {

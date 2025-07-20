@@ -192,11 +192,12 @@ private extension CashBookListViewController {
         
         // 선택된 셀의 오늘 지출화면으로 이동
         listCollectionView.rx.modelSelected(CashBookModel.self)
-            .subscribe(onNext: { [weak self] selectedItem in
-                guard let self = self else { return }
-                let data = self.getData(selectedItem)
-                self.coordinator?.pushDetailViewController(data)
-            })
+            .withUnretained(self)
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { owner, selectedItem in
+                let data = owner.getData(selectedItem)
+                owner.coordinator?.pushDetailViewController(data)
+            }
             .disposed(by: disposeBag)
     }
     

@@ -5,19 +5,20 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-final class TodayViewController: UIViewController {
+final class ExpenditureViewController: UIViewController {
     
     // MARK: - Rx Properties
     
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
+    
     private lazy var fetchTrigger =  BehaviorRelay<(String,String, UUID)>(value: ("전체", "전체", cashBookID) )
     private let deleteExpenseTrigger = PublishRelay<(IndexPath, String, String)>()
-    fileprivate let totalAmountRelay = PublishRelay<Int>()
     private let filterTapRelay = PublishRelay<Void>()
+    fileprivate let totalAmountRelay = PublishRelay<Int>()
     
     // MARK: - Properties
     
-    private let viewModel: TodayViewModel
+    private let viewModel = TodayViewModel()
     private let cashBookID: UUID // ✅ 저장된 cashBookID
     
     // MARK: - UI Components
@@ -108,12 +109,16 @@ final class TodayViewController: UIViewController {
     
     init(cashBookID: UUID) {
         self.cashBookID = cashBookID
-        self.viewModel = TodayViewModel()
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        debugPrint("📌 deinit \(Self.self)")
     }
     
     // MARK: - ViewController LifeCycle
@@ -139,7 +144,7 @@ final class TodayViewController: UIViewController {
 
 // MARK: - Private Method
 
-private extension TodayViewController {
+private extension ExpenditureViewController {
     
     func setupUI() {
         view.backgroundColor = UIColor.CustomColors.Background.detailBackground
@@ -330,8 +335,7 @@ private extension TodayViewController {
             }.disposed(by: disposeBag)
         
         // ✅ Rx 방식으로 delegate 설정
-        tableView.rx.setDelegate(self)
-            .disposed(by: disposeBag)
+        tableView.rx.setDelegate(self).disposed(by: disposeBag)
     }
     
     /// 오늘의 환율을 반환하는 메소드
@@ -375,7 +379,7 @@ private extension TodayViewController {
 
 // MARK: - TableView Delegate Method
 
-extension TodayViewController: UITableViewDelegate {
+extension ExpenditureViewController: UITableViewDelegate {
     
     // 기본 삭제 기능을 완전히 비활성화
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -498,7 +502,7 @@ extension TodayViewController: UITableViewDelegate {
 
 // MARK: - Reactive Extension
 
-extension Reactive where Base: TodayViewController {
+extension Reactive where Base: ExpenditureViewController {
     /// 총 지출 합계를 이벤트로 방출하는 옵저버블
     var totalAmount: PublishRelay<Int> {
         base.totalAmountRelay

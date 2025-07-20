@@ -412,6 +412,8 @@
 		};
 		AAC9B08C2D3A7073006892A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = AAC9B05F2D3A7070006892A7 /* TripLog */;
+			baseConfigurationReferenceRelativePath = Application/APIKey.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;

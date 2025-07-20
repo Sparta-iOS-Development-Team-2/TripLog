@@ -90,6 +90,7 @@ private extension LaunchViewController {
                 }
                 ThemeManager.loadTheme(for: self.view.window)
             }) { _ in
+                LottieAnimationCache.shared?.clearCache()
                 self.coordinator?.launchCoordinatorDidFinish()
             }
         }

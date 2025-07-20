@@ -58,7 +58,7 @@ final class CalendarViewController: UIViewController {
         $0.applyViewStyle()
     }
     
-    private let calendarViewModel : CalendarViewModel
+    private let calendarViewModel: CalendarViewModel
     
     // MARK: - Initalization
     
@@ -69,8 +69,13 @@ final class CalendarViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        debugPrint("📌 deinit \(Self.self)")
     }
     
     // MARK: - Properties
@@ -130,7 +135,7 @@ final class CalendarViewController: UIViewController {
         
         scrollView.addSubview(contentStackView)
         contentStackView.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(16)
+            $0.directionalVerticalEdges.equalToSuperview().inset(16)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(view.bounds.width - 32)
         }
@@ -225,8 +230,8 @@ final class CalendarViewController: UIViewController {
         
         // 미래 날짜 스트림
         output.addButtonTapped
+            .filter { date in date > Date() }
             .withUnretained(self)
-            .filter { _, date in date > Date() }
             .flatMap { owner, date in
                 let dateStatus = Date.caculateDateNumber()
                 
@@ -260,8 +265,8 @@ final class CalendarViewController: UIViewController {
 
         // 현재/과거 날짜 스트림
         output.addButtonTapped
+            .filter { date in date <= Date() }
             .withUnretained(self)
-            .filter { _, date in date <= Date() }
             .flatMap { owner, date in
                 let checkDate: (Date) -> Date = { date in
                     return Date() < date ? Date() : date
@@ -288,8 +293,6 @@ final class CalendarViewController: UIViewController {
                 UserDefaults.standard.set(data.country, forKey: "lastSelectedCurrency")
             }
             .disposed(by: disposeBag)
-        
-        
         
         // expense 지출내역 데이터 채우기
         output.expenses
