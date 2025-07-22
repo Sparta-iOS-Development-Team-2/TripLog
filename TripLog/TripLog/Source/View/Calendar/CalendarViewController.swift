@@ -177,22 +177,22 @@ final class CalendarViewController: UIViewController {
         return totalExpense
     }
     
-    private func checkDateAlert(date: String) -> Observable<Void> {
-            return Observable.create { observer in
-                let alert = AlertManager(
-                    title: "환율 정보 안내",
-                    message: "미래 날짜의 환율이 없어 \(date) 환율로 계산됩니다.",
-                    cancelTitle: "취소",
-                    activeTitle: "확인"
-                ) {
-                    observer.onNext(())
-                    observer.onCompleted()
-                }
-                alert.showAlert(.alert)
-                return Disposables.create()
+    private func checkDateAlert(date: Date) -> Observable<Date> {
+        return Observable.create { observer in
+            let alert = AlertManager(
+                title: "환율 정보 안내",
+                message: "미래 날짜의 환율이 없어 최신 환율을 기준으로 계산됩니다.",
+                cancelTitle: "취소",
+                activeTitle: "확인"
+            ) {
+                observer.onNext(date)
+                observer.onCompleted()
             }
+            alert.showAlert(.alert)
+            return Disposables.create()
         }
-
+    }
+    
     private func setupTripPlan(cashBookID: UUID) {
         guard
             let cashBook = CoreDataManager.shared.fetch(type: CashBookEntity.self, predicate: cashBookID).first,
@@ -203,7 +203,7 @@ final class CalendarViewController: UIViewController {
         self.startDate = start.formattedStringToDate()
         self.endDate = end.formattedStringToDate()
     }
-
+    
     
     // MARK: - Calendar Setup
     
@@ -228,62 +228,34 @@ final class CalendarViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
-        // 미래 날짜 스트림
+        // 새 지출내역 추가
         output.addButtonTapped
-            .filter { date in date > Date() }
-            .withUnretained(self)
-            .flatMap { owner, date in
-                let dateStatus = Date.caculateDateNumber()
-                
-                return owner.checkDateAlert(date: dateStatus)
-                    .flatMap { _ in
-                        let checkDate: (Date) -> Date = { date in
-                            return Date() < date ? Date() : date
-                        }
-                        
-                        let rates = CoreDataManager.shared.fetch(
-                            type: CurrencyEntity.self,
-                            predicate: Date.formattedDateString(from: checkDate(date))
-                        )
-                        
-                        return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
-                            cashBookID: owner.calendarViewModel.cashBookID,
-                            date: date,
-                            exchangeRate: rates
-                        )))
-                        .compactMap { $0 as? MyCashBookModel }
-                    }
+            .skip(.milliseconds(300), scheduler: MainScheduler())
+            .map { date -> (isFuture: Bool, date: Date) in
+                return (date > Date(), date)
             }
-            .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
-            .emit { owner, data in
-                CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
-                owner.calendarViewModel.loadExpenseData()
-                owner.updateTotalAmount.accept(owner.getTotalAmount())
-            }
-            .disposed(by: disposeBag)
-
-        // 현재/과거 날짜 스트림
-        output.addButtonTapped
-            .filter { date in date <= Date() }
-            .withUnretained(self)
-            .flatMap { owner, date in
-                let checkDate: (Date) -> Date = { date in
-                    return Date() < date ? Date() : date
+            .flatMap { owner, dateData -> Observable<Date> in
+                if dateData.isFuture {
+                    return owner.checkDateAlert(date: dateData.date)
+                } else {
+                    return .just(dateData.date)
                 }
-                
-                let rates = CoreDataManager.shared.fetch(
-                    type: CurrencyEntity.self,
-                    predicate: Date.formattedDateString(from: checkDate(date))
-                )
-                
+            }
+            .map { date -> (rate: [CurrencyEntity], date: Date) in
+                let predicate = date > Date() ? Date().formattedDateString() : date.formattedDateString()
+                let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: predicate)
+                return (rates, date)
+            }
+            .withUnretained(self)
+            .flatMap { owner, data in
                 return ModalViewManager.showModal(state: .createNewConsumption(data: .init(
                     cashBookID: owner.calendarViewModel.cashBookID,
-                    date: date,
-                    exchangeRate: rates
-                )))
-                .compactMap { $0 as? MyCashBookModel }
+                    date: data.date,
+                    exchangeRate: data.rate)
+                ))
             }
+            .compactMap { $0 as? MyCashBookModel }
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, data in
