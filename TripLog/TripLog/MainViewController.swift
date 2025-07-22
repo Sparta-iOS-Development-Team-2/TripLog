@@ -45,7 +45,7 @@ class MainViewController: UIViewController {
                 }
             } else {
                 _ = CoreDataManager.shared.fetch(type: CurrencyEntity.self,
-                                                 predicate: Date.formattedDateString(from: Date()))
+                                                 predicate: Date().formattedDateString())
             }
         }
     }

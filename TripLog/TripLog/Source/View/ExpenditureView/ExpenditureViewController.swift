@@ -341,7 +341,7 @@ private extension ExpenditureViewController {
     /// 오늘의 환율을 반환하는 메소드
     /// - Returns: 금일 환율
     func getTodayExchangeRate() -> [CurrencyEntity] {
-        let todayString = Date.formattedDateString(from: Date())
+        let todayString = Date().formattedDateString()
         let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
         
         return exchangeRate

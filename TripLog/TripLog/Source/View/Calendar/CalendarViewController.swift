@@ -457,7 +457,7 @@ extension CalendarViewController: UITableViewDelegate {
         let checkDate: (_ date: Date) -> Date = { date in
             return Date() < date ? Date() : date
         }
-        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date.formattedDateString(from: checkDate(expense.expenseDate)))
+        let rates = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: checkDate(expense.expenseDate).formattedDateString())
         
         ModalViewManager.showModal(state: .editConsumption(data: expense, exchangeRate: rates))
             .compactMap { $0 as? MyCashBookModel }

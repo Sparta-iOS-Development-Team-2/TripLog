@@ -91,7 +91,7 @@ final class TodayViewModel: ViewModelType {
     /// 날짜대로 그룹화 최신날짜가 상단으로 오게 설정
     private func groupByDate(_ expenses: [MyCashBookModel]) -> [TodaySectionModel] {
         let groupedDictionary = Dictionary(grouping: expenses) {
-            Date.formattedDateString(from: $0.expenseDate) }
+            $0.expenseDate.formattedDateString() }
         
         let sortedGroupedDictionary = groupedDictionary.mapValues { expenses in
             expenses.sorted(by: { $0.expenseDate > $1.expenseDate })

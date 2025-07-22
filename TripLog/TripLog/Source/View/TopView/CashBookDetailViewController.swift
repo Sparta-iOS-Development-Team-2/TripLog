@@ -5,7 +5,7 @@ import RxSwift
 import RxCocoa
 
 final class CashBookDetailViewController: UIViewController {
-    
+        
     private var disposeBag = DisposeBag()
     
     private let expenditureViewController: ExpenditureViewController
@@ -28,11 +28,7 @@ final class CashBookDetailViewController: UIViewController {
     }
     
     deinit {
-        [calendarViewController, expenditureViewController].forEach { vc in
-            vc.removeFromParent()
-            vc.view.removeFromSuperview()
-            vc.view.snp.removeConstraints()
-        }
+        
         debugPrint("deinit", Self.self)
     }
     

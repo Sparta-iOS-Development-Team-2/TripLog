@@ -180,7 +180,7 @@ extension MyCashBookEntity {
     /// - Returns: [지출내역]
     func getCurrentMyCashBook(expenseDate: Date) -> [MyCashBookEntity] {
         let context = CoreDataManager.shared.context
-        let predicate = Date.formattedDateString(from: expenseDate)
+        let predicate = Date().formattedDateString()
         let element = MyCashBookElement()
         
         let request: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()
