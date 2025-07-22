@@ -277,7 +277,6 @@ final class CalendarViewController: UIViewController {
             .disposed(by: disposeBag)
     }
 }
-                  
 
 // MARK: - FSCalendarDelegate, FSCalendarDataSource
 extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
@@ -299,7 +298,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         
         return cell
     }
-        
+    
     /// 셀의 날짜 레이블을 설정하는 메서드
     /// - Parameters:
     ///   - cell: 설정할 캘린더 커스텀 셀
@@ -308,7 +307,6 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
         let day = Calendar.current.component(.day, from: date)
         cell.titleLabel.text = "\(day)"
     }
-    
     
     /// 셀의 지출금액 레이블을 설정하는 메서드
     /// - Parameters:
@@ -355,12 +353,16 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
             cell.contentView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
             cell.titleLabel.textColor = .white
             cell.expenseLabel.textColor = .white
-            if date == startDate {
+            
+            if date == startDate && date == endDate {
                 cell.layer.cornerRadius = 10
-                cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMinXMinYCorner]
+                cell.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
             } else if date == endDate {
                 cell.layer.cornerRadius = 10
                 cell.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner]
+            } else if date == startDate {
+                cell.layer.cornerRadius = 10
+                cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMinXMinYCorner]
             } else {
                 cell.layer.cornerRadius = 0
             }
@@ -387,13 +389,20 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
             cell.expenseLabel.textColor = .red
             cell.contentView.backgroundColor = .CustomColors.Accent.blue.withAlphaComponent(0.2)
             cell.backgroundColor = .clear
-            if date == startDate {
+            
+            if date == startDate && date == endDate {
                 cell.contentView.layer.cornerRadius = 10
-                cell.contentView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMinXMinYCorner]
+                cell.contentView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
             } else if date == endDate {
                 cell.contentView.layer.cornerRadius = 10
                 cell.contentView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner]
+            } else if date == startDate {
+                cell.contentView.layer.cornerRadius = 10
+                cell.contentView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMinXMinYCorner]
+            } else {
+                cell.contentView.layer.cornerRadius = 0
             }
+            
         } else {
             let isToday = Calendar.current.isDateInToday(date)
             cell.dateLabel.textColor = isToday ? UIColor.CustomColors.Accent.blue : UIColor.CustomColors.Text.textPrimary
@@ -412,7 +421,7 @@ extension CalendarViewController: FSCalendarDelegate, FSCalendarDataSource {
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         self.selectedDate.accept(date)
     }
-
+    
 }
 
 extension CalendarViewController: UITableViewDelegate {
