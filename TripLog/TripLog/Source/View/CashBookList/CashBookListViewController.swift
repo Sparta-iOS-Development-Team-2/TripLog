@@ -187,11 +187,13 @@ private extension CashBookListViewController {
         
         // addButton 바인딩
         addCellView.addButton.rx.tap
+            .throttle(.seconds(2), latest: false, scheduler: MainScheduler())
             .bind(to: addButtonTapped)
             .disposed(by: disposeBag)
         
         // 선택된 셀의 오늘 지출화면으로 이동
         listCollectionView.rx.modelSelected(CashBookModel.self)
+            .throttle(.seconds(2), latest: false, scheduler: MainScheduler())
             .withUnretained(self)
             .asDriver(onErrorDriveWith: .empty())
             .drive { owner, selectedItem in

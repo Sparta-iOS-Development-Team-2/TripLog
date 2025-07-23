@@ -16,10 +16,13 @@ final class CashBookDetailViewController: UIViewController {
     
     init(cashBook: CashBookModel) {
         expenditureViewController = ExpenditureViewController(cashBookID: cashBook.id)
-        calendarViewController = CalendarViewController(cashBook: cashBook.id, balance: cashBook.budget)
+        calendarViewController = CalendarViewController(cashBook: cashBook)
         tripSummaryView = .init(cashBookData: cashBook)
         super.init(nibName: nil, bundle: nil)
         self.navigationItem.title = cashBook.tripName
+        let currency = getTodayExchangeRate()
+        expenditureViewController.updateCurrency(currency)
+        calendarViewController.updateCurrency(currency)
     }
     
     @available(*, unavailable)
@@ -28,7 +31,12 @@ final class CashBookDetailViewController: UIViewController {
     }
     
     deinit {
-        
+        disposeBag = DisposeBag()
+        [expenditureViewController, calendarViewController].forEach {
+            $0.view.snp.removeConstraints()
+            $0.view.removeFromSuperview()
+            $0.removeFromParent()
+        }
         debugPrint("deinit", Self.self)
     }
     
@@ -97,22 +105,37 @@ private extension CashBookDetailViewController {
         }
     }
     
+    /// 오늘의 환율을 반환하는 메소드
+    /// - Returns: 금일 환율
+    func getTodayExchangeRate() -> [CurrencyEntity] {
+        let todayString = Date().formattedDateString()
+        let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
+        
+        return exchangeRate
+    }
+    
     func bind() {
         expenditureViewController.rx.totalAmount
+            .distinctUntilChanged()
+            .skip(until: expenditureViewController.rx.viewDidAppear)
+            .take(until: expenditureViewController.rx.deallocated)
             .withUnretained(self)
             .asDriver(onErrorDriveWith: .empty())
             .drive { owner, totalAmount in
-                debugPrint("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
+                debugPrint("🔹 expenditureView 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
                 owner.tripSummaryView.updateProgress(totalAmount)
                 owner.calendarViewController.reloadCalendarView()
             }
             .disposed(by: disposeBag)
         
         calendarViewController.rx.updateTotalAmount
+            .distinctUntilChanged()
+            .skip(until: calendarViewController.rx.viewDidAppear)
+            .take(until: calendarViewController.rx.deallocated)
             .withUnretained(self)
             .asDriver(onErrorDriveWith: .empty())
             .drive { owner, totalAmount in
-                debugPrint("🔹 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
+                debugPrint("🔹 calendarView 지출 업데이트: \(totalAmount)") // ✅ 디버깅 출력
                 owner.tripSummaryView.updateProgress(totalAmount)
                 owner.expenditureViewController.updateTodayConsumption()
             }

@@ -7,15 +7,15 @@
 
 import RxDataSources
 
-struct TodaySectionModel {
+struct ExpenditureSectionModel {
     var date: String // 섹션의 헤더로 사용할 날짜
     var items: [MyCashBookModel] // 해당 날짜에 속하는 지출 항목
 }
 
-extension TodaySectionModel: SectionModelType {
+extension ExpenditureSectionModel: SectionModelType {
     typealias Item = MyCashBookModel
 
-    init(original: TodaySectionModel, items: [MyCashBookModel]) {
+    init(original: ExpenditureSectionModel, items: [MyCashBookModel]) {
         self = original
         self.items = items
     }

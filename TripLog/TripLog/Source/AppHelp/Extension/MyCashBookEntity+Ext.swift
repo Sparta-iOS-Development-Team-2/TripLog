@@ -92,9 +92,7 @@ extension MyCashBookEntity: CoreDataManagable {
         request.predicate = NSPredicate(format: "\(element.cashBookID) == %@", predicate as CVarArg)
         do {
             let result = try context.fetch(request)
-            for item in result {
-                debugPrint("검색 결과: \n이름: \(item.value(forKey: element.cashBookID) ?? "")")
-            }
+            debugPrint("검색 결과: \(result.count)")
             return result
         } catch {
             debugPrint("데이터 읽기 실패: \(error)")

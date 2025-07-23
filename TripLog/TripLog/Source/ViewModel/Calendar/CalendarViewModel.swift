@@ -29,7 +29,8 @@ final class CalendarViewModel: ViewModelType {
     
     struct Output {
         let updatedDate: BehaviorRelay<Date>
-        let expenses: BehaviorRelay<(date: Date, data: [MyCashBookModel], balance: Int)>
+        let updateExpensesView: BehaviorRelay<(date: Date, data: [MyCashBookModel], balance: Int)>
+        let expense: BehaviorRelay<[MyCashBookModel]>
         let addButtonTapped: PublishRelay<Date>
     }
     
@@ -43,9 +44,6 @@ final class CalendarViewModel: ViewModelType {
     // 지출 데이터를 저장
     private let expenseRelay = BehaviorRelay<[MyCashBookModel]>(value: [])
     
-    // 선택 날짜의 지출 데이터를 저장
-    private let selectedDateData = PublishRelay<([MyCashBookModel], Date)>()
-    
     // 셀 데이트 저장
     var selectedDate = Date()
     
@@ -53,7 +51,6 @@ final class CalendarViewModel: ViewModelType {
     private let currentPageRelay = BehaviorRelay<Date>(value: Date())
     private let addButtonTapped = PublishRelay<Date>()
     private let expensesData = BehaviorRelay<(date: Date, data: [MyCashBookModel], balance: Int)>(value: (Date(), [], 0))
-    
     
     // MARK: - Initalization
     init(cashBookID: UUID, balance: Int) {
@@ -98,26 +95,13 @@ final class CalendarViewModel: ViewModelType {
             .emit { [weak self] date in
                 self?.addButtonTapped.accept(date)
             }.disposed(by: disposeBag)
-            
         
         input.didSelected
             .withUnretained(self)
             .map { owner, date -> (date: Date, data: [MyCashBookModel], balance: Int) in
                 owner.selectedDate = date
                 let remainingBudget = owner.calculateRemainingBudget(upTo: date)
-                return (date, owner.expensesForDate(date: date), remainingBudget)
-            }
-            .asDriver(onErrorDriveWith: .empty())
-            .drive{ [weak self] data in
-                self?.expensesData.accept(data)
-            }
-            .disposed(by: disposeBag)
-        
-        expenseRelay
-            .withUnretained(self)
-            .map { owner, _ -> (date: Date, data: [MyCashBookModel], balance: Int) in
-                let remainingBudget = owner.calculateRemainingBudget(upTo: owner.selectedDate)
-                return (owner.selectedDate, owner.expensesForDate(date: owner.selectedDate), remainingBudget)
+                return (date, owner.expenseRelay.value, remainingBudget)
             }
             .asDriver(onErrorDriveWith: .empty())
             .drive{ [weak self] data in
@@ -126,9 +110,10 @@ final class CalendarViewModel: ViewModelType {
             .disposed(by: disposeBag)
         
         return Output(
-            updatedDate: self.currentPageRelay,
-            expenses: expensesData,
-            addButtonTapped: self.addButtonTapped
+            updatedDate: currentPageRelay,
+            updateExpensesView: expensesData,
+            expense: expenseRelay,
+            addButtonTapped: addButtonTapped
         )
     }
     
@@ -146,7 +131,7 @@ final class CalendarViewModel: ViewModelType {
             
             return MyCashBookModel(
                 amount: entity.amount,
-                cashBookID: entity.cashBookID ?? self.cashBookID,
+                cashBookID: entityID,
                 caculatedAmount: entity.caculatedAmount,
                 category: entity.category ?? "",
                 country: entity.country ?? "",
@@ -157,19 +142,12 @@ final class CalendarViewModel: ViewModelType {
             )
         }
         
+        let currentDate = selectedDate
+        let remainingBudget = calculateRemainingBudget(upTo: currentDate)
+        
         DispatchQueue.main.async { [weak self] in
             self?.expenseRelay.accept(models)
-            
-            // 현재 선택된 날짜의 데이터도 업데이트
-            if let self = self {
-                let remainingBudget = self.calculateRemainingBudget(upTo: self.selectedDate)
-                let currentData = (
-                    self.selectedDate,
-                    self.expensesForDate(date: self.selectedDate),
-                    remainingBudget
-                )
-                self.expensesData.accept(currentData)
-            }
+            self?.expensesData.accept((currentDate, models, remainingBudget))
         }
     }
     
