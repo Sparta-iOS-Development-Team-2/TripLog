@@ -31,13 +31,12 @@ final class CashBookDetailViewController: UIViewController {
     }
     
     deinit {
-        disposeBag = DisposeBag()
         [expenditureViewController, calendarViewController].forEach {
             $0.view.snp.removeConstraints()
             $0.view.removeFromSuperview()
             $0.removeFromParent()
         }
-        debugPrint("deinit", Self.self)
+        debugPrint("📌 deinit \(Self.self)")
     }
     
     // MARK: - VC LifeCycle
@@ -51,6 +50,12 @@ final class CashBookDetailViewController: UIViewController {
         super.viewDidLoad()
         
         setupUI()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        disposeBag = DisposeBag()
     }
 }
 
@@ -156,12 +161,5 @@ private extension CashBookDetailViewController {
                 owner.changeCurrentView(false)
             }
             .disposed(by: disposeBag)
-    }
-}
-
-// 사용하는 뷰컨트롤러에 추가를 해주셔야 popover기능을 아이폰에서 정상적으로 사용 가능합니다.
-extension CashBookDetailViewController: UIPopoverPresentationControllerDelegate {
-    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
-        return .none
     }
 }

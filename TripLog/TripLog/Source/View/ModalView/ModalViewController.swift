@@ -16,7 +16,7 @@ final class ModalViewController: UIViewController {
     
     // MARK: - Rx Properties
     
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
     fileprivate let cashBookActiveButtonTapped = PublishRelay<CashBookModel>()
     fileprivate let consumptionActiveButtonTapped = PublishRelay<MyCashBookModel>()
     
@@ -40,8 +40,13 @@ final class ModalViewController: UIViewController {
         configureSelf()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        debugPrint("📌 deinit \(Self.self)")
     }
     
     // MARK: - UIViewController LifeCycle
