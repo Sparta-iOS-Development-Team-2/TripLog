@@ -80,6 +80,12 @@ final class ExpenseCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+//        containerView.layer.shadowPath = containerView.shadowPath()
+    }
 
     private func setupLayout() {
         containerView.snp.makeConstraints {

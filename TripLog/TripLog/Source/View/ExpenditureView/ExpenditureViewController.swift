@@ -28,6 +28,13 @@ final class ExpenditureViewController: UIViewController {
     // 🔹 상단 UI StackView
     private let topStackView = UIStackView()
     
+    private let emptyLabel = UILabel().then {
+        $0.text = "지출 내역이 없습니다"
+        $0.font = .SCDream(size: .body, weight: .medium)
+        $0.textColor = UIColor.CustomColors.Text.textSecondary
+        $0.textAlignment = .center
+    }
+    
     // "지출 내역" 헤더 레이블
     private let headerTitleLabel = UILabel().then {
         $0.text = "전체 내역"
@@ -66,7 +73,7 @@ final class ExpenditureViewController: UIViewController {
     }
     
     // 지출 내역을 표시할 테이블 뷰
-    private let tableView = UITableView(frame: .zero, style: .grouped).then {
+    private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
         $0.register(ExpenseCell.self, forCellReuseIdentifier: ExpenseCell.identifier)
         $0.separatorStyle = .none
         $0.backgroundColor = .clear
@@ -78,6 +85,7 @@ final class ExpenditureViewController: UIViewController {
         $0.allowsSelection = true
         $0.allowsMultipleSelection = false
         $0.sectionFooterHeight = 0 // 푸터 삭제
+        $0.backgroundView = emptyLabel
     }
     
     private let floatingButton = UIButton(type: .system).then {
@@ -228,25 +236,15 @@ private extension ExpenditureViewController {
             $0.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(32)
         }
-        
-        // 스크롤을 최대로 했을 때 floatingButton 높이만큼 추가 여백 설정
-        tableView.contentInset.bottom = 80
     }
     
     /// 지출 목록이 비었을 경우 emptyLabel의 hidden 속성을 변환하는 메소드
     /// - Parameter isEmpty: 지출 목록이 비어있는지에 대한 여부
     func updateEmptyState(isEmpty: Bool) {
         if isEmpty {
-            let emptyLabel = UILabel().then {
-                $0.text = "지출 내역이 없습니다"
-                $0.font = .SCDream(size: .body, weight: .medium)
-                $0.textColor = UIColor.CustomColors.Text.textSecondary
-                $0.textAlignment = .center
-            }
-            tableView.backgroundView = emptyLabel
+            tableView.backgroundView?.isHidden = false
         } else {
-            tableView.backgroundView?.removeFromSuperview()
-            tableView.backgroundView = nil
+            tableView.backgroundView?.isHidden = true
         }
     }
     
