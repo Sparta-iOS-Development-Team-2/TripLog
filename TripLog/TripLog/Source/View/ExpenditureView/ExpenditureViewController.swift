@@ -11,7 +11,7 @@ final class ExpenditureViewController: UIViewController {
     
     private var disposeBag = DisposeBag()
     
-    private lazy var fetchTrigger = BehaviorRelay<(String, String, UUID)>(value: ("전체", "전체", cashBookID) )
+    private lazy var fetchTrigger = BehaviorRelay<(String, String, UUID)>(value: ("전체", "전체", cashBookID))
     private let deleteExpenseTrigger = PublishRelay<(IndexPath, String, String)>()
     private let filterTapRelay = PublishRelay<Void>()
     fileprivate let totalAmountRelay = PublishRelay<Int>()
@@ -176,10 +176,6 @@ private extension ExpenditureViewController {
         setupViews()
         setupConstraints()
         bind()
-        
-        // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
-        let data = (fetchTrigger.value.0, fetchTrigger.value.1, cashBookID)
-        fetchTrigger.accept(data)
     }
     
     // 🔹 UI 요소 추가

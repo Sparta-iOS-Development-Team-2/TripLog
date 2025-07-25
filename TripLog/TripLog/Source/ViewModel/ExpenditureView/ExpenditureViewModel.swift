@@ -66,7 +66,7 @@ final class ExpenditureViewModel: ViewModelType {
             }
             .disposed(by: disposeBag)
         
-        return Output( expenses: expensesRelay )
+        return Output(expenses: expensesRelay)
     }
     
     /// 섹션에서 탐색
