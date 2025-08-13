@@ -53,7 +53,7 @@ final class CalendarView: UIView {
         addSubview(calendar)
         
         calendar.snp.makeConstraints {
-            $0.top.horizontalEdges.equalToSuperview().inset(16)
+            $0.top.directionalHorizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalToSuperview().inset(8)
         }
     }

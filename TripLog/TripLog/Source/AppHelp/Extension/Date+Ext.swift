@@ -9,10 +9,10 @@ import Foundation
 
 extension Date {
     /// Date를 입력하면 20250121 형태의 문자열을 출력
-    static func formattedDateString(from date: Date) -> String {
+    func formattedDateString() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
-        return dateFormatter.string(from: date)
+        return dateFormatter.string(from: self)
     }
     
     static func getPreviousDate(from dateString: String) -> String? {
@@ -39,7 +39,7 @@ extension Date {
     static func caculateDate() -> String {
         let calendar = Calendar.current
         
-        let todayDate = Date.formattedDateString(from: Date())
+        let todayDate = Date().formattedDateString()
         
         guard let fetchRateDate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayDate).first,
               let rateDate = fetchRateDate.rateDate,
@@ -64,7 +64,7 @@ extension Date {
     /// 날짜 계산 메서드(YY.MM.DD)
     static func caculateDateNumber() -> String {
 
-        let todayDate = Date.formattedDateString(from: Date())
+        let todayDate = Date().formattedDateString()
         
         guard let fetchRateDate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayDate).first,
               let rateDate = fetchRateDate.rateDate,

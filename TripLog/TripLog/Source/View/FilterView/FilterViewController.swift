@@ -24,7 +24,7 @@ enum SectionLayoutKind: Int, CaseIterable {
     }
 }
 
-class FilterViewController: UIViewController {
+final class FilterViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
     private let viewModel = FilterViewModel()
@@ -33,7 +33,8 @@ class FilterViewController: UIViewController {
     private let sendPayment = BehaviorRelay<String>(value: "전체")
     private let sendCategory = BehaviorRelay<String>(value: "전체")
     
-    fileprivate lazy var sendFilterCondition: Observable<(String, String)> = {
+    fileprivate lazy var sendFilterCondition: Observable<(String, String)> = { [weak self] in
+        guard let self else { return .error(NSError(domain: "", code: 1))}
         return Observable.combineLatest(self.sendPayment, self.sendCategory)
             .map { ($0, $1) }
             .share(replay: 1, scope: .whileConnected)
@@ -135,7 +136,7 @@ private extension FilterViewController {
     func setupConstraint() {
         topHorizontalStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
         }
         
         closeButton.snp.makeConstraints {
@@ -145,7 +146,7 @@ private extension FilterViewController {
         
         collectionView.snp.makeConstraints {
             $0.top.equalTo(topHorizontalStackView.snp.bottom).offset(8)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
     }

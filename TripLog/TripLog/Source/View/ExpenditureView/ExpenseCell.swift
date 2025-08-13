@@ -75,6 +75,17 @@ final class ExpenseCell: UITableViewCell {
         setupLayout()
         backgroundColor = .clear
     }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+//        containerView.layer.shadowPath = containerView.shadowPath()
+    }
 
     private func setupLayout() {
         containerView.snp.makeConstraints {
@@ -101,10 +112,6 @@ final class ExpenseCell: UITableViewCell {
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(16)
         }
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 
     func configure(title: String, category: String, amount: String, exchangeRate: String, payment: Bool) {

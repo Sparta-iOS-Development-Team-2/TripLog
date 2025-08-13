@@ -97,8 +97,8 @@ final class CalendarExpenseView: UIView {
     ///   - expenses: 해당 날짜의 지출 항목 배열
     ///   - balance: 현재 잔액
     func configure(date: Date, expenses: [MyCashBookModel], balance: Int) {
-        self.expenses = expenses
-        let totalExpense = expenses.reduce(0) { $0 + Int(round($1.caculatedAmount))}
+        self.expenses = expenses.filter { Calendar.current.isDate($0.expenseDate, inSameDayAs: date) }
+        let totalExpense = self.expenses.reduce(0) { $0 + Int(round($1.caculatedAmount))}
         headerView.configure(date: date, expense: totalExpense, balance: balance)
         
         emptyStateLabel.isHidden = !expenses.isEmpty
