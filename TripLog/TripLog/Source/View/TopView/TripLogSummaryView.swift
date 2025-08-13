@@ -14,41 +14,57 @@ import RxCocoa
 /// 🔹 여행 요약 정보를 표시하는 뷰 (타이틀, 날짜, 예산, 진행 상태, 버튼 포함)
 final class TripLogSummaryView: UIView {
     
-    private let disposeBag = DisposeBag()
-    
-    private let switcherView: TripSwitcherView
-    
-    /// 🔹 `titleDateView`, `progressView`, `buttonStackView`를 감싸는 컨테이너 뷰
-    private let tripSummaryContainerView = UIView().then {
-        $0.backgroundColor = UIColor.CustomColors.Background.background
-    }
+    private var disposeBag = DisposeBag()
     
     private let titleDateView = TitleDateView()
-    let progressView = TopProgressView()
-    private let buttonStackView = TopCustomButtonStackView()
+    private let progressView = TopProgressView()
+    fileprivate let buttonStackView = CustomButtonStackView()
     
-    /// ✅ `TripSwitcherView`를 인자로 받아 초기화
-    init(switcherView: TripSwitcherView) {
-        self.switcherView = switcherView
+    // MARK: - Initializer
+    init(cashBookData: CashBookModel) {
         super.init(frame: .zero)
+        configure(
+            subtitle: cashBookData.note,
+            date: "\(cashBookData.departure.formattedDate()) - \(cashBookData.homecoming.formattedDate())",
+            budget: cashBookData.budget,
+            amount: getTotalAmount(cashBookData.id)
+        )
         setupLayout()
-        setupButtonActions()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func changeButtonStyle(_ firstButtonSelected: Bool) {
+        buttonStackView.changeButtonStyle(firstButtonSelected)
+    }
+    
+    func updateProgress(_ amount: Int) {
+        progressView.updateProgress(amount)
+    }
+    
+}
+private extension TripLogSummaryView {
+    
     /// ✅ 여행 정보를 설정하는 메서드
     func configure(subtitle: String, date: String, budget: Int, amount: Int) {
         titleDateView.configure(subtitle: subtitle, date: date)
-        progressView.setBudget(budget)
-        progressView.expense.accept(amount)
+        progressView.setProgress(budget, amount)
     }
     
-    private func setupLayout() {
-        /// ✅ tripSummaryContainerView 내부에 `titleDateView`, `progressView`, `buttonStackView` 추가
-        [titleDateView, progressView, buttonStackView].forEach { tripSummaryContainerView.addSubview($0) }
+    func getTotalAmount(_ id: UUID) -> Int {
+        let data = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: id)
+        let totalExpense = data.reduce(0) { $0 + Int(round($1.caculatedAmount))}
+        
+        return totalExpense
+    }
+    
+    func setupLayout() {
+        [titleDateView, progressView, buttonStackView].forEach {
+            addSubview($0)
+        }
         
         titleDateView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(8)
@@ -67,34 +83,16 @@ final class TripLogSummaryView: UIView {
             $0.leading.trailing.equalToSuperview().inset(-1)
             $0.bottom.equalToSuperview()
         }
+        
+    }
+}
 
-        addSubview(tripSummaryContainerView)
-        addSubview(switcherView)
-        
-        /// ✅ `tripSummaryContainerView` 레이아웃 설정
-        tripSummaryContainerView.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(190)
-        }
-        
-        switcherView.snp.makeConstraints {
-            $0.top.equalTo(tripSummaryContainerView.snp.bottom)
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
-        }
-    
+extension Reactive where Base: TripLogSummaryView {
+    var firstButtonTapped: ControlEvent<Void> {
+        base.buttonStackView.rx.firstButtonTapped
     }
     
-    /// ✅ 버튼 클릭 시 `TripSwitcherView`의 뷰 변경
-    private func setupButtonActions() {
-        buttonStackView.setButtonActions(
-            todayAction: { [weak self] in
-                self?.switcherView.showTodayView()
-            },
-            calendarAction: { [weak self] in
-                self?.switcherView.showCalendarView()
-            }
-        )
+    var secondButtonTapped: ControlEvent<Void> {
+        base.buttonStackView.rx.secondButtonTapped
     }
 }

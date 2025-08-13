@@ -165,35 +165,35 @@ private extension OnboardingView {
         let padding: CGFloat = window.safeAreaInsets.bottom == 0 ? 50 : 0
         
         imageView.snp.makeConstraints {
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.directionalHorizontalEdges.bottom.equalToSuperview()
             $0.top.equalToSuperview().inset(padding)
         }
         
         infoTextView.snp.makeConstraints {
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.directionalHorizontalEdges.bottom.equalToSuperview()
             $0.height.equalTo(280 - padding)
         }
         
         pageControl.snp.makeConstraints {
             $0.top.equalTo(infoTextView).inset(8)
-            $0.horizontalEdges.equalToSuperview()
+            $0.directionalHorizontalEdges.equalToSuperview()
             $0.height.equalTo(16)
         }
         
         infoLabel.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview()
+            $0.directionalHorizontalEdges.equalToSuperview()
             $0.top.equalTo(pageControl.snp.bottom).offset(24)
             $0.height.equalTo(50)
         }
         
         activeButton.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(56)
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(50)
         }
         
         skipButton.snp.makeConstraints {
-            $0.horizontalEdges.equalTo(activeButton)
+            $0.directionalHorizontalEdges.equalTo(activeButton)
             $0.height.equalTo(20)
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(16)
         }

@@ -135,7 +135,7 @@ final class ModalViewModel: ViewModelType {
         vc.addChild(categoryVC)
         vc.view.addSubview(categoryVC.view)
         categoryVC.view.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview()
+            $0.directionalHorizontalEdges.equalToSuperview()
             $0.top.equalTo(vc.view.snp.bottom)
             $0.height.equalTo(190 - padding)
         }

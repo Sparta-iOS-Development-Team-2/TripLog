@@ -139,13 +139,13 @@ final class CalendarExpenseListHeaderView: UIView {
     private func setupConstraints() {
         topStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(40)
         }
         
         bottomStackView.snp.makeConstraints {
             $0.top.equalTo(topStackView.snp.bottom)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.bottom.equalToSuperview()
         }
     }

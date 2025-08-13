@@ -5,25 +5,35 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-final class TodayViewController: UIViewController {
+final class ExpenditureViewController: UIViewController {
     
     // MARK: - Rx Properties
     
-    private let disposeBag = DisposeBag()
-    private lazy var fetchTrigger =  BehaviorRelay<(String,String, UUID)>(value: ("전체", "전체", cashBookID) )
+    private var disposeBag = DisposeBag()
+    
+    private lazy var fetchTrigger = BehaviorRelay<(String, String, UUID)>(value: ("전체", "전체", cashBookID))
     private let deleteExpenseTrigger = PublishRelay<(IndexPath, String, String)>()
-    fileprivate let totalAmountRelay = PublishRelay<Int>()
     private let filterTapRelay = PublishRelay<Void>()
+    fileprivate let totalAmountRelay = PublishRelay<Int>()
     
     // MARK: - Properties
     
-    private let viewModel: TodayViewModel
+    private let viewModel = ExpenditureViewModel()
     private let cashBookID: UUID // ✅ 저장된 cashBookID
+    private var currentSum: Int = 0
+    private var currencyData: [CurrencyEntity] = []
     
     // MARK: - UI Components
     
     // 🔹 상단 UI StackView
     private let topStackView = UIStackView()
+    
+    private let emptyLabel = UILabel().then {
+        $0.text = "지출 내역이 없습니다"
+        $0.font = .SCDream(size: .body, weight: .medium)
+        $0.textColor = UIColor.CustomColors.Text.textSecondary
+        $0.textAlignment = .center
+    }
     
     // "지출 내역" 헤더 레이블
     private let headerTitleLabel = UILabel().then {
@@ -63,7 +73,7 @@ final class TodayViewController: UIViewController {
     }
     
     // 지출 내역을 표시할 테이블 뷰
-    private let tableView = UITableView(frame: .zero, style: .grouped).then {
+    private lazy var tableView = UITableView(frame: .zero, style: .grouped).then {
         $0.register(ExpenseCell.self, forCellReuseIdentifier: ExpenseCell.identifier)
         $0.separatorStyle = .none
         $0.backgroundColor = .clear
@@ -75,6 +85,7 @@ final class TodayViewController: UIViewController {
         $0.allowsSelection = true
         $0.allowsMultipleSelection = false
         $0.sectionFooterHeight = 0 // 푸터 삭제
+        $0.backgroundView = emptyLabel
     }
     
     private let floatingButton = UIButton(type: .system).then {
@@ -87,7 +98,7 @@ final class TodayViewController: UIViewController {
     }
     
     // ✅ RxDataSources 사용을 위한 데이터소스 정의
-    private lazy var dataSource = RxTableViewSectionedReloadDataSource<TodaySectionModel>(
+    private lazy var dataSource = RxTableViewSectionedReloadDataSource<ExpenditureSectionModel>(
         configureCell: { _, tableView, indexPath, expense in
             let cell = tableView.dequeueReusableCell(withIdentifier: ExpenseCell.identifier, for: indexPath) as! ExpenseCell
             cell.configure(
@@ -108,12 +119,16 @@ final class TodayViewController: UIViewController {
     
     init(cashBookID: UUID) {
         self.cashBookID = cashBookID
-        self.viewModel = TodayViewModel()
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        debugPrint("📌 deinit \(Self.self)")
     }
     
     // MARK: - ViewController LifeCycle
@@ -131,15 +146,29 @@ final class TodayViewController: UIViewController {
         floatingButton.layer.shadowPath = floatingButton.shadowPath()
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        disposeBag = DisposeBag()
+    }
+    
     func updateTodayConsumption() {
         let data = (fetchTrigger.value.0, fetchTrigger.value.1, cashBookID)
         fetchTrigger.accept(data)
+    }
+    
+    func updateCurrency(_ currency: [CurrencyEntity]) {
+        if currency.isEmpty {
+            currencyData = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: Date().formattedDateString())
+        } else {
+            currencyData = currency
+        }
     }
 }
 
 // MARK: - Private Method
 
-private extension TodayViewController {
+private extension ExpenditureViewController {
     
     func setupUI() {
         view.backgroundColor = UIColor.CustomColors.Background.detailBackground
@@ -147,14 +176,10 @@ private extension TodayViewController {
         setupViews()
         setupConstraints()
         bind()
-        
-        // ✅ 데이터 가져오기 (viewDidLoad에서 실행)
-        let data = (fetchTrigger.value.0, fetchTrigger.value.1, cashBookID)
-        fetchTrigger.accept(data)
     }
     
     // 🔹 UI 요소 추가
-    private func setupViews() {
+    func setupViews() {
         let headerStackView = UIStackView(arrangedSubviews: [headerTitleLabel]).then {
             $0.axis = .horizontal
             $0.spacing = 8
@@ -170,11 +195,9 @@ private extension TodayViewController {
             $0.distribution = .equalSpacing
         }
         
-        view.addSubview(topStackView)
-        view.addSubview(filterText)
-        view.addSubview(amountLabel)
-        view.addSubview(tableView)
-        view.addSubview(floatingButton) // ✅ 추가
+        [topStackView, filterText, amountLabel, tableView, floatingButton].forEach {
+            view.addSubview($0)
+        }
     }
     
     // 🔹 UI 레이아웃 설정
@@ -209,25 +232,15 @@ private extension TodayViewController {
             $0.trailing.equalTo(view.safeAreaLayoutGuide).inset(16)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(32)
         }
-        
-        // 스크롤을 최대로 했을 때 floatingButton 높이만큼 추가 여백 설정
-        tableView.contentInset.bottom = 80
     }
     
     /// 지출 목록이 비었을 경우 emptyLabel의 hidden 속성을 변환하는 메소드
     /// - Parameter isEmpty: 지출 목록이 비어있는지에 대한 여부
     func updateEmptyState(isEmpty: Bool) {
         if isEmpty {
-            let emptyLabel = UILabel().then {
-                $0.text = "지출 내역이 없습니다"
-                $0.font = .SCDream(size: .body, weight: .medium)
-                $0.textColor = UIColor.CustomColors.Text.textSecondary
-                $0.textAlignment = .center
-            }
-            tableView.backgroundView = emptyLabel
+            tableView.backgroundView?.isHidden = false
         } else {
-            tableView.backgroundView?.removeFromSuperview()
-            tableView.backgroundView = nil
+            tableView.backgroundView?.isHidden = true
         }
     }
     
@@ -245,7 +258,7 @@ private extension TodayViewController {
             .take(until: dismissSignal)
             .withUnretained(self)
             .map{ owner, data -> (String, String, UUID) in
-                return (data.0, data.1, owner.cashBookID )
+                return (data.0, data.1, owner.cashBookID)
             }
             .bind(to: fetchTrigger)
             .disposed(by: disposeBag)
@@ -256,20 +269,14 @@ private extension TodayViewController {
     // Rx 바인딩 메소드
     func bind() {
         
-        let input: TodayViewModel.Input = .init(fetchTrigger: fetchTrigger,
-                                                deleteExpenseTrigger: deleteExpenseTrigger
-                                            
+        let input: ExpenditureViewModel.Input = .init(fetchTrigger: fetchTrigger,
+                                                      deleteExpenseTrigger: deleteExpenseTrigger
         )
         
         let output = viewModel.transform(input: input)
         
-        // 필터 이벤트
-        filterButton.rx.tap
-            .asSignal(onErrorSignalWith: .empty())
-            .withUnretained(self)
-            .emit { owner, _ in
-                owner.showFilterView()
-            }.disposed(by: disposeBag)
+        // ✅ Rx 방식으로 delegate 설정
+        tableView.rx.setDelegate(self).disposed(by: disposeBag)
         
         output.expenses
             .asDriver(onErrorDriveWith: .empty())
@@ -280,8 +287,13 @@ private extension TodayViewController {
             .withUnretained(self)
             .asDriver(onErrorDriveWith: .empty())
             .drive { owner, expenses in
+                let totalAmount = owner.getTotalAmount(expenses)
+                
                 owner.updateEmptyState(isEmpty: expenses.isEmpty)
-                owner.amountLabel.text = owner.getFilterTotalAmount(expenses) + " 원"
+                owner.currentSum = Int(totalAmount)
+                owner.totalAmountRelay.accept(owner.currentSum)
+                owner.amountLabel.text = "\(totalAmount.formattedWithFormatter) 원"
+                
                 if owner.fetchTrigger.value.0 != "전체" && owner.fetchTrigger.value.1 != "전체" {
                     owner.filterText.text = "\(owner.fetchTrigger.value.0) / \(owner.fetchTrigger.value.1)"
                 } else if owner.fetchTrigger.value.0 == "전체" && owner.fetchTrigger.value.1 != "전체" {
@@ -296,87 +308,65 @@ private extension TodayViewController {
         
         // ✅ `modelSelected` 수정: SectionModel을 고려하여 데이터 선택
         tableView.rx.modelSelected(MyCashBookModel.self)
+            .throttle(.seconds(2), latest: false, scheduler: MainScheduler())
             .withUnretained(self)
             .flatMap { owner, data in
-                let exchangeRate = owner.getTodayExchangeRate()
-                return ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: exchangeRate))
+                return ModalViewManager.showModal(state: .editConsumption(data: data, exchangeRate: owner.currencyData))
                     .compactMap { $0 as? MyCashBookModel }
             }
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, data in
                 CoreDataManager.shared.update(type: MyCashBookEntity.self, entityID: data.id, data: data)
-                let fetchData = (owner.fetchTrigger.value.0, owner.fetchTrigger.value.1, owner.cashBookID)
-                owner.fetchTrigger.accept(fetchData)
-                owner.totalAmountRelay.accept(owner.getTotalAmount())
+                owner.fetchTrigger.accept(owner.fetchTrigger.value)
             }
             .disposed(by: disposeBag)
         
         // 🔹 모달 표시 바인딩 (RxSwift 적용)
         floatingButton.rx.tap
+            .throttle(.seconds(2), latest: false, scheduler: MainScheduler())
             .withUnretained(self)
             .flatMap { owner, _ in
-                let exchangeRate = owner.getTodayExchangeRate()
-                return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.cashBookID, date: Date(), exchangeRate: exchangeRate)))
+                return ModalViewManager.showModal(state: .createNewConsumption(data: .init(cashBookID: owner.cashBookID, date: Date(), exchangeRate: owner.currencyData)))
                     .compactMap { $0 as? MyCashBookModel }
             }
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, data in
                 CoreDataManager.shared.save(type: MyCashBookEntity.self, data: data)
-                let fetchData = (owner.fetchTrigger.value.0, owner.fetchTrigger.value.1, owner.cashBookID)
-                owner.fetchTrigger.accept(fetchData)
-                owner.totalAmountRelay.accept(owner.getTotalAmount())
+                owner.fetchTrigger.accept(owner.fetchTrigger.value)
                 UserDefaults.standard.set(data.country, forKey: "lastSelectedCurrency")
-            }.disposed(by: disposeBag)
-        
-        // ✅ Rx 방식으로 delegate 설정
-        tableView.rx.setDelegate(self)
+            }
             .disposed(by: disposeBag)
-    }
-    
-    /// 오늘의 환율을 반환하는 메소드
-    /// - Returns: 금일 환율
-    func getTodayExchangeRate() -> [CurrencyEntity] {
-        let todayString = Date.formattedDateString(from: Date())
-        let exchangeRate = CoreDataManager.shared.fetch(type: CurrencyEntity.self, predicate: todayString)
         
-        return exchangeRate
-    }
-    
-    /// 오늘 날짜의 포맷을 변경하여 반환하는 메소드
-    /// - Returns: "yyyy.MM.dd" 형식의 금일 날짜
-    func getTodayDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy.MM.dd"  // 날짜 포맷 설정
-        dateFormatter.locale = Locale(identifier: "ko_KR") // 한국 로케일 적용 (필요시 변경 가능)
-        return dateFormatter.string(from: Date()) // 현재 날짜 반환
+        // 필터 이벤트
+        filterButton.rx.tap
+            .throttle(.seconds(2), latest: false, scheduler: MainScheduler())
+            .asSignal(onErrorSignalWith: .empty())
+            .withUnretained(self)
+            .emit { owner, _ in
+                owner.showFilterView()
+            }
+            .disposed(by: disposeBag)
     }
     
     /// 현재 가계부의 총 지출 합계를 가져오는 메소드
     /// - Returns: 현재 가계부의 총 지출 합계
-    func getTotalAmount() -> Int {
-        let data = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: self.cashBookID)
-        let totalExpense = data.reduce(0) { $0 + Int(round($1.caculatedAmount))}
-        
-        return totalExpense
-    }
-    
-    func getFilterTotalAmount(_ data: [TodaySectionModel]) -> String {
+    func getTotalAmount(_ data: [ExpenditureSectionModel]) -> Double {
         let datas = data.map { $0.items }
         var totalAmount: Double = 0
         datas.forEach { data in
             totalAmount += data.map { $0.caculatedAmount.rounded() }.reduce(0) { $0 + $1 }
         }
         
-        return totalAmount.formattedWithFormatter
+        return totalAmount
     }
 
 }
 
 // MARK: - TableView Delegate Method
 
-extension TodayViewController: UITableViewDelegate {
+extension ExpenditureViewController: UITableViewDelegate {
     
     // 기본 삭제 기능을 완전히 비활성화
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -389,17 +379,15 @@ extension TodayViewController: UITableViewDelegate {
         let deleteImage = createDeleteButtonImage()
         
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completionHandler in
-            guard let self = self else { return }
+            guard let self else { return }
             
             let alert = AlertManager(title: "삭제 확인",
                                      message: "정말로 삭제하시겠습니까?",
                                      cancelTitle: "취소",
-                                     destructiveTitle: "삭제")
-            {
-                let data = (indexPath, self.fetchTrigger.value.0
-                            , self.fetchTrigger.value.1)
+                                     destructiveTitle: "삭제"
+            ) {
+                let data = (indexPath, self.fetchTrigger.value.0, self.fetchTrigger.value.1)
                 self.deleteExpenseTrigger.accept(data)
-                self.totalAmountRelay.accept(self.getTotalAmount())
                 completionHandler(true)
             }
             
@@ -499,9 +487,15 @@ extension TodayViewController: UITableViewDelegate {
 
 // MARK: - Reactive Extension
 
-extension Reactive where Base: TodayViewController {
+extension Reactive where Base: ExpenditureViewController {
     /// 총 지출 합계를 이벤트로 방출하는 옵저버블
     var totalAmount: PublishRelay<Int> {
         base.totalAmountRelay
+    }
+    
+    var viewDidAppear: Observable<Void> {
+        return self.base.rx.methodInvoked(#selector(Base.viewDidAppear(_:)))
+            .map { _ in }
+            .asObservable()
     }
 }
