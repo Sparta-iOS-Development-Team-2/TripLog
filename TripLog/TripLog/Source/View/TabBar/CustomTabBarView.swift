@@ -123,7 +123,7 @@ private extension TabBarView {
         cashBookTabButton.snp.makeConstraints {
             //중앙에서 왼쪽으로 50% 이동
             $0.centerX.equalToSuperview().multipliedBy(0.5)
-            $0.verticalEdges.equalToSuperview()
+            $0.directionalVerticalEdges.equalToSuperview()
             $0.width.equalTo(60)
         }
         
@@ -136,7 +136,7 @@ private extension TabBarView {
         settingTabButton.snp.makeConstraints {
             //중앙에서 오른쪽으로 50% 이동
             $0.centerX.equalToSuperview().multipliedBy(1.5)
-            $0.verticalEdges.equalToSuperview()
+            $0.directionalVerticalEdges.equalToSuperview()
             $0.width.equalTo(60)
         }
         

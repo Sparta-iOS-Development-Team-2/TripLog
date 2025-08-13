@@ -144,36 +144,36 @@ private extension ModalView {
     func setupLayout() {
         titleLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(24)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
         }
         
         firstSection.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(66)
         }
         
         secondSection.snp.makeConstraints {
             $0.top.equalTo(firstSection.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(66)
         }
         
         thirdSection.snp.makeConstraints {
             $0.top.equalTo(secondSection.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(66)
         }
         
         forthSection.snp.makeConstraints {
             $0.top.equalTo(thirdSection.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(66)
         }
         
         buttons.snp.makeConstraints {
             $0.top.equalTo(forthSection.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(44)
         }
     }

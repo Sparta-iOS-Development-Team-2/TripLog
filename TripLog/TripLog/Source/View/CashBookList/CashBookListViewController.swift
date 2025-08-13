@@ -13,6 +13,8 @@ import RxSwift
 
 final class CashBookListViewController: UIViewController {
     
+    weak var coordinator: MainCoordinator?
+    
     private let disposeBag = DisposeBag()
     private let addCellView = AddCellView()
     private let viewModel = CashBookListViewModel()
@@ -42,6 +44,7 @@ final class CashBookListViewController: UIViewController {
     
     // RxdataSource(animated)
     typealias DataSource = RxCollectionViewSectionedAnimatedDataSource<SectionOfListCellData>
+    
     private let dataSource: DataSource = {
         let animationConfiguration = AnimationConfiguration(
             insertAnimation: .bottom,
@@ -66,6 +69,16 @@ final class CashBookListViewController: UIViewController {
     }()
     
     //MARK: - Initializer
+    init(coordinator: MainCoordinator) {
+        self.coordinator = coordinator
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -117,19 +130,19 @@ private extension CashBookListViewController {
         
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(safeArea.snp.top).offset(12)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(26)
         }
         
         addCellView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(152)
         }
         
         listCollectionView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(safeArea.snp.bottom)
         }
         
@@ -174,16 +187,19 @@ private extension CashBookListViewController {
         
         // addButton 바인딩
         addCellView.addButton.rx.tap
+            .throttle(.seconds(2), latest: false, scheduler: MainScheduler())
             .bind(to: addButtonTapped)
             .disposed(by: disposeBag)
         
         // 선택된 셀의 오늘 지출화면으로 이동
         listCollectionView.rx.modelSelected(CashBookModel.self)
-            .subscribe(onNext: { [weak self] selectedItem in
-                guard let self = self else { return }
-                let data = self.getData(selectedItem)
-                self.navigationController?.pushViewController(TopViewController(cashBook: data), animated: true)
-            })
+            .throttle(.seconds(2), latest: false, scheduler: MainScheduler())
+            .withUnretained(self)
+            .asDriver(onErrorDriveWith: .empty())
+            .drive { owner, selectedItem in
+                let data = owner.getData(selectedItem)
+                owner.coordinator?.pushDetailViewController(data)
+            }
             .disposed(by: disposeBag)
     }
     

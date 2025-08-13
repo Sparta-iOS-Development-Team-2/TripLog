@@ -3,7 +3,7 @@ import RxSwift
 import RxCocoa
 import CoreData
 
-final class TodayViewModel: ViewModelType {
+final class ExpenditureViewModel: ViewModelType {
     
     struct Input {
         let fetchTrigger: BehaviorRelay<(String, String, UUID)>
@@ -11,18 +11,18 @@ final class TodayViewModel: ViewModelType {
     }
     
     struct Output {
-        let expenses: BehaviorRelay<[TodaySectionModel]>
+        let expenses: BehaviorRelay<[ExpenditureSectionModel]>
     }
     
-    let disposeBag = DisposeBag()
-    private let expensesRelay = BehaviorRelay<[TodaySectionModel]>(value: [])
+    var disposeBag = DisposeBag()
+    private let expensesRelay = BehaviorRelay<[ExpenditureSectionModel]>(value: [])
     private let deleteExpenseTrigger = PublishRelay<Void>()
         
     func transform(input: Input) -> Output {
         
         input.fetchTrigger
             .withUnretained(self)
-            .map { owner, data -> [TodaySectionModel] in
+            .map { owner, data -> [ExpenditureSectionModel] in
                 let isCardPayment = data.0 == "카드"
                 let entities = CoreDataManager.shared.fetch(type: MyCashBookEntity.self, predicate: data.2)
                 let expense = entities.map {
@@ -66,7 +66,7 @@ final class TodayViewModel: ViewModelType {
             }
             .disposed(by: disposeBag)
         
-        return Output( expenses: expensesRelay )
+        return Output(expenses: expensesRelay)
     }
     
     /// 섹션에서 탐색
@@ -89,15 +89,15 @@ final class TodayViewModel: ViewModelType {
     }
 
     /// 날짜대로 그룹화 최신날짜가 상단으로 오게 설정
-    private func groupByDate(_ expenses: [MyCashBookModel]) -> [TodaySectionModel] {
+    private func groupByDate(_ expenses: [MyCashBookModel]) -> [ExpenditureSectionModel] {
         let groupedDictionary = Dictionary(grouping: expenses) {
-            Date.formattedDateString(from: $0.expenseDate) }
+            $0.expenseDate.formattedDateString() }
         
         let sortedGroupedDictionary = groupedDictionary.mapValues { expenses in
             expenses.sorted(by: { $0.expenseDate > $1.expenseDate })
         }
         
-        return sortedGroupedDictionary.map { TodaySectionModel(date: $0.key, items: $0.value) }
+        return sortedGroupedDictionary.map { ExpenditureSectionModel(date: $0.key, items: $0.value) }
             .sorted { $0.date > $1.date }
     }
 }

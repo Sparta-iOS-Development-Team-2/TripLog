@@ -46,6 +46,7 @@ private extension SettingViewController {
             .disposed(by: disposeBag)
         
         settingView.tableView.rx.itemSelected
+            .throttle(.seconds(2), latest: false, scheduler: MainScheduler())
             .asSignal(onErrorSignalWith: .empty())
             .withUnretained(self)
             .emit { owner, indexPath in

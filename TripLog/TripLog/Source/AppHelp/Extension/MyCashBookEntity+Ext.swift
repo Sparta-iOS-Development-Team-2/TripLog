@@ -92,9 +92,7 @@ extension MyCashBookEntity: CoreDataManagable {
         request.predicate = NSPredicate(format: "\(element.cashBookID) == %@", predicate as CVarArg)
         do {
             let result = try context.fetch(request)
-            for item in result {
-                debugPrint("검색 결과: \n이름: \(item.value(forKey: element.cashBookID) ?? "")")
-            }
+            debugPrint("검색 결과: \(result.count)")
             return result
         } catch {
             debugPrint("데이터 읽기 실패: \(error)")
@@ -180,7 +178,7 @@ extension MyCashBookEntity {
     /// - Returns: [지출내역]
     func getCurrentMyCashBook(expenseDate: Date) -> [MyCashBookEntity] {
         let context = CoreDataManager.shared.context
-        let predicate = Date.formattedDateString(from: expenseDate)
+        let predicate = Date().formattedDateString()
         let element = MyCashBookElement()
         
         let request: NSFetchRequest<MyCashBookEntity> = MyCashBookEntity.fetchRequest()

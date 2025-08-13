@@ -131,7 +131,7 @@ private extension CategoryViewController {
         
         categoryCollectionView.snp.makeConstraints {
             $0.top.equalTo(viewTitle.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview().inset(8)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(8)
             $0.height.equalTo(80)
         }
     }

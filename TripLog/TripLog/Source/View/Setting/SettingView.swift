@@ -70,7 +70,7 @@ private extension SettingView {
         
         tableView.snp.makeConstraints {
             $0.top.equalTo(title.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview()
+            $0.directionalHorizontalEdges.equalToSuperview()
             $0.bottom.equalTo(self.safeAreaLayoutGuide)
         }
     }

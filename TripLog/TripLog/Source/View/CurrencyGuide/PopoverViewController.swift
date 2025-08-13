@@ -65,7 +65,7 @@ final class PopoverViewController: UIViewController {
         view.addSubview(verticalStackView)
         
         verticalStackView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(8)
+            $0.directionalHorizontalEdges.equalToSuperview().inset(8)
             $0.top.equalToSuperview().offset(5)
         }
     }
